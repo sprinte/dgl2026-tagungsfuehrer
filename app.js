@@ -155,6 +155,7 @@
         var added = isInPlan(id);
         var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
+        var showAddBtn = !block.noPlan;
         card.innerHTML =
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
             '<div style="flex:1;min-width:0;">' +
@@ -163,14 +164,16 @@
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.room ? '<div class="block-room">' + esc(block.room) + '</div>' : '') +
             '</div>' +
-            '<button class="add-btn' + (added ? ' added' : '') + '" data-id="' + id + '">' + (added ? '&#10003;' : '+') + '</button>' +
+            (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-id="' + id + '">' + (added ? '&#10003;' : '+') + '</button>' : '') +
           '</div>';
-        card.querySelector('.add-btn').addEventListener('click', function(){
-          togglePlan({
-            id: id, dayId: day.id, dayLabel: day.label, date: day.date,
-            time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || ''
+        if(showAddBtn){
+          card.querySelector('.add-btn').addEventListener('click', function(){
+            togglePlan({
+              id: id, dayId: day.id, dayLabel: day.label, date: day.date,
+              time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || ''
+            });
           });
-        });
+        }
       } else {
         var head = document.createElement('div');
         head.className = 'block-time';
@@ -336,6 +339,8 @@
   }
 
   // ---------- Exkursionen ----------
+  var expandedExk = {};
+
   function renderExkursionen(){
     var list = document.getElementById('exkList');
     list.innerHTML = '';
@@ -347,13 +352,47 @@
       var day = lang === 'en' ? e.day_en : e.day;
       var time = lang === 'en' ? e.time_en : e.time;
       var cost = lang === 'en' ? e.cost_en : e.cost;
-      var info = lang === 'en' ? e.info_en : e.info;
-      card.innerHTML =
-        '<div class="exk-title">' + esc(e.id) + ': ' + esc(title) + '</div>' +
-        '<div class="exk-meta">' + esc(day) + ' · ' + esc(time) + '</div>' +
-        '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
-        '<span class="badge-cost">' + esc(cost) + '</span>' +
-        '<div class="exk-info">' + esc(info) + '</div>';
+      var hasDetails = !!(e.meta && e.meta.length) || !!e.details;
+      var isOpen = !!expandedExk[e.id];
+
+      var header = document.createElement('div');
+      header.className = 'exk-header';
+      header.innerHTML =
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="exk-title">' + esc(e.id) + ': ' + esc(title) + '</div>' +
+          '<div class="exk-meta">' + esc(day) + ' · ' + esc(time) + '</div>' +
+          '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
+          '<span class="badge-cost">' + esc(cost) + '</span>' +
+        '</div>' +
+        (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '');
+      card.appendChild(header);
+
+      if(hasDetails){
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function(){
+          var wasOpen = !!expandedExk[e.id];
+          expandedExk = {};
+          if(!wasOpen){ expandedExk[e.id] = true; }
+          renderExkursionen();
+        });
+      }
+
+      if(hasDetails && isOpen){
+        var box = document.createElement('div');
+        box.className = 'abstract-box';
+        var metaList = e.meta || [];
+        var detailsText = e.details || '';
+        var html = '';
+        if(metaList.length){
+          html += '<ul class="exk-meta-list">' + metaList.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>';
+        }
+        if(detailsText){
+          html += detailsText.split('\n\n').map(function(p){ return '<p class="exk-detail-p">' + esc(p) + '</p>'; }).join('');
+        }
+        box.innerHTML = html;
+        card.appendChild(box);
+      }
+
       list.appendChild(card);
     });
   }
