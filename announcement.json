@@ -7,3 +7,13 @@
   "message_de": "Hier steht dein Text, der als Pop-up angezeigt wird.",
   "message_en": "This is where your text appears as a pop-up."
 }
+
+{
+  "id": "2026-09-15-general-assembly",
+  "enabled": true,
+  "expires": "2026-09-14T19:30:00",
+  "title_de": "Wichtiger Hinweis",
+  "title_en": "Important notice",
+  "message_de": "Mitgliederversammlung startet um 17 Uhr im HS 0/115",
+  "message_en": "General assembly about to start at 5pm in HS 0/115"
+}
