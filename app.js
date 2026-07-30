@@ -70,6 +70,11 @@
   function planIdForSession(dayId, block, s){
     return 's_' + dayId + '_' + block.time + '_' + s.room;
   }
+  function planIdForTalk(dayId, block, s, t, idx){
+    return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + idx;
+  }
+
+  var expandedSessions = {};
 
   function renderProgrammList(){
     var day = DATA.programm.find(function(d){ return d.id === currentDay; });
@@ -106,21 +111,70 @@
         block.sessions.forEach(function(s){
           var sid = planIdForSession(day.id, block, s);
           var sadded = isInPlan(sid);
+          var hasTalks = s.talks && s.talks.length > 0;
+          var expandKey = sid;
+          var isOpen = !!expandedSessions[expandKey];
+
           var row = document.createElement('div');
           row.className = 'session-row';
-          row.innerHTML =
+
+          var header = document.createElement('div');
+          header.className = 'session-header';
+          header.innerHTML =
             '<div class="session-main">' +
               '<span class="session-tag">' + esc(s.code) + '</span><span class="session-room">' + esc(s.room) + '</span>' +
               '<div class="session-title">' + esc(s.title) + '</div>' +
               (s.mod ? '<div class="session-mod">Mod.: ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
-            '<button class="add-btn' + (sadded ? ' added' : '') + '" data-id="' + sid + '">' + (sadded ? '&#10003;' : '+') + '</button>';
-          row.querySelector('.add-btn').addEventListener('click', function(){
+            '<div class="session-btns">' +
+              '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add">' + (sadded ? '&#10003;' : '+') + '</button>' +
+              (hasTalks ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+            '</div>';
+          row.appendChild(header);
+
+          header.querySelector('[data-role="session-add"]').addEventListener('click', function(ev){
+            ev.stopPropagation();
             togglePlan({
               id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
               time: block.time, title: s.code + ' · ' + s.title, subtitle: s.mod ? 'Mod.: ' + s.mod : '', room: s.room
             });
           });
+
+          if(hasTalks){
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(ev){
+              if(ev.target.closest('[data-role="session-add"]')) return;
+              expandedSessions[expandKey] = !expandedSessions[expandKey];
+              renderProgrammList();
+            });
+          }
+
+          if(hasTalks && isOpen){
+            var talkList = document.createElement('div');
+            talkList.className = 'talk-list';
+            s.talks.forEach(function(t, idx){
+              var tid = planIdForTalk(day.id, block, s, t, idx);
+              var tadded = isInPlan(tid);
+              var trow = document.createElement('div');
+              trow.className = 'talk-row';
+              trow.innerHTML =
+                '<div style="flex:1;min-width:0;">' +
+                  '<div class="talk-time">' + esc(t.time) + '</div>' +
+                  '<div class="talk-title">' + esc(t.title) + '</div>' +
+                  '<div class="talk-authors">' + esc(t.authors) + '</div>' +
+                '</div>' +
+                '<button class="add-btn small' + (tadded ? ' added' : '') + '" data-id="' + tid + '">' + (tadded ? '&#10003;' : '+') + '</button>';
+              trow.querySelector('.add-btn').addEventListener('click', function(){
+                togglePlan({
+                  id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
+                  time: t.time, title: t.title, subtitle: t.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room
+                });
+              });
+              talkList.appendChild(trow);
+            });
+            row.appendChild(talkList);
+          }
+
           card.appendChild(row);
         });
       }
