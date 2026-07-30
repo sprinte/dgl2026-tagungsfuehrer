@@ -12,7 +12,9 @@
       route: 'Route', website: 'Website',
       openMaps: 'In Google Maps öffnen',
       oepnvLabel: 'ÖPNV:',
-      min: 'Min'
+      min: 'Min',
+      headerTitle: '41. DGL-Jahrestagung & WRHC',
+      headerDates: '14.–18. September 2026'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -25,7 +27,9 @@
       route: 'Directions', website: 'Website',
       openMaps: 'Open in Google Maps',
       oepnvLabel: 'Public transport:',
-      min: 'min'
+      min: 'min',
+      headerTitle: '41st DGL Annual Conference & WRHC',
+      headerDates: '14–18 September 2026'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -35,6 +39,8 @@
   function t(key){ return I18N[lang][key]; }
 
   function applyStaticI18n(){
+    document.getElementById('headerTitle').textContent = t('headerTitle');
+    document.getElementById('headerDates').textContent = t('headerDates');
     document.getElementById('navProgramm').textContent = t('navProgramm');
     document.getElementById('navLunch').textContent = t('navLunch');
     document.getElementById('navExk').textContent = t('navExk');
@@ -191,10 +197,11 @@
 
           var header = document.createElement('div');
           header.className = 'session-header';
+          var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
           header.innerHTML =
             '<div class="session-main">' +
               '<span class="session-tag">' + esc(s.code) + '</span><span class="session-room">' + esc(s.room) + '</span>' +
-              '<div class="session-title">' + esc(s.title) + '</div>' +
+              '<div class="session-title">' + esc(s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
@@ -207,7 +214,7 @@
             ev.stopPropagation();
             togglePlan({
               id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
-              time: block.time, title: s.code + ' · ' + s.title, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room
+              time: block.time, title: s.code + ' · ' + s.title + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room
             });
           });
 
@@ -318,6 +325,7 @@
       var card = document.createElement('div');
       card.className = 'card';
       var typDisplay = lang === 'en' ? l.typ_en : l.typ;
+      var noteDisplay = lang === 'en' ? l.note_en : l.note;
       var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.name + ', ' + (l.address||''));
       card.innerHTML =
         '<div class="lunch-card">' +
@@ -325,7 +333,7 @@
             '<div class="lunch-name">' + esc(l.name) + '</div>' +
             '<div class="lunch-meta">' + esc(typDisplay) + (l.hours ? ' · ' + esc(l.hours) : '') + '</div>' +
             '<div class="lunch-meta">' + esc(l.address || '') + '</div>' +
-            (l.note ? '<div class="lunch-note">' + esc(l.note) + '</div>' : '') +
+            (noteDisplay ? '<div class="lunch-note">' + esc(noteDisplay) + '</div>' : '') +
           '</div>' +
           '<div class="lunch-dist">' + l.distMin + ' ' + t('min') + '<br>' + l.distM + ' m</div>' +
         '</div>' +
