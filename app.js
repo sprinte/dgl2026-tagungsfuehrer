@@ -21,7 +21,14 @@
       weatherTitle: 'Wetter während der Tagung',
       weatherUnavailable: 'Die Wetterprognose ist erst ca. 10 Tage vor der Tagung verfügbar.',
       weatherError: 'Wetterdaten konnten nicht geladen werden.',
-      planConflict: 'Zeitliche Überschneidung mit:'
+      planConflict: 'Zeitliche Überschneidung mit:',
+      aboutSpeaker: 'Zur Person',
+      nextUp: 'Nächster Termin',
+      shareBtnLabel: 'Teilen',
+      linkCopied: 'Link kopiert!',
+      copyManually: 'Diesen Link kopieren:',
+      sharedPlanConfirmPrefix: 'Geteilten Plan mit ',
+      sharedPlanConfirmSuffix: ' Einträgen laden? Das ersetzt deinen aktuellen Plan.'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -43,7 +50,14 @@
       weatherTitle: 'Weather during the conference',
       weatherUnavailable: 'The forecast becomes available roughly 10 days before the conference.',
       weatherError: 'Could not load weather data.',
-      planConflict: 'Overlaps with:'
+      planConflict: 'Overlaps with:',
+      aboutSpeaker: 'About the speaker',
+      nextUp: 'Next up',
+      shareBtnLabel: 'Share',
+      linkCopied: 'Link copied!',
+      copyManually: 'Copy this link:',
+      sharedPlanConfirmPrefix: 'Load shared plan with ',
+      sharedPlanConfirmSuffix: ' items? This will replace your current plan.'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -67,6 +81,7 @@
     document.getElementById('titlePlan').textContent = t('titlePlan');
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
+    document.getElementById('sharePlanBtnText').textContent = t('shareBtnLabel');
     document.getElementById('programmSearch').placeholder = t('searchPlaceholder');
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
@@ -85,6 +100,22 @@
     });
   });
 
+  // ---------- Dark mode ----------
+  var THEME_KEY = 'dgl2026_theme_v1';
+  var theme = (function(){
+    try{ return localStorage.getItem(THEME_KEY) || 'light'; }catch(e){ return 'light'; }
+  })();
+  function applyTheme(){
+    document.body.classList.toggle('dark', theme === 'dark');
+    document.getElementById('themeToggleIcon').innerHTML = theme === 'dark' ? '&#9728;' : '&#127769;';
+  }
+  document.getElementById('themeToggleBtn').addEventListener('click', function(){
+    theme = theme === 'dark' ? 'light' : 'dark';
+    try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+    applyTheme();
+  });
+  applyTheme();
+
 
   var PLAN_KEY = 'dgl2026_plan_v1';
 
@@ -98,6 +129,25 @@
     try{ localStorage.setItem(PLAN_KEY, JSON.stringify(plan)); }catch(e){}
   }
   var plan = loadPlan();
+
+  // ---------- Import shared plan from URL hash ----------
+  (function importSharedPlanFromHash(){
+    if(location.hash.indexOf('#plan=') !== 0) return;
+    try{
+      var encoded = location.hash.slice(6);
+      var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(encoded)))));
+      if(Array.isArray(decoded) && decoded.length){
+        var msg = t('sharedPlanConfirmPrefix') + decoded.length + t('sharedPlanConfirmSuffix');
+        if(confirm(msg)){
+          plan = decoded;
+          savePlan(plan);
+        }
+      }
+    }catch(e){
+      console.warn('Could not parse shared plan from link:', e);
+    }
+    history.replaceState(null, '', location.pathname + location.search);
+  })();
 
   function isInPlan(id){
     return plan.some(function(p){ return p.id === id; });
@@ -217,6 +267,36 @@
   var expandedSessions = {};
   var expandedTalks = {};
 
+  function renderAuthorsHtml(authorsStr){
+    if(!authorsStr) return '';
+    var parts = authorsStr.split(' — ');
+    var namesPart = parts[0];
+    var affPart = parts.length > 1 ? parts.slice(1).join(' — ') : '';
+    var names = namesPart.split(/,\s*/).filter(Boolean);
+    var namesHtml = names.map(function(n){
+      var clean = n.trim();
+      return '<span class="author-link" data-author="' + esc(clean) + '">' + esc(clean) + '</span>';
+    }).join(', ');
+    return namesHtml + (affPart ? ' — ' + esc(affPart) : '');
+  }
+
+  function searchForAuthor(name){
+    var input = document.getElementById('programmSearch');
+    input.value = name;
+    document.getElementById('searchClearBtn').style.display = 'block';
+    renderSearchResults(name);
+    var target = document.getElementById('view-programm');
+    if(!target.classList.contains('active')){
+      document.querySelectorAll('nav.bottom-nav button').forEach(function(b){
+        b.classList.toggle('active', b.getAttribute('data-view') === 'programm');
+      });
+      views.forEach(function(v){
+        document.getElementById('view-'+v).classList.toggle('active', v === 'programm');
+      });
+    }
+    window.scrollTo(0,0);
+  }
+
   function renderProgrammList(){
     var day = DATA.programm.find(function(d){ return d.id === currentDay; });
     var list = document.getElementById('programmList');
@@ -234,24 +314,70 @@
         var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
         var showAddBtn = !block.noPlan;
-        card.innerHTML =
-          liveBadgeHtml +
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+        var hasInfoDetails = !!(block.abstract || block.bio_de || block.bio_en);
+        var infoOpen = !!expandedSessions[id];
+        if(blockIsNow){
+          var liveBadgeInfoEl = document.createElement('div');
+          liveBadgeInfoEl.className = 'live-badge';
+          liveBadgeInfoEl.innerHTML = '<span class="dot"></span>' + t('liveNow');
+          card.appendChild(liveBadgeInfoEl);
+        }
+        var headerDiv = document.createElement('div');
+        headerDiv.style.display = 'flex';
+        headerDiv.style.justifyContent = 'space-between';
+        headerDiv.style.alignItems = 'flex-start';
+        headerDiv.style.gap = '10px';
+        if(hasInfoDetails) headerDiv.style.cursor = 'pointer';
+        headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(block.time) + '</div>' +
               '<div class="block-title">' + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.room ? '<div class="block-room">' + esc(block.room) + '</div>' : '') +
             '</div>' +
-            (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-id="' + id + '">' + (added ? '&#10003;' : '+') + '</button>' : '') +
-          '</div>';
+            '<div class="session-btns">' +
+              (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' : '') +
+              (hasInfoDetails ? '<div class="chevron' + (infoOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+            '</div>';
+        card.appendChild(headerDiv);
         if(showAddBtn){
-          card.querySelector('.add-btn').addEventListener('click', function(){
+          headerDiv.querySelector('[data-role="info-add"]').addEventListener('click', function(ev){
+            ev.stopPropagation();
             togglePlan({
               id: id, dayId: day.id, dayLabel: day.label, date: day.date,
               time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || ''
             });
           });
+        }
+        if(hasInfoDetails){
+          headerDiv.addEventListener('click', function(ev){
+            if(ev.target.closest('[data-role="info-add"]')) return;
+            var wasOpen = !!expandedSessions[id];
+            expandedSessions = {};
+            if(!wasOpen){ expandedSessions[id] = true; }
+            renderProgrammList();
+          });
+        }
+        if(hasInfoDetails && infoOpen){
+          var infoBox = document.createElement('div');
+          if(block.abstract){
+            var abP = document.createElement('div');
+            abP.className = 'abstract-box';
+            abP.textContent = block.abstract;
+            infoBox.appendChild(abP);
+          }
+          var bioText = lang === 'en' ? block.bio_en : block.bio_de;
+          if(bioText){
+            var bioHeading = document.createElement('div');
+            bioHeading.className = 'bio-heading';
+            bioHeading.textContent = t('aboutSpeaker');
+            infoBox.appendChild(bioHeading);
+            var bioP = document.createElement('div');
+            bioP.className = 'abstract-box';
+            bioP.textContent = bioText;
+            infoBox.appendChild(bioP);
+          }
+          card.appendChild(infoBox);
         }
       } else {
         if(blockIsNow){
@@ -332,14 +458,21 @@
                 '<div class="talk-main">' +
                   '<div class="talk-time">' + esc(talk.time) + '</div>' +
                   '<div class="talk-title">' + esc(talk.title) + '</div>' +
-                  '<div class="talk-authors">' + esc(talk.authors) + '</div>' +
+                  '<div class="talk-authors">' + renderAuthorsHtml(talk.authors) + '</div>' +
                 '</div>' +
                 '<button class="add-btn small' + (tadded ? ' added' : '') + '" data-id="' + tid + '">' + (tadded ? '&#10003;' : '+') + '</button>';
-              trow.querySelector('.talk-main').addEventListener('click', function(){
+              trow.querySelector('.talk-main').addEventListener('click', function(ev){
+                if(ev.target.closest('.author-link')) return;
                 var wasOpen = !!expandedTalks[tid];
                 expandedTalks = {};
                 if(!wasOpen){ expandedTalks[tid] = true; }
                 renderProgrammList();
+              });
+              trow.querySelectorAll('.author-link').forEach(function(el){
+                el.addEventListener('click', function(ev){
+                  ev.stopPropagation();
+                  searchForAuthor(el.getAttribute('data-author'));
+                });
               });
               trow.querySelector('.add-btn').addEventListener('click', function(ev){
                 ev.stopPropagation();
@@ -380,7 +513,7 @@
           var id = planIdForBlock(day.id, block);
           searchIndex.push({
             kind: 'info', dayId: day.id, jumpId: id, timeLabel: block.time,
-            text: [block.title, block.title_en, block.subtitle, block.subtitle_en].filter(Boolean).join(' '),
+            text: [block.title, block.title_en, block.subtitle, block.subtitle_en, block.abstract, block.bio_de, block.bio_en].filter(Boolean).join(' '),
             title: block.title, title_en: block.title_en
           });
         } else {
@@ -390,7 +523,8 @@
               kind: 'session', dayId: day.id, jumpId: sid, sid: sid, timeLabel: block.time,
               text: [s.code, s.title, s.mod].filter(Boolean).join(' '),
               title: s.code + ' · ' + s.title, sub: s.mod ? ('Mod.: ' + s.mod) : '',
-              hasTalks: !!(s.talks && s.talks.length)
+              hasTalks: !!(s.talks && s.talks.length),
+              code: s.code, isContinuation: !!s.isContinuation
             });
             (s.talks || []).forEach(function(talk, idx){
               var tid = planIdForTalk(day.id, block, s, talk, idx);
@@ -408,6 +542,26 @@
 
   var dayLabelMap = {};
   DATA.programm.forEach(function(d){ dayLabelMap[d.id] = { de: d.label, en: d.label_en }; });
+
+  function jumpToEntry(m){
+    currentDay = m.dayId;
+    expandedSessions = {};
+    expandedTalks = {};
+    if(m.kind === 'session' && m.hasTalks){ expandedSessions[m.sid] = true; }
+    if(m.kind === 'talk'){ expandedSessions[m.sid] = true; expandedTalks[m.jumpId] = true; }
+    document.getElementById('programmSearch').value = '';
+    document.getElementById('searchClearBtn').style.display = 'none';
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('dayTabs').style.display = '';
+    document.getElementById('programmList').style.display = '';
+    document.getElementById('topicJump').value = '';
+    renderDayTabs();
+    renderProgrammList();
+    setTimeout(function(){
+      var el = document.getElementById('row-' + m.jumpId);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 50);
+  }
 
   function renderSearchResults(query){
     var wrap = document.getElementById('searchResults');
@@ -443,22 +597,7 @@
         '<div class="search-result-title">' + esc(title) + '</div>' +
         (m.sub ? '<div class="search-result-sub">' + esc(m.sub) + '</div>' : '');
       item.addEventListener('click', function(){
-        currentDay = m.dayId;
-        expandedSessions = {};
-        expandedTalks = {};
-        if(m.kind === 'session' && m.hasTalks){ expandedSessions[m.sid] = true; }
-        if(m.kind === 'talk'){ expandedSessions[m.sid] = true; expandedTalks[m.jumpId] = true; }
-        document.getElementById('programmSearch').value = '';
-        document.getElementById('searchClearBtn').style.display = 'none';
-        wrap.style.display = 'none';
-        document.getElementById('dayTabs').style.display = '';
-        document.getElementById('programmList').style.display = '';
-        renderDayTabs();
-        renderProgrammList();
-        setTimeout(function(){
-          var el = document.getElementById('row-' + m.jumpId);
-          if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
-        }, 50);
+        jumpToEntry(m);
       });
       wrap.appendChild(item);
     });
@@ -474,6 +613,36 @@
     searchInputEl.value = '';
     searchClearEl.style.display = 'none';
     renderSearchResults('');
+  });
+
+  // ---------- Topic jump dropdown ----------
+  var topicList = [];
+  (function buildTopicList(){
+    var seen = {};
+    searchIndex.forEach(function(entry){
+      if(entry.kind === 'session' && !entry.isContinuation && entry.code && !seen[entry.code]){
+        seen[entry.code] = true;
+        topicList.push(entry);
+      }
+    });
+  })();
+
+  function renderTopicJump(){
+    var sel = document.getElementById('topicJump');
+    var placeholder = lang === 'en' ? 'Jump to topic/session…' : 'Zu Thema/Session springen…';
+    sel.innerHTML = '<option value="">' + esc(placeholder) + '</option>';
+    topicList.forEach(function(entry, idx){
+      var opt = document.createElement('option');
+      opt.value = idx;
+      var label = entry.title.length > 70 ? entry.title.slice(0, 67) + '…' : entry.title;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('topicJump').addEventListener('change', function(){
+    var idx = this.value;
+    if(idx === '') return;
+    jumpToEntry(topicList[idx]);
   });
 
   // ---------- Mittagessen ----------
@@ -661,7 +830,43 @@
   }
 
   // ---------- Mein Plan ----------
+  function computeNextUp(){
+    var now = nowDate();
+    var candidates = [];
+    plan.forEach(function(item){
+      var r = blockDateRange(item.dayId, item.time);
+      if(r && r.start > now){ candidates.push({ item: item, start: r.start }); }
+    });
+    candidates.sort(function(a,b){ return a.start - b.start; });
+    return candidates[0];
+  }
+
+  function renderNextUp(){
+    var box = document.getElementById('nextUpBox');
+    var next = computeNextUp();
+    if(!next){ box.innerHTML = ''; return; }
+    var now = nowDate();
+    var diffMin = Math.round((next.start - now) / 60000);
+    var whenText;
+    if(diffMin < 60){
+      whenText = lang === 'en' ? ('in ' + diffMin + ' min') : ('in ' + diffMin + ' Min');
+    } else if(diffMin < 24*60){
+      var h = Math.floor(diffMin/60), m = diffMin%60;
+      whenText = lang === 'en' ? ('in ' + h + 'h ' + m + 'min') : ('in ' + h + ' Std ' + m + ' Min');
+    } else {
+      var days = Math.floor(diffMin/(24*60));
+      whenText = lang === 'en' ? ('in ' + days + ' days') : ('in ' + days + ' Tagen');
+    }
+    box.innerHTML =
+      '<div class="next-up-card">' +
+        '<div class="next-up-label">' + t('nextUp') + '</div>' +
+        '<div class="next-up-title">' + esc(next.item.title) + '</div>' +
+        '<div class="next-up-meta">' + esc(whenText) + (next.item.room ? ' · ' + esc(next.item.room) : '') + '</div>' +
+      '</div>';
+  }
+
   function renderPlan(){
+    renderNextUp();
     var box = document.getElementById('planList');
     box.innerHTML = '';
     if(plan.length === 0){
@@ -720,6 +925,32 @@
     });
   }
 
+  function showToast(msg){
+    var el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 2500);
+  }
+
+  document.getElementById('sharePlanBtn').addEventListener('click', function(){
+    if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(plan)))));
+    var shareUrl = location.origin + location.pathname + '#plan=' + encoded;
+    var shareTitle = lang === 'en' ? 'My DGL 2026 Plan' : 'Mein DGL-2026-Plan';
+    if(navigator.share){
+      navigator.share({ title: shareTitle, url: shareUrl }).catch(function(){});
+    } else if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(shareUrl).then(function(){
+        showToast(t('linkCopied'));
+      }).catch(function(){
+        prompt(t('copyManually'), shareUrl);
+      });
+    } else {
+      prompt(t('copyManually'), shareUrl);
+    }
+  });
+
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
     var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DGL 2026//Tagungsfuehrer//DE'];
@@ -753,6 +984,7 @@
   function renderAll(){
     renderDayTabs();
     renderProgrammList();
+    renderTopicJump();
     renderLunchFilters();
     renderLunchList();
     renderExkursionen();
@@ -767,6 +999,7 @@
   setInterval(function(){
     renderDayTabs();
     renderProgrammList();
+    renderPlan();
   }, 60000);
 
   // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
