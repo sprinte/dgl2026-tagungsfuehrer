@@ -546,7 +546,7 @@
       var day = lang === 'en' ? e.day_en : e.day;
       var time = lang === 'en' ? e.time_en : e.time;
       var cost = lang === 'en' ? e.cost_en : e.cost;
-      var hasDetails = !!(e.meta && e.meta.length) || !!e.details;
+      var hasDetails = !!e.details;
       var isOpen = !!expandedExk[e.id];
 
       var header = document.createElement('div');
@@ -574,12 +574,8 @@
       if(hasDetails && isOpen){
         var box = document.createElement('div');
         box.className = 'abstract-box';
-        var metaList = (lang === 'en' ? e.meta_en : e.meta) || [];
         var detailsText = (lang === 'en' ? e.details_en : e.details) || '';
         var html = '';
-        if(metaList.length){
-          html += '<ul class="exk-meta-list">' + metaList.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>';
-        }
         if(detailsText){
           html += detailsText.split('\n\n').map(function(p){ return '<p class="exk-detail-p">' + esc(p) + '</p>'; }).join('');
         }
