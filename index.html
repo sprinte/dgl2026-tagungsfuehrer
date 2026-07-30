@@ -43,6 +43,27 @@
     color:#dce7f0;
   }
   .header-meta strong{color:#fff;font-size:15px;}
+  .lang-switch{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    padding:8px 0 0;
+  }
+  .lang-btn{
+    border:1px solid rgba(255,255,255,.35);
+    background:rgba(255,255,255,.08);
+    color:#dce7f0;
+    font-size:12.5px;
+    font-weight:600;
+    padding:5px 12px;
+    border-radius:16px;
+    cursor:pointer;
+  }
+  .lang-btn.active{
+    background:#fff;
+    color:var(--navy);
+    border-color:#fff;
+  }
   main{
     max-width:720px;
     margin:0 auto;
@@ -197,6 +218,22 @@
   .talk-title{font-size:13px;margin:2px 0 2px;line-height:1.35;}
   .talk-authors{font-size:11.5px;color:var(--text-muted);}
   .add-btn.small{width:26px;height:26px;font-size:14px;}
+  .talk-main{flex:1;min-width:0;cursor:pointer;}
+  .abstract-box{
+    font-size:12.5px;
+    line-height:1.55;
+    color:var(--text);
+    background:#f4f6f5;
+    border-radius:8px;
+    padding:10px 12px;
+    margin:2px 0 10px 8px;
+  }
+  .abstract-empty{
+    font-size:12px;
+    color:var(--text-muted);
+    font-style:italic;
+    margin:2px 0 10px 8px;
+  }
   .filter-row{
     display:flex;
     gap:6px;
@@ -334,50 +371,54 @@
 
 <header class="topbar">
   <img src="logo.png" alt="DGL Jahrestagung 2026 Logo">
-  <div class="header-meta"><strong>41. DGL-Jahrestagung &amp; WRHC</strong><br>14.–18. September 2026 · Erwin-Schrödinger-Zentrum, Berlin-Adlershof</div>
+  <div class="lang-switch" id="langSwitch">
+    <button class="lang-btn active" data-lang="de">🇩🇪 DE</button>
+    <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+  </div>
+  <div class="header-meta"><strong>41. DGL-Jahrestagung &amp; WRHC</strong><br><span id="headerDates">14.–18. September 2026</span> · Erwin-Schrödinger-Zentrum, Berlin-Adlershof</div>
 </header>
 
 <main>
 
   <section id="view-programm" class="view active">
-    <h2 class="section-title">Programm</h2>
+    <h2 class="section-title" id="titleProgramm">Programm</h2>
     <div class="day-tabs" id="dayTabs"></div>
     <div id="programmList"></div>
   </section>
 
   <section id="view-lunch" class="view">
-    <h2 class="section-title">Mittagessen in der Nähe</h2>
+    <h2 class="section-title" id="titleLunch">Mittagessen in der Nähe</h2>
     <div class="filter-row" id="lunchFilters"></div>
     <div id="lunchList"></div>
   </section>
 
   <section id="view-exkursionen" class="view">
-    <h2 class="section-title">Exkursionen</h2>
+    <h2 class="section-title" id="titleExk">Exkursionen</h2>
     <div id="exkList"></div>
   </section>
 
   <section id="view-venue" class="view">
-    <h2 class="section-title">Tagungsort</h2>
+    <h2 class="section-title" id="titleVenue">Tagungsort</h2>
     <div id="venueBox"></div>
   </section>
 
   <section id="view-plan" class="view">
-    <h2 class="section-title">Mein Plan</h2>
+    <h2 class="section-title" id="titlePlan">Mein Plan</h2>
     <div class="plan-actions">
-      <button class="btn-secondary" id="exportPlanBtn">Als Kalender exportieren (.ics)</button>
+      <button class="btn-secondary" id="exportPlanBtn"><span id="exportPlanBtnText">Als Kalender exportieren (.ics)</span></button>
     </div>
     <div id="planList"></div>
-    <p class="note-inline">Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar.</p>
+    <p class="note-inline" id="planNote">Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar.</p>
   </section>
 
 </main>
 
 <nav class="bottom-nav">
-  <button data-view="programm" class="active"><span class="ic">&#128197;</span>Programm</button>
-  <button data-view="lunch"><span class="ic">&#127869;</span>Mittagessen</button>
-  <button data-view="exkursionen"><span class="ic">&#128506;</span>Exkursionen</button>
-  <button data-view="venue"><span class="ic">&#128205;</span>Tagungsort</button>
-  <button data-view="plan"><span class="ic">&#11088;</span>Mein Plan</button>
+  <button data-view="programm" class="active"><span class="ic">&#128197;</span><span id="navProgramm">Programm</span></button>
+  <button data-view="lunch"><span class="ic">&#127869;</span><span id="navLunch">Mittagessen</span></button>
+  <button data-view="exkursionen"><span class="ic">&#128506;</span><span id="navExk">Exkursionen</span></button>
+  <button data-view="venue"><span class="ic">&#128205;</span><span id="navVenue">Tagungsort</span></button>
+  <button data-view="plan"><span class="ic">&#11088;</span><span id="navPlan">Mein Plan</span></button>
 </nav>
 
 <script src="app-data.js"></script>
