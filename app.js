@@ -218,17 +218,19 @@
 
   // ---------- Navigation ----------
   var views = ['programm','lunch','exkursionen','venue','plan'];
+  function switchToView(target){
+    views.forEach(function(v){
+      document.getElementById('view-'+v).classList.toggle('active', v === target);
+    });
+    document.querySelectorAll('nav.bottom-nav button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-view') === target);
+    });
+    if(target === 'plan') renderPlan();
+    window.scrollTo(0,0);
+  }
   document.querySelectorAll('nav.bottom-nav button').forEach(function(btn){
     btn.addEventListener('click', function(){
-      var target = btn.getAttribute('data-view');
-      views.forEach(function(v){
-        document.getElementById('view-'+v).classList.toggle('active', v === target);
-      });
-      document.querySelectorAll('nav.bottom-nav button').forEach(function(b){
-        b.classList.toggle('active', b === btn);
-      });
-      if(target === 'plan') renderPlan();
-      window.scrollTo(0,0);
+      switchToView(btn.getAttribute('data-view'));
     });
   });
 
@@ -285,16 +287,7 @@
     input.value = name;
     document.getElementById('searchClearBtn').style.display = 'block';
     renderSearchResults(name);
-    var target = document.getElementById('view-programm');
-    if(!target.classList.contains('active')){
-      document.querySelectorAll('nav.bottom-nav button').forEach(function(b){
-        b.classList.toggle('active', b.getAttribute('data-view') === 'programm');
-      });
-      views.forEach(function(v){
-        document.getElementById('view-'+v).classList.toggle('active', v === 'programm');
-      });
-    }
-    window.scrollTo(0,0);
+    switchToView('programm');
   }
 
   function renderProgrammList(){
@@ -315,6 +308,7 @@
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
         var showAddBtn = !block.noPlan;
         var hasInfoDetails = !!(block.abstract || block.bio_de || block.bio_en);
+        var isClickable = hasInfoDetails || !!block.linkView || !!block.linkExk;
         var infoOpen = !!expandedSessions[id];
         if(blockIsNow){
           var liveBadgeInfoEl = document.createElement('div');
@@ -327,7 +321,7 @@
         headerDiv.style.justifyContent = 'space-between';
         headerDiv.style.alignItems = 'flex-start';
         headerDiv.style.gap = '10px';
-        if(hasInfoDetails) headerDiv.style.cursor = 'pointer';
+        if(isClickable) headerDiv.style.cursor = 'pointer';
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(block.time) + '</div>' +
@@ -338,6 +332,7 @@
             '<div class="session-btns">' +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' : '') +
               (hasInfoDetails ? '<div class="chevron' + (infoOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+              (block.linkView || block.linkExk ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
         if(showAddBtn){
@@ -356,6 +351,23 @@
             expandedSessions = {};
             if(!wasOpen){ expandedSessions[id] = true; }
             renderProgrammList();
+          });
+        } else if(block.linkView){
+          headerDiv.addEventListener('click', function(ev){
+            if(ev.target.closest('[data-role="info-add"]')) return;
+            switchToView(block.linkView);
+          });
+        } else if(block.linkExk){
+          headerDiv.addEventListener('click', function(ev){
+            if(ev.target.closest('[data-role="info-add"]')) return;
+            switchToView('exkursionen');
+            expandedExk = {};
+            expandedExk[block.linkExk] = true;
+            renderExkursionen();
+            setTimeout(function(){
+              var el = document.getElementById('exk-' + block.linkExk);
+              if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+            }, 50);
           });
         }
         if(hasInfoDetails && infoOpen){
@@ -711,6 +723,7 @@
     DATA.exkursionen.forEach(function(e){
       var card = document.createElement('div');
       card.className = 'card';
+      card.id = 'exk-' + e.id;
       var title = lang === 'en' ? e.title_en : e.title;
       var day = lang === 'en' ? e.day_en : e.day;
       var time = lang === 'en' ? e.time_en : e.time;
@@ -847,16 +860,8 @@
     if(!next){ box.innerHTML = ''; return; }
     var now = nowDate();
     var diffMin = Math.round((next.start - now) / 60000);
-    var whenText;
-    if(diffMin < 60){
-      whenText = lang === 'en' ? ('in ' + diffMin + ' min') : ('in ' + diffMin + ' Min');
-    } else if(diffMin < 24*60){
-      var h = Math.floor(diffMin/60), m = diffMin%60;
-      whenText = lang === 'en' ? ('in ' + h + 'h ' + m + 'min') : ('in ' + h + ' Std ' + m + ' Min');
-    } else {
-      var days = Math.floor(diffMin/(24*60));
-      whenText = lang === 'en' ? ('in ' + days + ' days') : ('in ' + days + ' Tagen');
-    }
+    if(diffMin > 15){ box.innerHTML = ''; return; }
+    var whenText = lang === 'en' ? ('in ' + diffMin + ' min') : ('in ' + diffMin + ' Min');
     box.innerHTML =
       '<div class="next-up-card">' +
         '<div class="next-up-label">' + t('nextUp') + '</div>' +
@@ -1001,6 +1006,31 @@
     renderProgrammList();
     renderPlan();
   }, 60000);
+
+  // ---------- Announcement popup ----------
+  var ANNOUNCEMENT_DISMISS_KEY = 'dgl2026_announcement_dismissed_id';
+  function loadAnnouncement(){
+    fetch('announcement.json', { cache: 'no-store' }).then(function(res){
+      if(!res.ok) throw new Error('no announcement file');
+      return res.json();
+    }).then(function(a){
+      if(!a || !a.enabled) return;
+      if(a.expires && new Date(a.expires) < new Date()) return;
+      var dismissedId = null;
+      try{ dismissedId = localStorage.getItem(ANNOUNCEMENT_DISMISS_KEY); }catch(e){}
+      if(dismissedId === a.id) return;
+      var title = lang === 'en' ? (a.title_en || a.title_de) : (a.title_de || a.title_en);
+      var message = lang === 'en' ? (a.message_en || a.message_de) : (a.message_de || a.message_en);
+      document.getElementById('announcementTitle').textContent = title || '';
+      document.getElementById('announcementMessage').textContent = message || '';
+      document.getElementById('announcementOverlay').style.display = 'flex';
+      document.getElementById('announcementCloseBtn').onclick = function(){
+        document.getElementById('announcementOverlay').style.display = 'none';
+        try{ localStorage.setItem(ANNOUNCEMENT_DISMISS_KEY, a.id); }catch(e){}
+      };
+    }).catch(function(){ /* no announcement file or not reachable — silently ignore */ });
+  }
+  loadAnnouncement();
 
   // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
   window.dglDebug = {

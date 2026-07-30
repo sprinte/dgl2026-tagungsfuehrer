@@ -648,6 +648,51 @@
     background:#3a2c10;
     color:#ffcf7a;
   }
+
+  /* Announcement popup */
+  .announcement-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:200;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .announcement-card{
+    background:var(--card);
+    color:var(--text);
+    border-radius:16px;
+    padding:24px 20px 20px;
+    max-width:420px;
+    width:100%;
+    position:relative;
+    box-shadow:0 12px 40px rgba(0,0,0,.3);
+  }
+  .announcement-close{
+    position:absolute;
+    top:10px; right:10px;
+    width:30px; height:30px;
+    border:none;
+    background:#eef2f5;
+    border-radius:50%;
+    font-size:18px;
+    color:var(--text-muted);
+    cursor:pointer;
+  }
+  .announcement-title{
+    font-size:17px;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:10px;
+    padding-right:24px;
+  }
+  .announcement-message{
+    font-size:14px;
+    line-height:1.55;
+    white-space:pre-wrap;
+  }
 </style>
 </head>
 <body>
@@ -736,6 +781,14 @@
   <button data-view="venue"><span class="ic">&#128205;</span><span id="navVenue">Tagungsort</span></button>
   <button data-view="plan"><span class="ic">&#11088;</span><span id="navPlan">Mein Plan</span></button>
 </nav>
+
+<div id="announcementOverlay" class="announcement-overlay" style="display:none;">
+  <div class="announcement-card">
+    <button class="announcement-close" id="announcementCloseBtn">&times;</button>
+    <div class="announcement-title" id="announcementTitle"></div>
+    <div class="announcement-message" id="announcementMessage"></div>
+  </div>
+</div>
 
 <script src="app-data.js"></script>
 <script src="app.js"></script>

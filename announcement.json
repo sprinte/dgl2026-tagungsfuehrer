@@ -1,0 +1,9 @@
+{
+  "id": "2026-09-14-a",
+  "enabled": false,
+  "expires": "2026-09-19T00:00:00",
+  "title_de": "Wichtiger Hinweis",
+  "title_en": "Important notice",
+  "message_de": "Hier steht dein Text, der als Pop-up angezeigt wird.",
+  "message_en": "This is where your text appears as a pop-up."
+}
