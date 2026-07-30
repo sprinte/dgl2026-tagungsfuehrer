@@ -398,6 +398,137 @@
   nav.bottom-nav button .ic{font-size:19px;}
   nav.bottom-nav button.active{color:var(--navy);font-weight:700;}
   p.note-inline{font-size:12px;color:var(--text-muted);line-height:1.5;margin-top:18px;}
+
+  /* Search */
+  .search-box{
+    position:relative;
+    margin-bottom:12px;
+  }
+  .search-input{
+    width:100%;
+    padding:10px 36px 10px 14px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:14px;
+    color:var(--text);
+    box-sizing:border-box;
+  }
+  .search-input:focus{outline:2px solid var(--navy);outline-offset:1px;}
+  .search-clear{
+    position:absolute;
+    right:8px; top:50%;
+    transform:translateY(-50%);
+    width:24px;height:24px;
+    border:none;
+    background:#e8eff5;
+    border-radius:50%;
+    color:var(--text-muted);
+    font-size:15px;
+    cursor:pointer;
+  }
+  .search-results{margin-bottom:14px;}
+  .search-result-item{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    margin-bottom:8px;
+    cursor:pointer;
+  }
+  .search-result-day{
+    font-size:11px;
+    font-weight:700;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:.02em;
+  }
+  .search-result-title{font-size:14px;font-weight:600;margin:3px 0 2px;line-height:1.35;}
+  .search-result-sub{font-size:12px;color:var(--text-muted);}
+  .search-no-results{
+    text-align:center;
+    color:var(--text-muted);
+    padding:20px;
+    font-size:13px;
+  }
+
+  /* Live / now highlighting */
+  .day-tab{position:relative;}
+  .day-tab-dot{
+    display:inline-block;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--accent);
+    margin-left:5px;
+    vertical-align:middle;
+  }
+  .card.now-live{
+    border-color:var(--accent);
+    box-shadow:0 0 0 1.5px var(--accent);
+  }
+  .live-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:10.5px;
+    font-weight:700;
+    color:#fff;
+    background:var(--accent);
+    padding:2px 8px;
+    border-radius:10px;
+    margin-bottom:6px;
+  }
+  .live-badge .dot{
+    width:6px;height:6px;
+    border-radius:50%;
+    background:#fff;
+  }
+
+  /* Weather widget */
+  .weather-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .weather-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--navy);
+    margin-bottom:10px;
+  }
+  .weather-days{
+    display:flex;
+    justify-content:space-between;
+    gap:6px;
+  }
+  .weather-day{
+    flex:1;
+    text-align:center;
+    font-size:11.5px;
+  }
+  .weather-day .wd-label{font-weight:700;color:var(--text);margin-bottom:4px;}
+  .weather-day .wd-icon{font-size:22px;margin-bottom:2px;}
+  .weather-day .wd-temp{color:var(--text-muted);}
+  .weather-fallback{
+    font-size:12.5px;
+    color:var(--text-muted);
+    line-height:1.5;
+  }
+
+  /* Plan conflict warning */
+  .plan-conflict{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    font-size:12px;
+    color:#8a4b00;
+    background:#fff4e0;
+    border-radius:8px;
+    padding:6px 10px;
+    margin-top:8px;
+  }
 </style>
 </head>
 <body>
@@ -431,6 +562,11 @@
 
   <section id="view-programm" class="view active">
     <h2 class="section-title" id="titleProgramm">Programm</h2>
+    <div class="search-box">
+      <input type="text" id="programmSearch" class="search-input">
+      <button id="searchClearBtn" class="search-clear" style="display:none;">&times;</button>
+    </div>
+    <div id="searchResults" class="search-results" style="display:none;"></div>
     <div class="day-tabs" id="dayTabs"></div>
     <div id="programmList"></div>
   </section>
@@ -448,6 +584,7 @@
 
   <section id="view-venue" class="view">
     <h2 class="section-title" id="titleVenue">Tagungsort</h2>
+    <div id="weatherBox"></div>
     <div id="venueBox"></div>
   </section>
 

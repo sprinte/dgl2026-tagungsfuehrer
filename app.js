@@ -14,7 +14,14 @@
       oepnvLabel: 'ÖPNV:',
       min: 'Min',
       headerTitle: '41. DGL-Jahrestagung & WRHC',
-      headerDates: '14.–18. September 2026'
+      headerDates: '14.–18. September 2026',
+      searchPlaceholder: 'Suche nach Titel, Autor:in, Stichwort...',
+      noResults: 'Keine Treffer.',
+      liveNow: 'Läuft gerade',
+      weatherTitle: 'Wetter während der Tagung',
+      weatherUnavailable: 'Die Wetterprognose ist erst ca. 10 Tage vor der Tagung verfügbar.',
+      weatherError: 'Wetterdaten konnten nicht geladen werden.',
+      planConflict: 'Zeitliche Überschneidung mit:'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -29,7 +36,14 @@
       oepnvLabel: 'Public transport:',
       min: 'min',
       headerTitle: '41st DGL Annual Conference & WRHC',
-      headerDates: '14–18 September 2026'
+      headerDates: '14–18 September 2026',
+      searchPlaceholder: 'Search by title, author, keyword...',
+      noResults: 'No results.',
+      liveNow: 'Happening now',
+      weatherTitle: 'Weather during the conference',
+      weatherUnavailable: 'The forecast becomes available roughly 10 days before the conference.',
+      weatherError: 'Could not load weather data.',
+      planConflict: 'Overlaps with:'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -53,6 +67,7 @@
     document.getElementById('titlePlan').textContent = t('titlePlan');
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
+    document.getElementById('programmSearch').placeholder = t('searchPlaceholder');
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
@@ -64,6 +79,9 @@
       try{ localStorage.setItem(LANG_KEY, lang); }catch(e){}
       applyStaticI18n();
       renderAll();
+      if(typeof searchInputEl !== 'undefined' && searchInputEl.value){
+        renderSearchResults(searchInputEl.value);
+      }
     });
   });
 
@@ -97,6 +115,53 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  // ---------- Shared time helpers ----------
+  function dateForDay(dayId){
+    var map = { mo:'20260914', di:'20260915', mi:'20260916', do:'20260917', fr:'20260918' };
+    return map[dayId] || '20260914';
+  }
+  function parseStartTime(timeStr){
+    var m = timeStr.match(/(\d{1,2}):(\d{2})/);
+    return m ? (m[1].padStart(2,'0') + m[2]) : '0900';
+  }
+  function parseTimeRangeMinutes(str){
+    if(!str) return null;
+    var parts = str.split('–');
+    var m1 = parts[0].match(/(\d{1,2}):(\d{2})/);
+    if(!m1) return null;
+    var start = parseInt(m1[1],10)*60 + parseInt(m1[2],10);
+    var end;
+    if(parts.length > 1){
+      var m2 = parts[1].match(/(\d{1,2}):(\d{2})/);
+      end = m2 ? parseInt(m2[1],10)*60 + parseInt(m2[2],10) : start + 45;
+    } else {
+      end = start + 45;
+    }
+    return { start: start, end: end };
+  }
+  function blockDateRange(dayId, timeStr){
+    var range = parseTimeRangeMinutes(timeStr);
+    if(!range) return null;
+    var ds = dateForDay(dayId);
+    var y = parseInt(ds.substr(0,4),10), mo = parseInt(ds.substr(4,2),10)-1, da = parseInt(ds.substr(6,2),10);
+    var start = new Date(y, mo, da, Math.floor(range.start/60), range.start%60);
+    var end = new Date(y, mo, da, Math.floor(range.end/60), range.end%60);
+    return { start: start, end: end };
+  }
+  function isBlockNow(dayId, timeStr){
+    var r = blockDateRange(dayId, timeStr);
+    if(!r) return false;
+    var now = new Date();
+    return now >= r.start && now <= r.end;
+  }
+  function isToday(dayId){
+    var ds = dateForDay(dayId);
+    var now = new Date();
+    var pad = function(n){ return String(n).padStart(2,'0'); };
+    var todayStr = '' + now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate());
+    return ds === todayStr;
+  }
+
   // ---------- Navigation ----------
   var views = ['programm','lunch','exkursionen','venue','plan'];
   document.querySelectorAll('nav.bottom-nav button').forEach(function(btn){
@@ -123,7 +188,7 @@
       var b = document.createElement('div');
       b.className = 'day-tab' + (day.id === currentDay ? ' active' : '');
       var dayLabel = lang === 'en' ? day.label_en : day.label;
-      b.textContent = dayLabel + ' ' + day.date.split('.')[0] + '.';
+      b.innerHTML = esc(dayLabel + ' ' + day.date.split('.')[0] + '.') + (isToday(day.id) ? '<span class="day-tab-dot"></span>' : '');
       b.addEventListener('click', function(){
         currentDay = day.id;
         expandedSessions = {};
@@ -154,15 +219,19 @@
     list.innerHTML = '';
     day.blocks.forEach(function(block){
       var card = document.createElement('div');
-      card.className = 'card';
+      var blockIsNow = isToday(day.id) && isBlockNow(day.id, block.time);
+      card.className = 'card' + (blockIsNow ? ' now-live' : '');
+      var liveBadgeHtml = blockIsNow ? '<div class="live-badge"><span class="dot"></span>' + t('liveNow') + '</div>' : '';
 
       if(block.type === 'info'){
         var id = planIdForBlock(day.id, block);
+        card.id = 'row-' + id;
         var added = isInPlan(id);
         var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
         var showAddBtn = !block.noPlan;
         card.innerHTML =
+          liveBadgeHtml +
           '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(block.time) + '</div>' +
@@ -181,6 +250,12 @@
           });
         }
       } else {
+        if(blockIsNow){
+          var liveBadgeEl = document.createElement('div');
+          liveBadgeEl.className = 'live-badge';
+          liveBadgeEl.innerHTML = '<span class="dot"></span>' + t('liveNow');
+          card.appendChild(liveBadgeEl);
+        }
         var head = document.createElement('div');
         head.className = 'block-time';
         head.textContent = block.time;
@@ -194,6 +269,7 @@
 
           var row = document.createElement('div');
           row.className = 'session-row';
+          row.id = 'row-' + sid;
 
           var header = document.createElement('div');
           header.className = 'session-header';
@@ -247,6 +323,7 @@
               var talkOpen = !!expandedTalks[tid];
               var trow = document.createElement('div');
               trow.className = 'talk-row';
+              trow.id = 'row-' + tid;
               trow.innerHTML =
                 '<div class="talk-main">' +
                   '<div class="talk-time">' + esc(talk.time) + '</div>' +
@@ -289,6 +366,111 @@
       list.appendChild(card);
     });
   }
+
+  // ---------- Search ----------
+  var searchIndex = [];
+  (function buildSearchIndex(){
+    DATA.programm.forEach(function(day){
+      day.blocks.forEach(function(block){
+        if(block.type === 'info'){
+          var id = planIdForBlock(day.id, block);
+          searchIndex.push({
+            kind: 'info', dayId: day.id, jumpId: id, timeLabel: block.time,
+            text: [block.title, block.title_en, block.subtitle, block.subtitle_en].filter(Boolean).join(' '),
+            title: block.title, title_en: block.title_en
+          });
+        } else {
+          block.sessions.forEach(function(s){
+            var sid = planIdForSession(day.id, block, s);
+            searchIndex.push({
+              kind: 'session', dayId: day.id, jumpId: sid, sid: sid, timeLabel: block.time,
+              text: [s.code, s.title, s.mod].filter(Boolean).join(' '),
+              title: s.code + ' · ' + s.title, sub: s.mod ? ('Mod.: ' + s.mod) : '',
+              hasTalks: !!(s.talks && s.talks.length)
+            });
+            (s.talks || []).forEach(function(talk, idx){
+              var tid = planIdForTalk(day.id, block, s, talk, idx);
+              searchIndex.push({
+                kind: 'talk', dayId: day.id, jumpId: tid, sid: sid, timeLabel: talk.time,
+                text: [talk.title, talk.authors, s.code].filter(Boolean).join(' '),
+                title: talk.title, sub: talk.authors
+              });
+            });
+          });
+        }
+      });
+    });
+  })();
+
+  var dayLabelMap = {};
+  DATA.programm.forEach(function(d){ dayLabelMap[d.id] = { de: d.label, en: d.label_en }; });
+
+  function renderSearchResults(query){
+    var wrap = document.getElementById('searchResults');
+    var q = query.trim().toLowerCase();
+    if(!q){
+      wrap.style.display = 'none';
+      document.getElementById('dayTabs').style.display = '';
+      document.getElementById('programmList').style.display = '';
+      return;
+    }
+    document.getElementById('dayTabs').style.display = 'none';
+    document.getElementById('programmList').style.display = 'none';
+    wrap.style.display = 'block';
+    wrap.innerHTML = '';
+
+    var matches = searchIndex.filter(function(entry){
+      return entry.text.toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 25);
+
+    if(matches.length === 0){
+      wrap.innerHTML = '<div class="search-no-results">' + t('noResults') + '</div>';
+      return;
+    }
+
+    matches.forEach(function(m){
+      var item = document.createElement('div');
+      item.className = 'search-result-item';
+      var dl = dayLabelMap[m.dayId];
+      var dayLabel = dl ? (lang === 'en' ? dl.en : dl.de) : '';
+      var title = (m.kind === 'info' && lang === 'en' && m.title_en) ? m.title_en : m.title;
+      item.innerHTML =
+        '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + '</div>' +
+        '<div class="search-result-title">' + esc(title) + '</div>' +
+        (m.sub ? '<div class="search-result-sub">' + esc(m.sub) + '</div>' : '');
+      item.addEventListener('click', function(){
+        currentDay = m.dayId;
+        expandedSessions = {};
+        expandedTalks = {};
+        if(m.kind === 'session' && m.hasTalks){ expandedSessions[m.sid] = true; }
+        if(m.kind === 'talk'){ expandedSessions[m.sid] = true; expandedTalks[m.jumpId] = true; }
+        document.getElementById('programmSearch').value = '';
+        document.getElementById('searchClearBtn').style.display = 'none';
+        wrap.style.display = 'none';
+        document.getElementById('dayTabs').style.display = '';
+        document.getElementById('programmList').style.display = '';
+        renderDayTabs();
+        renderProgrammList();
+        setTimeout(function(){
+          var el = document.getElementById('row-' + m.jumpId);
+          if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+        }, 50);
+      });
+      wrap.appendChild(item);
+    });
+  }
+
+  var searchInputEl = document.getElementById('programmSearch');
+  var searchClearEl = document.getElementById('searchClearBtn');
+  searchInputEl.addEventListener('input', function(){
+    searchClearEl.style.display = searchInputEl.value ? 'block' : 'none';
+    renderSearchResults(searchInputEl.value);
+  });
+  searchClearEl.addEventListener('click', function(){
+    searchInputEl.value = '';
+    searchClearEl.style.display = 'none';
+    renderSearchResults('');
+  });
 
   // ---------- Mittagessen ----------
   var lunchTypes = ['Alle'].concat(Array.from(new Set(DATA.lunch.map(function(l){ return l.typ; }))));
@@ -406,6 +588,65 @@
   }
 
   // ---------- Tagungsort ----------
+  var WEATHER_CODE_MAP = {
+    0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+    45: '🌫️', 48: '🌫️',
+    51: '🌦️', 53: '🌦️', 55: '🌦️',
+    61: '🌧️', 63: '🌧️', 65: '🌧️',
+    71: '🌨️', 73: '🌨️', 75: '🌨️',
+    80: '🌦️', 81: '🌧️', 82: '🌧️',
+    95: '⛈️', 96: '⛈️', 99: '⛈️'
+  };
+  var weatherCache = null;
+  var weatherLoading = false;
+  var CONFERENCE_DATES = ['2026-09-14','2026-09-15','2026-09-16','2026-09-17','2026-09-18'];
+
+  function renderWeatherBox(){
+    var box = document.getElementById('weatherBox');
+    if(weatherCache === 'error'){
+      box.innerHTML = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-fallback">' + t('weatherError') + '</div></div>';
+      return;
+    }
+    if(!weatherCache){
+      box.innerHTML = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-fallback">…</div></div>';
+      return;
+    }
+    var days = weatherCache.filter(function(d){ return CONFERENCE_DATES.indexOf(d.date) !== -1; });
+    if(days.length === 0){
+      box.innerHTML = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-fallback">' + t('weatherUnavailable') + '</div></div>';
+      return;
+    }
+    var weekdaysDe = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+    var weekdaysEn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var html = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-days">';
+    days.forEach(function(d){
+      var dt = new Date(d.date + 'T12:00:00');
+      var label = (lang === 'en' ? weekdaysEn : weekdaysDe)[dt.getDay()] + ' ' + dt.getDate() + '.';
+      var icon = WEATHER_CODE_MAP[d.code] || '🌡️';
+      html += '<div class="weather-day"><div class="wd-label">' + label + '</div><div class="wd-icon">' + icon + '</div><div class="wd-temp">' + Math.round(d.tmax) + '° / ' + Math.round(d.tmin) + '°</div></div>';
+    });
+    html += '</div></div>';
+    box.innerHTML = html;
+  }
+
+  function loadWeather(){
+    if(weatherCache || weatherLoading) return;
+    weatherLoading = true;
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=52.4344&longitude=13.5375&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin';
+    fetch(url).then(function(res){ return res.json(); }).then(function(data){
+      var d = data.daily;
+      weatherCache = d.time.map(function(date, i){
+        return { date: date, code: d.weathercode[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] };
+      });
+      weatherLoading = false;
+      renderWeatherBox();
+    }).catch(function(){
+      weatherCache = 'error';
+      weatherLoading = false;
+      renderWeatherBox();
+    });
+  }
+
   function renderVenue(){
     var v = DATA.venue;
     var box = document.getElementById('venueBox');
@@ -439,11 +680,25 @@
       var dayObj = DATA.programm.find(function(d){ return d.id === dayId; });
       var dayLabel = (lang === 'en' && dayObj) ? dayObj.label_en : (dayObj ? dayObj.label : group.label);
       group.items.sort(function(a,b){ return a.time.localeCompare(b.time); });
+
+      // Detect time conflicts within this day
+      var ranges = group.items.map(function(it){ return parseTimeRangeMinutes(it.time); });
+      var conflicts = group.items.map(function(){ return []; });
+      for(var i = 0; i < group.items.length; i++){
+        for(var j = 0; j < group.items.length; j++){
+          if(i === j) continue;
+          var ra = ranges[i], rb = ranges[j];
+          if(ra && rb && ra.start < rb.end && rb.start < ra.end){
+            conflicts[i].push(group.items[j].title);
+          }
+        }
+      }
+
       var heading = document.createElement('div');
       heading.className = 'plan-day-heading';
       heading.textContent = dayLabel + ', ' + group.date;
       box.appendChild(heading);
-      group.items.forEach(function(item){
+      group.items.forEach(function(item, idx){
         var card = document.createElement('div');
         card.className = 'card';
         card.innerHTML =
@@ -454,7 +709,8 @@
               (item.subtitle ? '<div class="block-subtitle">' + esc(item.subtitle) + '</div>' : '') +
             '</div>' +
             '<button class="remove-btn" data-id="' + item.id + '">&times;</button>' +
-          '</div>';
+          '</div>' +
+          (conflicts[idx].length ? '<div class="plan-conflict">⚠ ' + t('planConflict') + ' ' + esc(conflicts[idx].join(', ')) + '</div>' : '');
         card.querySelector('.remove-btn').addEventListener('click', function(){
           togglePlan(item);
           renderPlan();
@@ -462,15 +718,6 @@
         box.appendChild(card);
       });
     });
-  }
-
-  function dateForDay(dayId){
-    var map = { mo:'20260914', di:'20260915', mi:'20260916', do:'20260917', fr:'20260918' };
-    return map[dayId] || '20260914';
-  }
-  function parseStartTime(timeStr){
-    var m = timeStr.match(/(\d{1,2}):(\d{2})/);
-    return m ? (m[1].padStart(2,'0') + m[2]) : '0900';
   }
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
@@ -510,10 +757,16 @@
     renderLunchList();
     renderExkursionen();
     renderVenue();
+    renderWeatherBox();
     renderPlan();
   }
 
   applyStaticI18n();
   renderAll();
+  loadWeather();
+  setInterval(function(){
+    renderDayTabs();
+    renderProgrammList();
+  }, 60000);
 
 })();
