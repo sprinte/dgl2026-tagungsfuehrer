@@ -116,6 +116,10 @@
   }
 
   // ---------- Shared time helpers ----------
+  var debugNowOverride = null;
+  function nowDate(){
+    return debugNowOverride ? new Date(debugNowOverride) : new Date();
+  }
   function dateForDay(dayId){
     var map = { mo:'20260914', di:'20260915', mi:'20260916', do:'20260917', fr:'20260918' };
     return map[dayId] || '20260914';
@@ -151,12 +155,12 @@
   function isBlockNow(dayId, timeStr){
     var r = blockDateRange(dayId, timeStr);
     if(!r) return false;
-    var now = new Date();
+    var now = nowDate();
     return now >= r.start && now <= r.end;
   }
   function isToday(dayId){
     var ds = dateForDay(dayId);
-    var now = new Date();
+    var now = nowDate();
     var pad = function(n){ return String(n).padStart(2,'0'); };
     var todayStr = '' + now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate());
     return ds === todayStr;
@@ -768,5 +772,27 @@
     renderDayTabs();
     renderProgrammList();
   }, 60000);
+
+  // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
+  window.dglDebug = {
+    setNow: function(dateTimeString){
+      debugNowOverride = dateTimeString;
+      renderDayTabs();
+      renderProgrammList();
+      console.log('[dglDebug] Simulierte Zeit gesetzt auf:', new Date(dateTimeString).toString());
+    },
+    clearNow: function(){
+      debugNowOverride = null;
+      renderDayTabs();
+      renderProgrammList();
+      console.log('[dglDebug] Simulierte Zeit zurückgesetzt, echte Uhrzeit wird wieder verwendet.');
+    },
+    testWeather: function(dateArray){
+      CONFERENCE_DATES = dateArray;
+      weatherCache = null;
+      loadWeather();
+      console.log('[dglDebug] Wetter-Widget testet jetzt mit Daten:', dateArray);
+    }
+  };
 
 })();
