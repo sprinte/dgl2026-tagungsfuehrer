@@ -57,6 +57,7 @@
       b.textContent = day.label + ' ' + day.date.split('.')[0] + '.';
       b.addEventListener('click', function(){
         currentDay = day.id;
+        expandedSessions = {};
         renderDayTabs();
         renderProgrammList();
       });
@@ -144,7 +145,9 @@
             header.style.cursor = 'pointer';
             header.addEventListener('click', function(ev){
               if(ev.target.closest('[data-role="session-add"]')) return;
-              expandedSessions[expandKey] = !expandedSessions[expandKey];
+              var wasOpen = !!expandedSessions[expandKey];
+              expandedSessions = {};
+              if(!wasOpen){ expandedSessions[expandKey] = true; }
               renderProgrammList();
             });
           }
