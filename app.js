@@ -388,8 +388,8 @@
       if(hasDetails && isOpen){
         var box = document.createElement('div');
         box.className = 'abstract-box';
-        var metaList = e.meta || [];
-        var detailsText = e.details || '';
+        var metaList = (lang === 'en' ? e.meta_en : e.meta) || [];
+        var detailsText = (lang === 'en' ? e.details_en : e.details) || '';
         var html = '';
         if(metaList.length){
           html += '<ul class="exk-meta-list">' + metaList.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join('') + '</ul>';
