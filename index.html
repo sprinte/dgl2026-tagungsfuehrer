@@ -147,6 +147,10 @@
     background:#fff8ec;
   }
   body.dark .pt-item.pt-conflict{ background:#3a2c10; }
+  .pt-item.pt-item-block{
+    border-color:var(--navy);
+    border-left-color:var(--navy);
+  }
   .pt-item.pt-fixed{
     border-color:var(--border);
     border-left-color:var(--border);
@@ -878,6 +882,9 @@
     display:flex;
     gap:10px;
   }
+  .plan-card-block{
+    border-left:4px solid var(--navy);
+  }
   .social-link{
     flex:1;
     display:flex;
@@ -1140,8 +1147,10 @@
 <text x="657.5" y="278.0" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#003d73">0'110</text>
 <text x="657.5" y="293.0" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="#1d6f5c">Kleiner HS · 0/110</text>
 </g>
+<g id="fp-tagungsbuero" class="fp-room">
 <rect x="505" y="166" width="28" height="100" fill="#f3e4ee" stroke="#8a4b8f" stroke-width="2" rx="4"/>
 <text x="519.0" y="216.0" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#003d73" transform="rotate(-90 519.0 216.0)">Tagungsbüro</text>
+</g>
 <rect x="545" y="166" width="40" height="56" fill="#eceae2" stroke="#c7cbc4" stroke-width="1" rx="4"/>
 <line x1="550" y1="172.0" x2="580" y2="172.0" stroke="#5c6570" stroke-width="1"/>
 <line x1="550" y1="182.75" x2="580" y2="182.75" stroke="#5c6570" stroke-width="1"/>
@@ -1248,8 +1257,10 @@
 <text x="657.5" y="278.0" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="700" fill="#003d73">0'110</text>
 <text x="657.5" y="293.0" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="#1d6f5c">Small hall · 0/110</text>
 </g>
+<g id="fp-tagungsbuero" class="fp-room">
 <rect x="505" y="166" width="28" height="100" fill="#f3e4ee" stroke="#8a4b8f" stroke-width="2" rx="4"/>
 <text x="519.0" y="216.0" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#003d73" transform="rotate(-90 519.0 216.0)">Conference office</text>
+</g>
 <rect x="545" y="166" width="40" height="56" fill="#eceae2" stroke="#c7cbc4" stroke-width="1" rx="4"/>
 <line x1="550" y1="172.0" x2="580" y2="172.0" stroke="#5c6570" stroke-width="1"/>
 <line x1="550" y1="182.75" x2="580" y2="182.75" stroke="#5c6570" stroke-width="1"/>
@@ -1320,6 +1331,7 @@
       <button id="planViewListBtn" class="active" data-view="list"><span id="planViewListText">Liste</span></button>
       <button id="planViewTimelineBtn" data-view="timeline"><span id="planViewTimelineText">Zeitplan</span></button>
     </div>
+    <div class="day-tabs" id="planListDayTabs"></div>
     <div id="planList"></div>
     <div id="planTimelineWrap" style="display:none;">
       <div class="day-tabs" id="planTimelineDayTabs"></div>

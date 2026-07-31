@@ -1443,8 +1443,9 @@
       heading.textContent = dayLabel + ', ' + group.date;
       box.appendChild(heading);
       group.items.forEach(function(item, idx){
+       try {
         var card = document.createElement('div');
-        card.className = 'card';
+        card.className = 'card' + (item.authors ? '' : ' plan-card-block');
         var hasDetails = !!(item.abstract || item.bio);
         var isOpen = !!expandedPlanItems[item.id];
         var roomClickable = item.room && FLOORPLAN_ROOM_MAP[item.room];
@@ -1516,6 +1517,9 @@
           }
         }
         box.appendChild(card);
+       } catch(e){
+        console.warn('Skipped rendering a broken plan item:', item, e);
+       }
       });
     });
     renderPlanTimelineDayTabs();
@@ -1692,7 +1696,7 @@
       var colFrac = entry._col / entry._totalCols;
       var widthFrac = 1 / entry._totalCols;
       var el = document.createElement('div');
-      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '') + (p._fixed ? ' pt-fixed' : '');
+      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '') + (p._fixed ? ' pt-fixed' : (!p.authors ? ' pt-item-block' : ''));
       el.style.top = top + 'px';
       el.style.height = height + 'px';
       el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
