@@ -273,6 +273,10 @@
       b.classList.toggle('active', b.getAttribute('data-view') === target);
     });
     if(target === 'plan') renderPlan();
+    if(target !== 'programm'){
+      var backBtn = document.getElementById('searchBackBtn');
+      if(backBtn) backBtn.style.display = 'none';
+    }
     window.scrollTo(0,0);
   }
   document.querySelectorAll('nav.bottom-nav button').forEach(function(btn){
@@ -469,12 +473,50 @@
     return namesHtml + (affPart ? ' — ' + esc(affPart) : '');
   }
 
+  var searchBackState = null;
   function searchForAuthor(name){
+    searchBackState = {
+      day: currentDay,
+      categoryFilter: currentCategoryFilter,
+      expandedSessions: expandedSessions,
+      expandedTalks: expandedTalks,
+      scrollY: window.scrollY
+    };
+    document.getElementById('searchBackBtn').style.display = 'block';
     var input = document.getElementById('programmSearch');
     input.value = name;
     document.getElementById('searchClearBtn').style.display = 'block';
     renderSearchResults(name);
     switchToView('programm');
+  }
+  document.getElementById('searchBackBtn').addEventListener('click', function(){
+    if(!searchBackState) return;
+    currentDay = searchBackState.day;
+    currentCategoryFilter = searchBackState.categoryFilter;
+    expandedSessions = searchBackState.expandedSessions;
+    expandedTalks = searchBackState.expandedTalks;
+    document.getElementById('programmSearch').value = '';
+    document.getElementById('searchClearBtn').style.display = 'none';
+    renderSearchResults('');
+    renderDayTabs();
+    renderCategoryFilter();
+    renderProgrammList();
+    window.scrollTo(0, searchBackState.scrollY);
+    searchBackState = null;
+    this.style.display = 'none';
+  });
+
+  function rerenderPreservingScroll(anchorId){
+    var el = document.getElementById(anchorId);
+    var beforeTop = el ? el.getBoundingClientRect().top : null;
+    renderProgrammList();
+    if(beforeTop !== null){
+      var newEl = document.getElementById(anchorId);
+      if(newEl){
+        var afterTop = newEl.getBoundingClientRect().top;
+        window.scrollBy(0, afterTop - beforeTop);
+      }
+    }
   }
 
   function renderProgrammList(){
@@ -579,7 +621,7 @@
             var wasOpen = !!expandedSessions[id];
             expandedSessions = {};
             if(!wasOpen){ expandedSessions[id] = true; }
-            renderProgrammList();
+            rerenderPreservingScroll('row-' + id);
           });
         } else if(block.linkView){
           headerDiv.addEventListener('click', function(ev){
@@ -705,7 +747,7 @@
               var wasOpen = !!expandedSessions[expandKey];
               expandedSessions = {};
               if(!wasOpen){ expandedSessions[expandKey] = true; }
-              renderProgrammList();
+              rerenderPreservingScroll('row-' + sid);
             });
           }
 
@@ -740,7 +782,7 @@
                 var wasOpen = !!expandedTalks[tid];
                 expandedTalks = {};
                 if(!wasOpen){ expandedTalks[tid] = true; }
-                renderProgrammList();
+                rerenderPreservingScroll('row-' + tid);
               });
               trow.querySelectorAll('.author-link').forEach(function(el){
                 el.addEventListener('click', function(ev){

@@ -775,6 +775,20 @@
     cursor:pointer;
     z-index:50;
   }
+  .search-back-btn{
+    position:fixed;
+    left:16px;
+    bottom:84px;
+    width:44px; height:44px;
+    border-radius:50%;
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    font-size:20px;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);
+    cursor:pointer;
+    z-index:50;
+  }
   .social-links{
     display:flex;
     gap:10px;
@@ -1114,6 +1128,7 @@
 </div>
 
 <button id="backToTopBtn" class="back-to-top" aria-label="Nach oben" style="display:none;">&#8593;</button>
+<button id="searchBackBtn" class="search-back-btn" aria-label="Zurück" style="display:none;">&#8592;</button>
 
 <div id="floorplanOverlay" class="floorplan-overlay" style="display:none;">
   <button id="floorplanOverlayCloseBtn" class="floorplan-overlay-close" aria-label="Schließen">&times;</button>
