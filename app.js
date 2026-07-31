@@ -296,35 +296,64 @@
     'SR 1/305+306': ['1-305', '1-306']
   };
 
-  var fpZoomState = { scale: 1, tx: 0, ty: 0, pointers: {}, lastDist: null };
+  var fpZoomState = { scale: 1, tx: 0, ty: 0, pointers: {} };
+  var fpGesture = null;
   function fpApplyTransform(){
     var content = document.getElementById('floorplanZoomContent');
     content.style.transform = 'translate(' + fpZoomState.tx + 'px,' + fpZoomState.ty + 'px) scale(' + fpZoomState.scale + ')';
   }
   function fpResetZoom(){
     fpZoomState.scale = 1; fpZoomState.tx = 0; fpZoomState.ty = 0;
+    fpGesture = null;
+    fpApplyTransform();
+  }
+  function fpStartGesture(midX, midY, dist){
+    var content = document.getElementById('floorplanZoomContent');
+    var rect = content.getBoundingClientRect();
+    fpGesture = {
+      flexLeft: rect.left - fpZoomState.tx,
+      flexTop: rect.top - fpZoomState.ty,
+      anchorLx: (midX - rect.left) / fpZoomState.scale,
+      anchorLy: (midY - rect.top) / fpZoomState.scale,
+      startScale: fpZoomState.scale,
+      startDist: dist
+    };
+  }
+  function fpUpdateGesture(midX, midY, dist){
+    if(!fpGesture) return;
+    var newScale = Math.min(6, Math.max(1, fpGesture.startScale * (dist / fpGesture.startDist)));
+    fpZoomState.scale = newScale;
+    fpZoomState.tx = midX - fpGesture.flexLeft - newScale * fpGesture.anchorLx;
+    fpZoomState.ty = midY - fpGesture.flexTop - newScale * fpGesture.anchorLy;
     fpApplyTransform();
   }
   function fpZoomAt(clientX, clientY, newScale){
+    newScale = Math.min(6, Math.max(1, newScale));
     var content = document.getElementById('floorplanZoomContent');
     var rect = content.getBoundingClientRect();
-    newScale = Math.min(6, Math.max(1, newScale));
-    var ratio = newScale / fpZoomState.scale;
-    var dx = clientX - rect.left;
-    var dy = clientY - rect.top;
-    fpZoomState.tx = fpZoomState.tx + dx * (1 - ratio);
-    fpZoomState.ty = fpZoomState.ty + dy * (1 - ratio);
+    var flexLeft = rect.left - fpZoomState.tx;
+    var flexTop = rect.top - fpZoomState.ty;
+    var anchorLx = (clientX - rect.left) / fpZoomState.scale;
+    var anchorLy = (clientY - rect.top) / fpZoomState.scale;
     fpZoomState.scale = newScale;
+    fpZoomState.tx = clientX - flexLeft - newScale * anchorLx;
+    fpZoomState.ty = clientY - flexTop - newScale * anchorLy;
     fpApplyTransform();
   }
   (function initFloorplanZoom(){
     var container = document.getElementById('floorplanZoomContainer');
+    container.style.touchAction = 'none';
     container.addEventListener('pointerdown', function(e){
+      e.preventDefault();
       container.setPointerCapture(e.pointerId);
       fpZoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if(Object.keys(fpZoomState.pointers).length === 2){
+        fpGesture = null;
+      }
     });
     container.addEventListener('pointermove', function(e){
       if(!fpZoomState.pointers[e.pointerId]) return;
+      e.preventDefault();
       var prev = fpZoomState.pointers[e.pointerId];
       fpZoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
       var ids = Object.keys(fpZoomState.pointers);
@@ -336,16 +365,16 @@
         var p1 = fpZoomState.pointers[ids[0]], p2 = fpZoomState.pointers[ids[1]];
         var dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
         var mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-        if(fpZoomState.lastDist){
-          var delta = dist / fpZoomState.lastDist;
-          fpZoomAt(mid.x, mid.y, fpZoomState.scale * delta);
+        if(!fpGesture){
+          fpStartGesture(mid.x, mid.y, dist);
+        } else {
+          fpUpdateGesture(mid.x, mid.y, dist);
         }
-        fpZoomState.lastDist = dist;
       }
     });
     function releasePointer(e){
       delete fpZoomState.pointers[e.pointerId];
-      fpZoomState.lastDist = null;
+      fpGesture = null;
     }
     container.addEventListener('pointerup', releasePointer);
     container.addEventListener('pointercancel', releasePointer);
