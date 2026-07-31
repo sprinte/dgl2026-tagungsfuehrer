@@ -511,6 +511,7 @@
 
   var expandedSessions = {};
   var expandedTalks = {};
+  var expandedPlanItems = {};
 
   function renderAuthorsHtml(authorsStr){
     if(!authorsStr) return '';
@@ -661,9 +662,11 @@
         if(showAddBtn){
           headerDiv.querySelector('[data-role="info-add"]').addEventListener('click', function(ev){
             ev.stopPropagation();
+            var bioText = lang === 'en' ? block.bio_en : block.bio_de;
             togglePlan({
               id: id, dayId: day.id, dayLabel: day.label, date: day.date,
-              time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || ''
+              time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || '',
+              abstract: block.abstract || '', bio: bioText || ''
             });
           });
         }
@@ -753,8 +756,10 @@
         card.appendChild(head);
         block.sessions.forEach(function(s){
           var sid = planIdForSession(day.id, block, s);
-          var sadded = isInPlan(sid);
           var hasTalks = s.talks && s.talks.length > 0;
+          var sadded = hasTalks
+            ? s.talks.every(function(talk, idx){ return isInPlan(planIdForTalk(day.id, block, s, talk, idx)); })
+            : isInPlan(sid);
           var expandKey = sid;
           var isOpen = !!expandedSessions[expandKey];
 
@@ -779,10 +784,32 @@
 
           header.querySelector('[data-role="session-add"]').addEventListener('click', function(ev){
             ev.stopPropagation();
-            togglePlan({
-              id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
-              time: block.time, title: s.code + ' · ' + s.title + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room
-            });
+            if(hasTalks){
+              var allAdded = s.talks.every(function(talk, idx){ return isInPlan(planIdForTalk(day.id, block, s, talk, idx)); });
+              s.talks.forEach(function(talk, idx){
+                var tid = planIdForTalk(day.id, block, s, talk, idx);
+                var currentlyIn = isInPlan(tid);
+                if(allAdded && currentlyIn){
+                  var pidx = plan.findIndex(function(p){ return p.id === tid; });
+                  if(pidx >= 0) plan.splice(pidx, 1);
+                } else if(!allAdded && !currentlyIn){
+                  plan.push({
+                    id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
+                    time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room,
+                    abstract: talk.abstract || ''
+                  });
+                }
+              });
+              savePlan(plan);
+              render();
+            } else {
+              var sessionAbstractText = lang === 'en' ? s.abstract_en : s.abstract_de;
+              togglePlan({
+                id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
+                time: block.time, title: s.code + ' · ' + s.title + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room,
+                abstract: sessionAbstractText || ''
+              });
+            }
           });
 
           if(header.querySelector('.room-link')){
@@ -846,7 +873,8 @@
                 ev.stopPropagation();
                 togglePlan({
                   id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
-                  time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room
+                  time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room,
+                  abstract: talk.abstract || ''
                 });
               });
               talkList.appendChild(trow);
@@ -1337,20 +1365,70 @@
       group.items.forEach(function(item, idx){
         var card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML =
-          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+        var hasDetails = !!(item.abstract || item.bio);
+        var isOpen = !!expandedPlanItems[item.id];
+        var roomClickable = item.room && FLOORPLAN_ROOM_MAP[item.room];
+        var mainDiv = document.createElement('div');
+        mainDiv.style.display = 'flex';
+        mainDiv.style.justifyContent = 'space-between';
+        mainDiv.style.alignItems = 'flex-start';
+        mainDiv.style.gap = '10px';
+        if(hasDetails) mainDiv.style.cursor = 'pointer';
+        mainDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
-              '<div class="block-time">' + esc(item.time) + (item.room ? ' · ' + esc(item.room) : '') + '</div>' +
+              '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(item.room) + '">' + esc(item.room) + '</span>' : '') + '</div>' +
               '<div class="block-title">' + esc(item.title) + '</div>' +
               (item.subtitle ? '<div class="block-subtitle">' + esc(item.subtitle) + '</div>' : '') +
             '</div>' +
-            '<button class="remove-btn" data-id="' + item.id + '">&times;</button>' +
-          '</div>' +
-          (conflicts[idx].length ? '<div class="plan-conflict">⚠ ' + t('planConflict') + ' ' + esc(conflicts[idx].join(', ')) + '</div>' : '');
-        card.querySelector('.remove-btn').addEventListener('click', function(){
+            '<div class="session-btns">' +
+              '<button class="remove-btn" data-id="' + item.id + '">&times;</button>' +
+              (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+            '</div>';
+        card.appendChild(mainDiv);
+        if(conflicts[idx].length){
+          var confDiv = document.createElement('div');
+          confDiv.className = 'plan-conflict';
+          confDiv.textContent = '⚠ ' + t('planConflict') + ' ' + conflicts[idx].join(', ');
+          card.appendChild(confDiv);
+        }
+        if(roomClickable){
+          mainDiv.querySelector('.room-link').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            showFloorplanRoom(item.room);
+          });
+        }
+        mainDiv.querySelector('.remove-btn').addEventListener('click', function(ev){
+          ev.stopPropagation();
           togglePlan(item);
           renderPlan();
         });
+        if(hasDetails){
+          mainDiv.addEventListener('click', function(ev){
+            if(ev.target.closest('.remove-btn') || ev.target.closest('.room-link')) return;
+            var wasOpen = !!expandedPlanItems[item.id];
+            expandedPlanItems = {};
+            if(!wasOpen){ expandedPlanItems[item.id] = true; }
+            renderPlan();
+          });
+          if(isOpen){
+            if(item.abstract){
+              var abP = document.createElement('div');
+              abP.className = 'abstract-box';
+              abP.textContent = item.abstract;
+              card.appendChild(abP);
+            }
+            if(item.bio){
+              var bioHeading = document.createElement('div');
+              bioHeading.className = 'bio-heading';
+              bioHeading.textContent = t('aboutSpeaker');
+              card.appendChild(bioHeading);
+              var bioP = document.createElement('div');
+              bioP.className = 'abstract-box';
+              bioP.textContent = item.bio;
+              card.appendChild(bioP);
+            }
+          }
+        }
         box.appendChild(card);
       });
     });
