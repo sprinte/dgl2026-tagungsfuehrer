@@ -796,7 +796,7 @@
                   plan.push({
                     id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
                     time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room,
-                    abstract: talk.abstract || ''
+                    abstract: talk.abstract || '', code: s.code
                   });
                 }
               });
@@ -807,7 +807,7 @@
               togglePlan({
                 id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
                 time: block.time, title: s.code + ' · ' + s.title + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room,
-                abstract: sessionAbstractText || ''
+                abstract: sessionAbstractText || '', code: s.code
               });
             }
           });
@@ -874,7 +874,7 @@
                 togglePlan({
                   id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
                   time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room,
-                  abstract: talk.abstract || ''
+                  abstract: talk.abstract || '', code: s.code
                 });
               });
               talkList.appendChild(trow);
@@ -1324,6 +1324,14 @@
       '</div>';
   }
 
+  function conflictLabel(item){
+    var baseTitle = item.title;
+    if(item.code && baseTitle.indexOf(item.code + ' · ') === 0){
+      baseTitle = baseTitle.slice((item.code + ' · ').length);
+    }
+    return item.code ? (baseTitle + ' (' + item.code + ')') : baseTitle;
+  }
+
   function renderPlan(){
     renderNextUp();
     var box = document.getElementById('planList');
@@ -1353,7 +1361,7 @@
           if(i === j) continue;
           var ra = ranges[i], rb = ranges[j];
           if(ra && rb && ra.start < rb.end && rb.start < ra.end){
-            conflicts[i].push(group.items[j].title);
+            conflicts[i].push(conflictLabel(group.items[j]));
           }
         }
       }
