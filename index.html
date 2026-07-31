@@ -837,8 +837,48 @@
   .floorplan-wrap{
     width:100%;
     overflow-x:auto;
+    cursor:zoom-in;
   }
   .floorplan-wrap svg{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  .floorplan-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(20,24,28,.92);
+    z-index:300;
+    overflow:hidden;
+  }
+  .floorplan-overlay-close{
+    position:absolute;
+    top:14px; right:14px;
+    width:38px; height:38px;
+    border-radius:50%;
+    border:none;
+    background:#fff;
+    color:var(--text);
+    font-size:20px;
+    z-index:310;
+    box-shadow:0 2px 10px rgba(0,0,0,.3);
+  }
+  .floorplan-zoom-container{
+    width:100%;
+    height:100%;
+    touch-action:none;
+    overflow:hidden;
+  }
+  .floorplan-zoom-content{
+    width:90%;
+    max-width:700px;
+    margin:60px auto 0;
+    transform-origin:0 0;
+    background:#fff;
+    border-radius:12px;
+    padding:16px;
+  }
+  .floorplan-zoom-content svg{
     width:100%;
     height:auto;
     display:block;
@@ -929,7 +969,7 @@
     <h2 class="section-title" id="titleVenue">Tagungsort</h2>
     <div class="card">
       <div class="card-section-heading" id="titleFloorplan">Gebäudeplan</div>
-      <div class="floorplan-wrap">
+      <div class="floorplan-wrap" id="floorplanTrigger" role="button" tabindex="0" aria-label="Gebäudeplan vergrößern">
 <svg id="floorplanSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 800" role="img" aria-label="Gebäudeplan Erwin-Schrödinger-Zentrum" font-family="-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
 <rect x="0" y="0" width="780" height="800" fill="#ffffff"/>
 <text x="30" y="30" font-size="17" font-weight="700" fill="#003d73">Erwin-Schrödinger-Zentrum</text>
@@ -1074,6 +1114,13 @@
 </div>
 
 <button id="backToTopBtn" class="back-to-top" aria-label="Nach oben" style="display:none;">&#8593;</button>
+
+<div id="floorplanOverlay" class="floorplan-overlay" style="display:none;">
+  <button id="floorplanOverlayCloseBtn" class="floorplan-overlay-close" aria-label="Schließen">&times;</button>
+  <div id="floorplanZoomContainer" class="floorplan-zoom-container">
+    <div id="floorplanZoomContent" class="floorplan-zoom-content"></div>
+  </div>
+</div>
 
 <script src="app-data.js"></script>
 <script src="app.js"></script>

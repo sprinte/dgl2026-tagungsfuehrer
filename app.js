@@ -281,7 +281,7 @@
     });
   });
 
-  // ---------- Floor plan room highlighting ----------
+  // ---------- Floor plan room highlighting + zoomable lightbox ----------
   var FLOORPLAN_ROOM_MAP = {
     'HS 0/110': ['0-110'],
     'HS 0/115': ['0-115'],
@@ -291,19 +291,93 @@
     'HS 0/313': ['0-313'],
     'SR 1/305+306': ['1-305', '1-306']
   };
+
+  var fpZoomState = { scale: 1, tx: 0, ty: 0, pointers: {}, lastDist: null };
+  function fpApplyTransform(){
+    var content = document.getElementById('floorplanZoomContent');
+    content.style.transform = 'translate(' + fpZoomState.tx + 'px,' + fpZoomState.ty + 'px) scale(' + fpZoomState.scale + ')';
+  }
+  function fpResetZoom(){
+    fpZoomState.scale = 1; fpZoomState.tx = 0; fpZoomState.ty = 0;
+    fpApplyTransform();
+  }
+  (function initFloorplanZoom(){
+    var container = document.getElementById('floorplanZoomContainer');
+    container.addEventListener('pointerdown', function(e){
+      container.setPointerCapture(e.pointerId);
+      fpZoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    });
+    container.addEventListener('pointermove', function(e){
+      if(!fpZoomState.pointers[e.pointerId]) return;
+      var prev = fpZoomState.pointers[e.pointerId];
+      fpZoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(fpZoomState.pointers);
+      if(ids.length === 1){
+        fpZoomState.tx += e.clientX - prev.x;
+        fpZoomState.ty += e.clientY - prev.y;
+        fpApplyTransform();
+      } else if(ids.length === 2){
+        var p1 = fpZoomState.pointers[ids[0]], p2 = fpZoomState.pointers[ids[1]];
+        var dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        if(fpZoomState.lastDist){
+          var delta = dist / fpZoomState.lastDist;
+          fpZoomState.scale = Math.min(6, Math.max(1, fpZoomState.scale * delta));
+          fpApplyTransform();
+        }
+        fpZoomState.lastDist = dist;
+      }
+    });
+    function releasePointer(e){
+      delete fpZoomState.pointers[e.pointerId];
+      fpZoomState.lastDist = null;
+    }
+    container.addEventListener('pointerup', releasePointer);
+    container.addEventListener('pointercancel', releasePointer);
+    container.addEventListener('wheel', function(e){
+      e.preventDefault();
+      fpZoomState.scale = Math.min(6, Math.max(1, fpZoomState.scale - e.deltaY * 0.0015));
+      fpApplyTransform();
+    }, { passive: false });
+  })();
+
+  function openFloorplanLightbox(highlightIds){
+    var master = document.getElementById('floorplanSvg');
+    var clone = master.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.querySelectorAll('.fp-room').forEach(function(el){ el.classList.remove('fp-highlight'); });
+    (highlightIds || []).forEach(function(id){
+      var el = clone.querySelector('#fp-' + id);
+      if(el) el.classList.add('fp-highlight');
+    });
+    var content = document.getElementById('floorplanZoomContent');
+    content.innerHTML = '';
+    content.appendChild(clone);
+    fpResetZoom();
+    document.getElementById('floorplanOverlay').style.display = 'block';
+  }
+  document.getElementById('floorplanTrigger').addEventListener('click', function(){
+    var highlighted = [];
+    document.querySelectorAll('#floorplanSvg .fp-room.fp-highlight').forEach(function(el){
+      highlighted.push(el.id.replace('fp-', ''));
+    });
+    openFloorplanLightbox(highlighted);
+  });
+  document.getElementById('floorplanTrigger').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); this.click(); }
+  });
+  document.getElementById('floorplanOverlayCloseBtn').addEventListener('click', function(){
+    document.getElementById('floorplanOverlay').style.display = 'none';
+  });
+
   function showFloorplanRoom(roomStr){
     var ids = FLOORPLAN_ROOM_MAP[roomStr];
     if(!ids) return;
-    switchToView('venue');
-    document.querySelectorAll('.fp-room').forEach(function(el){ el.classList.remove('fp-highlight'); });
+    document.querySelectorAll('#floorplanSvg .fp-room').forEach(function(el){ el.classList.remove('fp-highlight'); });
     ids.forEach(function(id){
       var el = document.getElementById('fp-' + id);
       if(el) el.classList.add('fp-highlight');
     });
-    setTimeout(function(){
-      var target = document.getElementById('fp-' + ids[0]);
-      if(target) target.scrollIntoView({behavior:'smooth', block:'center'});
-    }, 60);
+    openFloorplanLightbox(ids);
   }
 
   // ---------- Programm ----------
