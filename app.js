@@ -18,9 +18,6 @@
       searchPlaceholder: 'Suche nach Titel, Autor:in, Stichwort...',
       noResults: 'Keine Treffer.',
       liveNow: 'Läuft gerade',
-      weatherTitle: 'Wetter während der Tagung',
-      weatherUnavailable: 'Die Wetterprognose ist erst ca. 10 Tage vor der Tagung verfügbar.',
-      weatherError: 'Wetterdaten konnten nicht geladen werden.',
       planConflict: 'Zeitliche Überschneidung mit:',
       aboutSpeaker: 'Zur Person',
       nextUp: 'Nächster Termin',
@@ -32,7 +29,8 @@
       lunchViewList: 'Liste',
       lunchViewMap: 'Auf Karte anzeigen',
       catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catSocial: 'Social',
-      noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.'
+      noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
+      followUs: 'Folgt uns'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -51,9 +49,6 @@
       searchPlaceholder: 'Search by title, author, keyword...',
       noResults: 'No results.',
       liveNow: 'Happening now',
-      weatherTitle: 'Weather during the conference',
-      weatherUnavailable: 'The forecast becomes available roughly 10 days before the conference.',
-      weatherError: 'Could not load weather data.',
       planConflict: 'Overlaps with:',
       aboutSpeaker: 'About the speaker',
       nextUp: 'Next up',
@@ -65,7 +60,8 @@
       lunchViewList: 'List',
       lunchViewMap: 'Show on map',
       catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catSocial: 'Social',
-      noItemsInCategory: 'No programme items in this category.'
+      noItemsInCategory: 'No programme items in this category.',
+      followUs: 'Follow us'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -442,6 +438,15 @@
               (block.linkView || block.linkExk ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
+        if(block.linkUrl || block.linkMapsUrl){
+          var linksDiv = document.createElement('div');
+          linksDiv.className = 'lunch-links';
+          linksDiv.style.marginTop = '8px';
+          linksDiv.innerHTML =
+            (block.linkMapsUrl ? '<a class="pill-link" href="' + esc(block.linkMapsUrl) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' : '') +
+            (block.linkUrl ? '<a class="pill-link" href="' + esc(block.linkUrl) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '');
+          card.appendChild(linksDiv);
+        }
         if(showAddBtn){
           headerDiv.querySelector('[data-role="info-add"]').addEventListener('click', function(ev){
             ev.stopPropagation();
@@ -871,6 +876,21 @@
       var popupHtml = '<strong>' + esc(l.name) + '</strong><br>' + esc(typDisplay) + (l.hours ? ' · ' + esc(l.hours) : '') + '<br>' + l.distMin + ' ' + t('min') + ' · ' + l.distM + ' m';
       L.marker([l.lat, l.lng], { icon: lunchIcon }).addTo(lunchMapInstance).bindPopup(popupHtml);
     });
+
+    if(venue.socialVenue){
+      var sv = venue.socialVenue;
+      var socialIcon = L.divIcon({
+        className: '', html:
+          '<div style="position:relative;width:34px;height:34px;">' +
+            '<div class="venue-pulse" style="background:rgba(155,89,20,.35);"></div>' +
+            '<div style="position:relative;background:#9b5914;color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);">&#127942;</div>' +
+          '</div>',
+        iconSize: [34,34], iconAnchor: [17,17]
+      });
+      L.marker([sv.lat, sv.lng], { icon: socialIcon, zIndexOffset: 900 }).addTo(lunchMapInstance)
+        .bindPopup('<strong>' + esc(sv.name) + '</strong><br>' + esc(sv.address) + '<br>' + (lang === 'en' ? 'Conference Dinner' : 'Gesellschaftsabend'))
+        .bindTooltip(sv.name + (lang === 'en' ? ' (Conference Dinner)' : ' (Gesellschaftsabend)'), { direction: 'top', offset: [0, -17], className: 'venue-tooltip social-tooltip' });
+    }
   }
 
   function setLunchView(mode){
@@ -949,65 +969,6 @@
   }
 
   // ---------- Tagungsort ----------
-  var WEATHER_CODE_MAP = {
-    0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
-    45: '🌫️', 48: '🌫️',
-    51: '🌦️', 53: '🌦️', 55: '🌦️',
-    61: '🌧️', 63: '🌧️', 65: '🌧️',
-    71: '🌨️', 73: '🌨️', 75: '🌨️',
-    80: '🌦️', 81: '🌧️', 82: '🌧️',
-    95: '⛈️', 96: '⛈️', 99: '⛈️'
-  };
-  var weatherCache = null;
-  var weatherLoading = false;
-  var CONFERENCE_DATES = ['2026-09-14','2026-09-15','2026-09-16','2026-09-17','2026-09-18'];
-
-  function renderWeatherBox(){
-    var box = document.getElementById('weatherBox');
-    if(weatherCache === 'error'){
-      box.innerHTML = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-fallback">' + t('weatherError') + '</div></div>';
-      return;
-    }
-    if(!weatherCache){
-      box.innerHTML = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-fallback">…</div></div>';
-      return;
-    }
-    var days = weatherCache.filter(function(d){ return CONFERENCE_DATES.indexOf(d.date) !== -1; });
-    if(days.length === 0){
-      box.innerHTML = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-fallback">' + t('weatherUnavailable') + '</div></div>';
-      return;
-    }
-    var weekdaysDe = ['So','Mo','Di','Mi','Do','Fr','Sa'];
-    var weekdaysEn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    var html = '<div class="weather-card"><div class="weather-title">' + t('weatherTitle') + '</div><div class="weather-days">';
-    days.forEach(function(d){
-      var dt = new Date(d.date + 'T12:00:00');
-      var label = (lang === 'en' ? weekdaysEn : weekdaysDe)[dt.getDay()] + ' ' + dt.getDate() + '.';
-      var icon = WEATHER_CODE_MAP[d.code] || '🌡️';
-      html += '<div class="weather-day"><div class="wd-label">' + label + '</div><div class="wd-icon">' + icon + '</div><div class="wd-temp">' + Math.round(d.tmax) + '° / ' + Math.round(d.tmin) + '°</div></div>';
-    });
-    html += '</div></div>';
-    box.innerHTML = html;
-  }
-
-  function loadWeather(){
-    if(weatherCache || weatherLoading) return;
-    weatherLoading = true;
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude=52.4344&longitude=13.5375&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin';
-    fetch(url).then(function(res){ return res.json(); }).then(function(data){
-      var d = data.daily;
-      weatherCache = d.time.map(function(date, i){
-        return { date: date, code: d.weathercode[i], tmax: d.temperature_2m_max[i], tmin: d.temperature_2m_min[i] };
-      });
-      weatherLoading = false;
-      renderWeatherBox();
-    }).catch(function(){
-      weatherCache = 'error';
-      weatherLoading = false;
-      renderWeatherBox();
-    });
-  }
-
   function renderVenue(){
     var v = DATA.venue;
     var box = document.getElementById('venueBox');
@@ -1018,6 +979,23 @@
         '<div class="lunch-meta" style="margin-top:6px;">' + esc(v.address) + '</div>' +
         '<a class="venue-map-link" href="' + esc(v.maps) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('oepnvLabel') + '</strong> ' + esc(oepnv) + '</div>' +
+      '</div>' +
+      '<div class="card social-card">' +
+        '<div class="lunch-name" style="margin-bottom:10px;">' + t('followUs') + '</div>' +
+        '<div class="social-links">' +
+          '<a class="social-link" href="https://www.instagram.com/dgl_ev/" target="_blank" rel="noopener">' +
+            '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>' +
+            '<span>Instagram</span>' +
+          '</a>' +
+          '<a class="social-link" href="https://www.linkedin.com/company/deutsche-gesellschaft-fur-limnologie-dgl/" target="_blank" rel="noopener">' +
+            '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>' +
+            '<span>LinkedIn</span>' +
+          '</a>' +
+          '<a class="social-link" href="https://bsky.app/profile/dgl-ev.bsky.social" target="_blank" rel="noopener">' +
+            '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 10.8C10.6 8 6.4 4.9 3.8 4c-.5 0-1 .2-1 1v10.4c0 .8.5 1.3 1.2 1.4 3.5.5 6.6 1.9 8 4.2 1.4-2.3 4.5-3.7 8-4.2.7-.1 1.2-.6 1.2-1.4V5c0-.8-.5-1-1-1-2.6.9-6.8 4-8.2 6.8z"/></svg>' +
+            '<span>BlueSky</span>' +
+          '</a>' +
+        '</div>' +
       '</div>';
   }
 
@@ -1174,13 +1152,11 @@
     renderLunchList();
     renderExkursionen();
     renderVenue();
-    renderWeatherBox();
     renderPlan();
   }
 
   applyStaticI18n();
   renderAll();
-  loadWeather();
   setInterval(function(){
     renderDayTabs();
     renderProgrammList();
@@ -1226,12 +1202,6 @@
       renderDayTabs();
       renderProgrammList();
       console.log('[dglDebug] Simulierte Zeit zurückgesetzt, echte Uhrzeit wird wieder verwendet.');
-    },
-    testWeather: function(dateArray){
-      CONFERENCE_DATES = dateArray;
-      weatherCache = null;
-      loadWeather();
-      console.log('[dglDebug] Wetter-Widget testet jetzt mit Daten:', dateArray);
     }
   };
 
