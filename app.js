@@ -30,7 +30,7 @@
       lunchViewMap: 'Auf Karte anzeigen',
       catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catSocial: 'Social',
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
-      followUs: 'Folgt uns',
+      followUs: 'Social Media',
       posterListLabel: 'Poster',
       posterBoard: 'Stellwand',
       organizersLabel: 'Veranstalter'
@@ -64,7 +64,7 @@
       lunchViewMap: 'Show on map',
       catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catSocial: 'Social',
       noItemsInCategory: 'No programme items in this category.',
-      followUs: 'Follow us',
+      followUs: 'Social Media',
       posterListLabel: 'Posters',
       posterBoard: 'Board',
       organizersLabel: 'Organizers'
@@ -1008,7 +1008,7 @@
     var oepnv = lang === 'en' ? v.oepnv_en : v.oepnv;
     box.innerHTML =
       '<div class="card">' +
-        '<div class="lunch-name" style="margin-bottom:10px;">' + t('organizersLabel') + '</div>' +
+        '<div class="card-section-heading">' + t('organizersLabel') + '</div>' +
         '<div class="org-links">' +
           '<a class="org-link" href="https://dgl-jahrestagungen.de/" target="_blank" rel="noopener">' +
             '<div class="org-logo-placeholder">DGL</div>' +
@@ -1027,7 +1027,7 @@
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('oepnvLabel') + '</strong> ' + esc(oepnv) + '</div>' +
       '</div>' +
       '<div class="card social-card">' +
-        '<div class="lunch-name" style="margin-bottom:10px;">' + t('followUs') + '</div>' +
+        '<div class="card-section-heading">' + t('followUs') + '</div>' +
         '<div class="social-links">' +
           '<a class="social-link" href="https://www.instagram.com/dgl_ev/" target="_blank" rel="noopener">' +
             '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>' +

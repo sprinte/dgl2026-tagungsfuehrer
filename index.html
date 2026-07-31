@@ -822,6 +822,12 @@
     width:44px; height:44px;
     object-fit:contain;
   }
+  .card-section-heading{
+    font-size:19px;
+    font-weight:600;
+    color:var(--navy);
+    margin-bottom:10px;
+  }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -917,7 +923,7 @@
   <button data-view="programm" class="active"><span class="ic">&#128197;</span><span id="navProgramm">Programm</span></button>
   <button data-view="lunch"><span class="ic">&#127869;</span><span id="navLunch">Mittagessen</span></button>
   <button data-view="exkursionen"><span class="ic">&#128506;</span><span id="navExk">Exkursionen</span></button>
-  <button data-view="venue"><span class="ic">&#8505;&#65039;</span><span id="navVenue">Tagungsort</span></button>
+  <button data-view="venue"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/></svg></span><span id="navVenue">Tagungsort</span></button>
   <button data-view="plan"><span class="ic">&#11088;</span><span id="navPlan">Mein Plan</span></button>
 </nav>
 
