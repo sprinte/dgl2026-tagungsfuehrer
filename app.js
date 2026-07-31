@@ -551,12 +551,14 @@
   }
 
   var searchBackState = null;
-  function searchForAuthor(name){
+  function searchForAuthor(name, originView){
     searchBackState = {
+      originView: originView || 'programm',
       day: currentDay,
       categoryFilter: currentCategoryFilter,
       expandedSessions: expandedSessions,
       expandedTalks: expandedTalks,
+      planViewMode: currentPlanViewMode,
       scrollY: window.scrollY
     };
     document.getElementById('searchBackBtn').style.display = 'block';
@@ -568,16 +570,21 @@
   }
   document.getElementById('searchBackBtn').addEventListener('click', function(){
     if(!searchBackState) return;
-    currentDay = searchBackState.day;
-    currentCategoryFilter = searchBackState.categoryFilter;
-    expandedSessions = searchBackState.expandedSessions;
-    expandedTalks = searchBackState.expandedTalks;
     document.getElementById('programmSearch').value = '';
     document.getElementById('searchClearBtn').style.display = 'none';
     renderSearchResults('');
-    renderDayTabs();
-    renderCategoryFilter();
-    renderProgrammList();
+    if(searchBackState.originView === 'plan'){
+      switchToView('plan');
+      setPlanView(searchBackState.planViewMode || 'list');
+    } else {
+      currentDay = searchBackState.day;
+      currentCategoryFilter = searchBackState.categoryFilter;
+      expandedSessions = searchBackState.expandedSessions;
+      expandedTalks = searchBackState.expandedTalks;
+      renderDayTabs();
+      renderCategoryFilter();
+      renderProgrammList();
+    }
     window.scrollTo(0, searchBackState.scrollY);
     searchBackState = null;
     this.style.display = 'none';
@@ -1432,7 +1439,7 @@
         mainDiv.querySelectorAll('.author-link').forEach(function(el){
           el.addEventListener('click', function(ev){
             ev.stopPropagation();
-            searchForAuthor(el.getAttribute('data-author'));
+            searchForAuthor(el.getAttribute('data-author'), 'plan');
           });
         });
         mainDiv.querySelector('.remove-btn').addEventListener('click', function(ev){
@@ -1480,7 +1487,9 @@
   var PT_END_HOUR = 20;
   var PT_PX_PER_MIN = 1.1;
 
+  var currentPlanViewMode = 'list';
   function setPlanView(mode){
+    currentPlanViewMode = mode;
     document.getElementById('planViewListBtn').classList.toggle('active', mode === 'list');
     document.getElementById('planViewTimelineBtn').classList.toggle('active', mode === 'timeline');
     document.getElementById('planList').style.display = mode === 'list' ? '' : 'none';
@@ -1568,17 +1577,23 @@
     var totalMin = (PT_END_HOUR - PT_START_HOUR) * 60;
     container.style.height = (totalMin * PT_PX_PER_MIN + 20) + 'px';
 
-    for(var h = PT_START_HOUR; h <= PT_END_HOUR; h++){
-      var y = (h - PT_START_HOUR) * 60 * PT_PX_PER_MIN;
+    var totalQuarters = (PT_END_HOUR - PT_START_HOUR) * 4;
+    for(var q = 0; q <= totalQuarters; q++){
+      var minFromStart = q * 15;
+      var y = minFromStart * PT_PX_PER_MIN;
+      var isHour = (minFromStart % 60) === 0;
       var line = document.createElement('div');
-      line.className = 'pt-hour-line';
+      line.className = 'pt-hour-line' + (isHour ? ' pt-hour-line-full' : ' pt-hour-line-quarter');
       line.style.top = y + 'px';
       container.appendChild(line);
-      var label = document.createElement('div');
-      label.className = 'pt-hour-label';
-      label.style.top = y + 'px';
-      label.textContent = (h < 10 ? '0'+h : h) + ':00';
-      container.appendChild(label);
+      if(isHour){
+        var h = PT_START_HOUR + minFromStart/60;
+        var label = document.createElement('div');
+        label.className = 'pt-hour-label';
+        label.style.top = y + 'px';
+        label.textContent = (h < 10 ? '0'+h : h) + ':00';
+        container.appendChild(label);
+      }
     }
 
     if(!currentPlanTimelineDay) return;
@@ -1659,7 +1674,7 @@
     content.querySelectorAll('.author-link').forEach(function(el){
       el.addEventListener('click', function(){
         document.getElementById('planItemOverlay').style.display = 'none';
-        searchForAuthor(el.getAttribute('data-author'));
+        searchForAuthor(el.getAttribute('data-author'), 'plan');
       });
     });
     document.getElementById('planItemOverlay').style.display = 'flex';
