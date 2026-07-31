@@ -1368,19 +1368,13 @@
     return item.code ? (baseTitle + ' (' + item.code + ')') : baseTitle;
   }
 
-  var currentPlanListDayFilter = 'alle';
+  var currentPlanListDayFilter = (function(){
+    var todayDay = DATA.programm.find(function(d){ return isToday(d.id); });
+    return (todayDay || DATA.programm[0]).id;
+  })();
   function renderPlanListDayTabs(){
     var wrap = document.getElementById('planListDayTabs');
     wrap.innerHTML = '';
-    var allBtn = document.createElement('div');
-    allBtn.className = 'day-tab' + (currentPlanListDayFilter === 'alle' ? ' active' : '');
-    allBtn.textContent = t('catAll');
-    allBtn.addEventListener('click', function(){
-      currentPlanListDayFilter = 'alle';
-      renderPlanListDayTabs();
-      renderPlan();
-    });
-    wrap.appendChild(allBtn);
     DATA.programm.forEach(function(dayObj){
       var b = document.createElement('div');
       b.className = 'day-tab' + (currentPlanListDayFilter === dayObj.id ? ' active' : '');
@@ -1402,7 +1396,7 @@
     renderPlanListDayTabs();
     var box = document.getElementById('planList');
     box.innerHTML = '';
-    var visiblePlan = currentPlanListDayFilter === 'alle' ? plan : plan.filter(function(p){ return p.dayId === currentPlanListDayFilter; });
+    var visiblePlan = plan.filter(function(p){ return p.dayId === currentPlanListDayFilter; });
     if(plan.length === 0){
       box.innerHTML = '<div class="empty-state">' + t('planEmpty') + '</div>';
       renderPlanTimelineDayTabs();
@@ -1538,6 +1532,7 @@
     document.getElementById('planViewListBtn').classList.toggle('active', mode === 'list');
     document.getElementById('planViewTimelineBtn').classList.toggle('active', mode === 'timeline');
     document.getElementById('planList').style.display = mode === 'list' ? '' : 'none';
+    document.getElementById('planListDayTabs').style.display = mode === 'list' ? '' : 'none';
     document.getElementById('planTimelineWrap').style.display = mode === 'timeline' ? '' : 'none';
     if(mode === 'timeline'){ renderPlanTimelineDayTabs(); renderPlanTimeline(); }
   }
