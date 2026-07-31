@@ -388,10 +388,22 @@
     var master = document.getElementById('floorplanSvg');
     var clone = master.cloneNode(true);
     clone.removeAttribute('id');
-    clone.querySelectorAll('.fp-room').forEach(function(el){ el.classList.remove('fp-highlight'); });
+    clone.querySelectorAll('.fp-room').forEach(function(el){
+      el.classList.remove('fp-highlight');
+      var oldRing = el.querySelector('.fp-pulse-ring');
+      if(oldRing) oldRing.remove();
+    });
     (highlightIds || []).forEach(function(id){
       var el = clone.querySelector('#fp-' + id);
-      if(el) el.classList.add('fp-highlight');
+      if(el){
+        el.classList.add('fp-highlight');
+        var baseRect = el.querySelector('rect');
+        if(baseRect){
+          var ring = baseRect.cloneNode(false);
+          ring.setAttribute('class', 'fp-pulse-ring');
+          el.appendChild(ring);
+        }
+      }
     });
     var content = document.getElementById('floorplanZoomContent');
     content.innerHTML = '';
