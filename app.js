@@ -306,16 +306,15 @@
     fpApplyTransform();
   }
   function fpZoomAt(clientX, clientY, newScale){
-    var container = document.getElementById('floorplanZoomContainer');
-    var rect = container.getBoundingClientRect();
+    var content = document.getElementById('floorplanZoomContent');
+    var rect = content.getBoundingClientRect();
     newScale = Math.min(6, Math.max(1, newScale));
-    var localX = clientX - rect.left;
-    var localY = clientY - rect.top;
-    var px = (localX - fpZoomState.tx) / fpZoomState.scale;
-    var py = (localY - fpZoomState.ty) / fpZoomState.scale;
+    var ratio = newScale / fpZoomState.scale;
+    var dx = clientX - rect.left;
+    var dy = clientY - rect.top;
+    fpZoomState.tx = fpZoomState.tx + dx * (1 - ratio);
+    fpZoomState.ty = fpZoomState.ty + dy * (1 - ratio);
     fpZoomState.scale = newScale;
-    fpZoomState.tx = localX - px * newScale;
-    fpZoomState.ty = localY - py * newScale;
     fpApplyTransform();
   }
   (function initFloorplanZoom(){
