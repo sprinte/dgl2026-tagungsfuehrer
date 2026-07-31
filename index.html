@@ -822,10 +822,12 @@
   body.dark .social-link{ background:#233042; }
   .org-links{
     display:flex;
+    flex-wrap:wrap;
     gap:10px;
   }
   .org-link{
-    flex:1;
+    flex:1 1 calc(50% - 10px);
+    min-width:80px;
     display:flex;
     flex-direction:column;
     align-items:center;
