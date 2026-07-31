@@ -826,13 +826,13 @@
     gap:10px;
   }
   .org-link{
-    flex:0 1 auto;
-    min-width:90px;
+    flex:1 1 calc(50% - 10px);
+    min-width:80px;
     display:flex;
     flex-direction:column;
     align-items:center;
     gap:6px;
-    padding:12px 14px;
+    padding:12px 6px;
     border-radius:12px;
     background:#f4f6f5;
     color:var(--navy);
@@ -842,7 +842,8 @@
   }
   body.dark .org-link{ background:#233042; }
   .org-logo-placeholder{
-    width:80px; height:80px;
+    width:100%;
+    height:70px;
     border-radius:10px;
     background:var(--navy);
     color:#fff;
@@ -853,9 +854,9 @@
     font-weight:700;
   }
   .org-link img{
-    height:80px;
-    width:auto;
-    max-width:100%;
+    width:100%;
+    height:auto;
+    max-height:80px;
     object-fit:contain;
   }
   .card-section-heading{
