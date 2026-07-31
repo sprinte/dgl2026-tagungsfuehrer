@@ -28,7 +28,9 @@
       linkCopied: 'Link kopiert!',
       copyManually: 'Diesen Link kopieren:',
       sharedPlanConfirmPrefix: 'Geteilten Plan mit ',
-      sharedPlanConfirmSuffix: ' Einträgen laden? Das ersetzt deinen aktuellen Plan.'
+      sharedPlanConfirmSuffix: ' Einträgen laden? Das ersetzt deinen aktuellen Plan.',
+      lunchViewList: 'Liste',
+      lunchViewMap: 'Auf Karte anzeigen'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -57,13 +59,13 @@
       linkCopied: 'Link copied!',
       copyManually: 'Copy this link:',
       sharedPlanConfirmPrefix: 'Load shared plan with ',
-      sharedPlanConfirmSuffix: ' items? This will replace your current plan.'
+      sharedPlanConfirmSuffix: ' items? This will replace your current plan.',
+      lunchViewList: 'List',
+      lunchViewMap: 'Show on map'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
-  var lang = (function(){
-    try{ return localStorage.getItem(LANG_KEY) || 'de'; }catch(e){ return 'de'; }
-  })();
+  var lang = 'de';
   function t(key){ return I18N[lang][key]; }
 
   function applyStaticI18n(){
@@ -82,6 +84,8 @@
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
     document.getElementById('sharePlanBtnText').textContent = t('shareBtnLabel');
+    document.getElementById('lunchViewListText').textContent = t('lunchViewList');
+    document.getElementById('lunchViewMapText').textContent = t('lunchViewMap');
     document.getElementById('programmSearch').placeholder = t('searchPlaceholder');
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
@@ -637,6 +641,16 @@
         topicList.push(entry);
       }
     });
+    function codeSortKey(code){
+      var m = code.match(/^([A-Za-z]+)0*(\d+)/);
+      if(m) return [m[1], parseInt(m[2], 10)];
+      return [code, 0];
+    }
+    topicList.sort(function(a, b){
+      var ka = codeSortKey(a.code), kb = codeSortKey(b.code);
+      if(ka[0] !== kb[0]) return ka[0] < kb[0] ? -1 : 1;
+      return ka[1] - kb[1];
+    });
   })();
 
   function renderTopicJump(){
@@ -712,6 +726,99 @@
       list.appendChild(card);
     });
   }
+
+  // ---------- Lunch map view ----------
+  var GEOCODE_CACHE_KEY = 'dgl2026_geocode_cache_v1';
+  var geocodeCache = (function(){
+    try{ return JSON.parse(localStorage.getItem(GEOCODE_CACHE_KEY) || '{}'); }catch(e){ return {}; }
+  })();
+  function saveGeocodeCache(){
+    try{ localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(geocodeCache)); }catch(e){}
+  }
+  var lunchMapInstance = null;
+  var lunchMapLoaded = false;
+
+  function geocodeAddress(address){
+    if(geocodeCache[address]) return Promise.resolve(geocodeCache[address]);
+    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address + ', Berlin, Germany');
+    return fetch(url, { headers: { 'Accept-Language': lang } }).then(function(res){ return res.json(); }).then(function(results){
+      if(results && results[0]){
+        var coords = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+        geocodeCache[address] = coords;
+        saveGeocodeCache();
+        return coords;
+      }
+      return null;
+    }).catch(function(){ return null; });
+  }
+
+  function initLunchMap(){
+    if(lunchMapLoaded || typeof L === 'undefined') return;
+    lunchMapLoaded = true;
+    var venue = DATA.venue;
+    lunchMapInstance = L.map('lunchMap').setView([52.4344, 13.5375], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(lunchMapInstance);
+
+    var venueIcon = L.divIcon({
+      className: '', html: '<div style="background:#003d73;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">&#127963;</div>',
+      iconSize: [28,28], iconAnchor: [14,14]
+    });
+    L.marker([52.4344, 13.5375], { icon: venueIcon }).addTo(lunchMapInstance)
+      .bindPopup('<strong>' + esc(venue.name) + '</strong>');
+
+    var noteEl = document.getElementById('lunchMapNote');
+    noteEl.style.display = 'block';
+    noteEl.textContent = lang === 'en' ? 'Loading locations…' : 'Lade Standorte…';
+
+    var lunchIcon = L.divIcon({
+      className: '', html: '<div style="background:#1d6f5c;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">&#127869;</div>',
+      iconSize: [24,24], iconAnchor: [12,12]
+    });
+
+    var items = DATA.lunch.slice();
+    var loaded = 0;
+    function geocodeNext(i){
+      if(i >= items.length){
+        noteEl.style.display = 'none';
+        return;
+      }
+      var l = items[i];
+      var address = l.address || l.name;
+      geocodeAddress(address).then(function(coords){
+        loaded++;
+        noteEl.textContent = (lang === 'en' ? 'Loading locations… ' : 'Lade Standorte… ') + loaded + '/' + items.length;
+        if(coords){
+          var typDisplay = lang === 'en' ? l.typ_en : l.typ;
+          var popupHtml = '<strong>' + esc(l.name) + '</strong><br>' + esc(typDisplay) + (l.hours ? ' · ' + esc(l.hours) : '') + '<br>' + l.distMin + ' ' + t('min') + ' · ' + l.distM + ' m';
+          L.marker([coords.lat, coords.lng], { icon: lunchIcon }).addTo(lunchMapInstance).bindPopup(popupHtml);
+        }
+        setTimeout(function(){ geocodeNext(i+1); }, 300);
+      });
+    }
+    geocodeNext(0);
+  }
+
+  function setLunchView(mode){
+    var listBtn = document.getElementById('lunchViewListBtn');
+    var mapBtn = document.getElementById('lunchViewMapBtn');
+    var listEl = document.getElementById('lunchList');
+    var mapEl = document.getElementById('lunchMap');
+    var filtersEl = document.getElementById('lunchFilters');
+    listBtn.classList.toggle('active', mode === 'list');
+    mapBtn.classList.toggle('active', mode === 'map');
+    listEl.style.display = mode === 'list' ? '' : 'none';
+    filtersEl.style.display = mode === 'list' ? '' : 'none';
+    mapEl.style.display = mode === 'map' ? 'block' : 'none';
+    if(mode === 'map'){
+      initLunchMap();
+      setTimeout(function(){ if(lunchMapInstance) lunchMapInstance.invalidateSize(); }, 100);
+    }
+  }
+  document.getElementById('lunchViewListBtn').addEventListener('click', function(){ setLunchView('list'); });
+  document.getElementById('lunchViewMapBtn').addEventListener('click', function(){ setLunchView('map'); });
 
   // ---------- Exkursionen ----------
   var expandedExk = {};
@@ -1015,6 +1122,7 @@
       return res.json();
     }).then(function(a){
       if(!a || !a.enabled) return;
+      if(a.begins && new Date(a.begins) > new Date()) return;
       if(a.expires && new Date(a.expires) < new Date()) return;
       var dismissedId = null;
       try{ dismissedId = localStorage.getItem(ANNOUNCEMENT_DISMISS_KEY); }catch(e){}
