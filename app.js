@@ -1254,19 +1254,15 @@
         '<div class="org-links">' +
           '<a class="org-link" href="https://dgl-jahrestagungen.de/" target="_blank" rel="noopener">' +
             '<img src="logo_dgl.png" alt="DGL">' +
-            '<span>DGL</span>' +
           '</a>' +
           '<a class="org-link" href="https://watersciencealliance.org/wrch" target="_blank" rel="noopener">' +
             '<div class="org-logo-placeholder">WSA</div>' +
-            '<span>WSA</span>' +
           '</a>' +
           '<a class="org-link" href="https://www.igb-berlin.de/" target="_blank" rel="noopener">' +
             '<img src="logo_igb.png" alt="IGB">' +
-            '<span>IGB</span>' +
           '</a>' +
           '<a class="org-link" href="https://www.hu-berlin.de/" target="_blank" rel="noopener">' +
             '<img src="logo_hu_berlin.png" alt="HU Berlin">' +
-            '<span>HU Berlin</span>' +
           '</a>' +
         '</div>' +
       '</div>';
