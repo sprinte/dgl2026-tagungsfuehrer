@@ -550,6 +550,11 @@
     display:flex;
     align-items:center;
   }
+  .font-btn{
+    padding:5px 9px;
+    font-size:12px;
+    font-weight:700;
+  }
 
   /* Topic jump dropdown */
   .topic-jump{
@@ -726,6 +731,45 @@
     text-align:center;
     margin-bottom:10px;
   }
+  .venue-pulse{
+    position:absolute;
+    top:50%; left:50%;
+    width:36px; height:36px;
+    margin-top:-18px; margin-left:-18px;
+    border-radius:50%;
+    background:rgba(0,61,115,.35);
+    animation:venuePulse 2s ease-out infinite;
+  }
+  @keyframes venuePulse{
+    0%{ transform:scale(1); opacity:.8; }
+    100%{ transform:scale(2.2); opacity:0; }
+  }
+  .venue-tooltip{
+    background:var(--navy) !important;
+    color:#fff !important;
+    border:none !important;
+    font-weight:700 !important;
+    font-size:11.5px !important;
+    padding:3px 8px !important;
+    border-radius:8px !important;
+  }
+  .venue-tooltip::before{
+    border-top-color:var(--navy) !important;
+  }
+  .back-to-top{
+    position:fixed;
+    right:16px;
+    bottom:84px;
+    width:44px; height:44px;
+    border-radius:50%;
+    border:none;
+    background:var(--navy);
+    color:#fff;
+    font-size:20px;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);
+    cursor:pointer;
+    z-index:50;
+  }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -756,6 +800,8 @@
     <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Dark mode">
       <span id="themeToggleIcon">&#127769;</span>
     </button>
+    <button class="theme-toggle-btn font-btn" id="fontDecBtn" aria-label="Schrift verkleinern">A&#8211;</button>
+    <button class="theme-toggle-btn font-btn" id="fontIncBtn" aria-label="Schrift vergrößern">A+</button>
   </div>
   <div class="header-meta"><strong id="headerTitle">41. DGL-Jahrestagung &amp; WRHC</strong><br><span id="headerDates">14.–18. September 2026</span><br><span id="headerVenue">Erwin-Schrödinger-Zentrum, Berlin-Adlershof</span></div>
 </header>
@@ -830,6 +876,8 @@
     <div class="announcement-message" id="announcementMessage"></div>
   </div>
 </div>
+
+<button id="backToTopBtn" class="back-to-top" aria-label="Nach oben" style="display:none;">&#8593;</button>
 
 <script src="app-data.js"></script>
 <script src="app.js"></script>
