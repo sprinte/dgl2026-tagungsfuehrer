@@ -939,7 +939,7 @@
     var q = query.trim().toLowerCase();
     if(!q){
       wrap.style.display = 'none';
-      document.getElementById('dayTabs').style.display = currentCategoryFilter === 'alle' ? '' : 'none';
+      document.getElementById('dayTabs').style.display = '';
       document.getElementById('categoryFilter').style.display = '';
       document.getElementById('programmList').style.display = '';
       return;
