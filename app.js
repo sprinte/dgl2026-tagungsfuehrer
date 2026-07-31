@@ -33,7 +33,8 @@
       followUs: 'Social Media',
       posterListLabel: 'Poster',
       posterBoard: 'Stellwand',
-      organizersLabel: 'Veranstalter'
+      organizersLabel: 'Veranstalter',
+      floorplanTitle: 'Gebäudeplan'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Info', navPlan: 'My Plan',
@@ -67,7 +68,8 @@
       followUs: 'Social Media',
       posterListLabel: 'Posters',
       posterBoard: 'Board',
-      organizersLabel: 'Organizers'
+      organizersLabel: 'Organizers',
+      floorplanTitle: 'Building plan'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -86,6 +88,7 @@
     document.getElementById('titleLunch').textContent = t('titleLunch');
     document.getElementById('titleExk').textContent = t('titleExk');
     document.getElementById('titleVenue').textContent = t('titleVenue');
+    document.getElementById('titleFloorplan').textContent = t('floorplanTitle');
     document.getElementById('titlePlan').textContent = t('titlePlan');
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
@@ -278,6 +281,31 @@
     });
   });
 
+  // ---------- Floor plan room highlighting ----------
+  var FLOORPLAN_ROOM_MAP = {
+    'HS 0/110': ['0-110'],
+    'HS 0/115': ['0-115'],
+    'HS 0/307': ['0-307'],
+    'HS 0/310': ['0-310'],
+    'HS 0/311': ['0-311'],
+    'HS 0/313': ['0-313'],
+    'SR 1/305+306': ['1-305', '1-306']
+  };
+  function showFloorplanRoom(roomStr){
+    var ids = FLOORPLAN_ROOM_MAP[roomStr];
+    if(!ids) return;
+    switchToView('venue');
+    document.querySelectorAll('.fp-room').forEach(function(el){ el.classList.remove('fp-highlight'); });
+    ids.forEach(function(id){
+      var el = document.getElementById('fp-' + id);
+      if(el) el.classList.add('fp-highlight');
+    });
+    setTimeout(function(){
+      var target = document.getElementById('fp-' + ids[0]);
+      if(target) target.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 60);
+  }
+
   // ---------- Programm ----------
   var currentDay = DATA.programm[0].id;
   var currentCategoryFilter = 'alle';
@@ -436,7 +464,7 @@
               '<div class="block-time">' + esc(block.time) + '</div>' +
               '<div class="block-title">' + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
-              (block.room ? '<div class="block-room">' + esc(block.room) + '</div>' : '') +
+              (block.room ? '<div class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' : '') +
@@ -453,6 +481,12 @@
             (block.linkUrl ? '<a class="pill-link" href="' + esc(block.linkUrl) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '');
           card.appendChild(linksDiv);
         }
+        if(headerDiv.querySelector('.room-link')){
+          headerDiv.querySelector('.room-link').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            showFloorplanRoom(this.getAttribute('data-room'));
+          });
+        }
         if(showAddBtn){
           headerDiv.querySelector('[data-role="info-add"]').addEventListener('click', function(ev){
             ev.stopPropagation();
@@ -464,7 +498,7 @@
         }
         if(hasInfoDetails){
           headerDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('[data-role="info-add"]')) return;
+            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
             var wasOpen = !!expandedSessions[id];
             expandedSessions = {};
             if(!wasOpen){ expandedSessions[id] = true; }
@@ -472,12 +506,12 @@
           });
         } else if(block.linkView){
           headerDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('[data-role="info-add"]')) return;
+            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
             switchToView(block.linkView);
           });
         } else if(block.linkExk){
           headerDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('[data-role="info-add"]')) return;
+            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
             switchToView('exkursionen');
             expandedExk = {};
             expandedExk[block.linkExk] = true;
@@ -562,7 +596,7 @@
           var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
           header.innerHTML =
             '<div class="session-main">' +
-              '<span class="session-tag">' + esc(s.code) + '</span><span class="session-room">' + esc(s.room) + '</span>' +
+              '<span class="session-tag">' + esc(s.code) + '</span><span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
               '<div class="session-title">' + esc(s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
@@ -580,10 +614,17 @@
             });
           });
 
+          if(header.querySelector('.room-link')){
+            header.querySelector('.room-link').addEventListener('click', function(ev){
+              ev.stopPropagation();
+              showFloorplanRoom(this.getAttribute('data-room'));
+            });
+          }
+
           if(hasTalks){
             header.style.cursor = 'pointer';
             header.addEventListener('click', function(ev){
-              if(ev.target.closest('[data-role="session-add"]')) return;
+              if(ev.target.closest('[data-role="session-add"]') || ev.target.closest('.room-link')) return;
               var wasOpen = !!expandedSessions[expandKey];
               expandedSessions = {};
               if(!wasOpen){ expandedSessions[expandKey] = true; }
@@ -1008,19 +1049,6 @@
     var oepnv = lang === 'en' ? v.oepnv_en : v.oepnv;
     box.innerHTML =
       '<div class="card">' +
-        '<div class="card-section-heading">' + t('organizersLabel') + '</div>' +
-        '<div class="org-links">' +
-          '<a class="org-link" href="https://dgl-jahrestagungen.de/" target="_blank" rel="noopener">' +
-            '<div class="org-logo-placeholder">DGL</div>' +
-            '<span>DGL</span>' +
-          '</a>' +
-          '<a class="org-link" href="https://watersciencealliance.org/wrch" target="_blank" rel="noopener">' +
-            '<div class="org-logo-placeholder">WSA</div>' +
-            '<span>WSA</span>' +
-          '</a>' +
-        '</div>' +
-      '</div>' +
-      '<div class="card">' +
         '<div class="lunch-name">' + esc(v.name) + '</div>' +
         '<div class="lunch-meta" style="margin-top:6px;">' + esc(v.address) + '</div>' +
         '<a class="venue-map-link" href="' + esc(v.maps) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
@@ -1040,6 +1068,19 @@
           '<a class="social-link" href="https://bsky.app/profile/dgl-ev.bsky.social" target="_blank" rel="noopener">' +
             '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 10.8C10.6 8 6.4 4.9 3.8 4c-.5 0-1 .2-1 1v10.4c0 .8.5 1.3 1.2 1.4 3.5.5 6.6 1.9 8 4.2 1.4-2.3 4.5-3.7 8-4.2.7-.1 1.2-.6 1.2-1.4V5c0-.8-.5-1-1-1-2.6.9-6.8 4-8.2 6.8z"/></svg>' +
             '<span>BlueSky</span>' +
+          '</a>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-section-heading">' + t('organizersLabel') + '</div>' +
+        '<div class="org-links">' +
+          '<a class="org-link" href="https://dgl-jahrestagungen.de/" target="_blank" rel="noopener">' +
+            '<div class="org-logo-placeholder">DGL</div>' +
+            '<span>DGL</span>' +
+          '</a>' +
+          '<a class="org-link" href="https://watersciencealliance.org/wrch" target="_blank" rel="noopener">' +
+            '<div class="org-logo-placeholder">WSA</div>' +
+            '<span>WSA</span>' +
           '</a>' +
         '</div>' +
       '</div>';
