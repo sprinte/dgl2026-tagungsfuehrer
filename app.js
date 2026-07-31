@@ -34,7 +34,8 @@
       posterListLabel: 'Poster',
       posterBoard: 'Stellwand',
       organizersLabel: 'Veranstalter',
-      floorplanTitle: 'Gebäudeplan'
+      floorplanTitle: 'Gebäudeplan',
+      venueCardTitle: 'Tagungsort'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Info', navPlan: 'My Plan',
@@ -69,7 +70,8 @@
       posterListLabel: 'Posters',
       posterBoard: 'Board',
       organizersLabel: 'Organizers',
-      floorplanTitle: 'Building plan'
+      floorplanTitle: 'Building plan',
+      venueCardTitle: 'Venue'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -96,6 +98,8 @@
     document.getElementById('lunchViewListText').textContent = t('lunchViewList');
     document.getElementById('lunchViewMapText').textContent = t('lunchViewMap');
     document.getElementById('programmSearch').placeholder = t('searchPlaceholder');
+    document.getElementById('floorplanSvg').style.display = lang === 'en' ? 'none' : '';
+    document.getElementById('floorplanSvgEn').style.display = lang === 'en' ? '' : 'none';
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
@@ -132,7 +136,7 @@
   // ---------- Font size ----------
   var FONT_KEY = 'dgl2026_fontscale_v1';
   var fontScale = (function(){
-    try{ return parseInt(localStorage.getItem(FONT_KEY), 10) || 100; }catch(e){ return 100; }
+    try{ return parseInt(localStorage.getItem(FONT_KEY), 10) || 115; }catch(e){ return 115; }
   })();
   function applyFontScale(){
     document.body.style.zoom = fontScale + '%';
@@ -385,9 +389,10 @@
   })();
 
   function openFloorplanLightbox(highlightIds){
-    var master = document.getElementById('floorplanSvg');
+    var master = document.getElementById(lang === 'en' ? 'floorplanSvgEn' : 'floorplanSvg');
     var clone = master.cloneNode(true);
     clone.removeAttribute('id');
+    clone.style.display = '';
     clone.querySelectorAll('.fp-room').forEach(function(el){
       el.classList.remove('fp-highlight');
       var oldRing = el.querySelector('.fp-pulse-ring');
@@ -447,7 +452,6 @@
   }
 
   function renderCategoryFilter(){
-    document.getElementById('dayTabs').style.display = currentCategoryFilter === 'alle' ? '' : 'none';
     var wrap = document.getElementById('categoryFilter');
     var cats = [
       { key: 'alle', label: t('catAll') },
@@ -464,6 +468,7 @@
         currentCategoryFilter = c.key;
         expandedSessions = {};
         expandedTalks = {};
+        renderDayTabs();
         renderCategoryFilter();
         renderProgrammList();
       });
@@ -476,16 +481,18 @@
     wrap.innerHTML = '';
     DATA.programm.forEach(function(day){
       var b = document.createElement('div');
-      b.className = 'day-tab' + (day.id === currentDay ? ' active' : '');
+      b.className = 'day-tab' + (currentCategoryFilter === 'alle' && day.id === currentDay ? ' active' : '');
       var dayLabel = lang === 'en' ? day.label_en : day.label;
       var dayNum = day.date.split('.')[0];
       var dateLabel = lang === 'en' ? (dayNum + ordinalSuffix(parseInt(dayNum,10))) : (dayNum + '.');
       b.innerHTML = esc(dayLabel + ' ' + dateLabel) + (isToday(day.id) ? '<span class="day-tab-dot"></span>' : '');
       b.addEventListener('click', function(){
         currentDay = day.id;
+        currentCategoryFilter = 'alle';
         expandedSessions = {};
         expandedTalks = {};
         renderDayTabs();
+        renderCategoryFilter();
         renderProgrammList();
       });
       wrap.appendChild(b);
@@ -1058,10 +1065,11 @@
       var typDisplay = lang === 'en' ? l.typ_en : l.typ;
       var noteDisplay = lang === 'en' ? l.note_en : l.note;
       var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.name + ', ' + (l.address||''));
+      var isCafe = l.name === "Gerdan's Café";
       card.innerHTML =
         '<div class="lunch-card">' +
           '<div style="flex:1;min-width:0;">' +
-            '<div class="lunch-name">' + esc(l.name) + '</div>' +
+            '<div class="lunch-name' + (isCafe ? ' room-link' : '') + '"' + (isCafe ? ' data-fp-room="cafe"' : '') + '>' + esc(l.name) + '</div>' +
             '<div class="lunch-meta">' + esc(typDisplay) + (l.hours ? ' · ' + esc(l.hours) : '') + '</div>' +
             '<div class="lunch-meta">' + esc(l.address || '') + '</div>' +
             (noteDisplay ? '<div class="lunch-note">' + esc(noteDisplay) + '</div>' : '') +
@@ -1074,6 +1082,11 @@
           (l.phone ? '<a class="pill-link" href="tel:' + esc(l.phone.replace(/\s+/g,'')) + '">' + esc(l.phone) + '</a>' : '') +
         '</div>';
       list.appendChild(card);
+      if(isCafe){
+        card.querySelector('.lunch-name').addEventListener('click', function(){
+          openFloorplanLightbox(['cafe']);
+        });
+      }
     });
   }
 
@@ -1213,6 +1226,7 @@
     var oepnv = lang === 'en' ? v.oepnv_en : v.oepnv;
     box.innerHTML =
       '<div class="card">' +
+        '<div class="card-section-heading">' + t('venueCardTitle') + '</div>' +
         '<div class="lunch-name">' + esc(v.name) + '</div>' +
         '<div class="lunch-meta" style="margin-top:6px;">' + esc(v.address) + '</div>' +
         '<a class="venue-map-link" href="' + esc(v.maps) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
