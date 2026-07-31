@@ -648,7 +648,7 @@
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
         var showAddBtn = !block.noPlan;
         var hasInfoDetails = !!(block.abstract || block.bio_de || block.bio_en || (block.posters && block.posters.length));
-        var isClickable = hasInfoDetails || !!block.linkView || !!block.linkExk;
+        var isClickable = hasInfoDetails || !!block.linkView || !!block.linkExk || !!block.linkFloorplan;
         var infoOpen = !!expandedSessions[id];
         if(blockIsNow){
           var liveBadgeInfoEl = document.createElement('div');
@@ -672,7 +672,7 @@
             '<div class="session-btns">' +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' : '') +
               (hasInfoDetails ? '<div class="chevron' + (infoOpen ? ' open' : '') + '">&#9656;</div>' : '') +
-              (block.linkView || block.linkExk ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
+              (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
         if(block.linkUrl || block.linkMapsUrl){
@@ -725,6 +725,11 @@
               var el = document.getElementById('exk-' + block.linkExk);
               if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
             }, 50);
+          });
+        } else if(block.linkFloorplan){
+          headerDiv.addEventListener('click', function(ev){
+            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
+            openFloorplanLightbox([block.linkFloorplan]);
           });
         }
         if(hasInfoDetails && infoOpen){
@@ -1363,16 +1368,52 @@
     return item.code ? (baseTitle + ' (' + item.code + ')') : baseTitle;
   }
 
+  var currentPlanListDayFilter = 'alle';
+  function renderPlanListDayTabs(){
+    var wrap = document.getElementById('planListDayTabs');
+    wrap.innerHTML = '';
+    var allBtn = document.createElement('div');
+    allBtn.className = 'day-tab' + (currentPlanListDayFilter === 'alle' ? ' active' : '');
+    allBtn.textContent = t('catAll');
+    allBtn.addEventListener('click', function(){
+      currentPlanListDayFilter = 'alle';
+      renderPlanListDayTabs();
+      renderPlan();
+    });
+    wrap.appendChild(allBtn);
+    DATA.programm.forEach(function(dayObj){
+      var b = document.createElement('div');
+      b.className = 'day-tab' + (currentPlanListDayFilter === dayObj.id ? ' active' : '');
+      var dayLabel = lang === 'en' ? dayObj.label_en : dayObj.label;
+      var dayNum = dayObj.date.split('.')[0];
+      var dateLabel = lang === 'en' ? (dayNum + ordinalSuffix(parseInt(dayNum,10))) : (dayNum + '.');
+      b.textContent = dayLabel + ' ' + dateLabel;
+      b.addEventListener('click', function(){
+        currentPlanListDayFilter = dayObj.id;
+        renderPlanListDayTabs();
+        renderPlan();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
   function renderPlan(){
     renderNextUp();
+    renderPlanListDayTabs();
     var box = document.getElementById('planList');
     box.innerHTML = '';
+    var visiblePlan = currentPlanListDayFilter === 'alle' ? plan : plan.filter(function(p){ return p.dayId === currentPlanListDayFilter; });
     if(plan.length === 0){
       box.innerHTML = '<div class="empty-state">' + t('planEmpty') + '</div>';
+      renderPlanTimelineDayTabs();
+      renderPlanTimeline();
       return;
     }
+    if(visiblePlan.length === 0){
+      box.innerHTML = '<div class="empty-state">' + t('planEmpty') + '</div>';
+    }
     var byDay = {};
-    plan.forEach(function(p){
+    visiblePlan.forEach(function(p){
       byDay[p.dayId] = byDay[p.dayId] || { label: p.dayLabel, date: p.date, items: [] };
       byDay[p.dayId].items.push(p);
     });
@@ -1483,9 +1524,9 @@
 
   // ---------- Plan timeline view ----------
   var currentPlanTimelineDay = null;
-  var PT_START_HOUR = 8;
+  var PT_START_HOUR = 9;
   var PT_END_HOUR = 20;
-  var PT_PX_PER_MIN = 1.1;
+  var PT_PX_PER_MIN = 1.6;
 
   var currentPlanViewMode = 'list';
   function setPlanView(mode){
@@ -1601,13 +1642,24 @@
 
     var dayObj = DATA.programm.find(function(d){ return d.id === currentPlanTimelineDay; });
     if(dayObj){
-      dayObj.blocks.forEach(function(block){
+      dayObj.blocks.forEach(function(block, blockIdx){
         if(block.type === 'info' && block.noPlan){
           var fixedTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
+          var displayTime = block.time;
+          if(block.time.indexOf('–') === -1){
+            var nextBlock = dayObj.blocks[blockIdx+1];
+            if(nextBlock){
+              var nextRange = parseTimeRangeMinutes(nextBlock.time);
+              if(nextRange) displayTime = block.time + ' – ' + minutesToHHMM(nextRange.start);
+            }
+          }
           dayItems.push({
             id: 'fixed_' + block.time + '_' + block.title,
-            time: block.time, title: fixedTitle, subtitle: '', room: '',
-            _fixed: true
+            time: displayTime, title: fixedTitle, subtitle: '', room: '',
+            _fixed: true,
+            _linkView: block.linkView || null,
+            _linkExk: block.linkExk || null,
+            _linkFloorplan: block.linkFloorplan || null
           });
         }
       });
@@ -1645,12 +1697,31 @@
       el.style.height = height + 'px';
       el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
       el.style.width = 'calc((100% - 44px) * ' + widthFrac + ' - 4px)';
+      var displayPtTime = (p.authors && !p._fixed) ? p.time.split(' – ')[0] : p.time;
       el.innerHTML =
-        '<div class="pt-item-time">' + esc(p.time) + '</div>' +
+        '<div class="pt-item-time">' + esc(displayPtTime) + '</div>' +
         '<div class="pt-item-title">' + esc(p.title) + '</div>';
       if(!p._fixed){
         el.addEventListener('click', function(){
           openPlanItemDetail(p);
+        });
+      } else if(p._linkView || p._linkExk || p._linkFloorplan){
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function(){
+          if(p._linkFloorplan){
+            openFloorplanLightbox([p._linkFloorplan]);
+          } else if(p._linkView){
+            switchToView(p._linkView);
+          } else if(p._linkExk){
+            switchToView('exkursionen');
+            expandedExk = {};
+            expandedExk[p._linkExk] = true;
+            renderExkursionen();
+            setTimeout(function(){
+              var exkEl = document.getElementById('exk-' + p._linkExk);
+              if(exkEl) exkEl.scrollIntoView({behavior:'smooth', block:'start'});
+            }, 50);
+          }
         });
       }
       container.appendChild(el);
