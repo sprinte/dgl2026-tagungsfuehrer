@@ -1500,8 +1500,11 @@
   function renderPlanTimelineDayTabs(){
     var wrap = document.getElementById('planTimelineDayTabs');
     wrap.innerHTML = '';
-    var days = planDaysWithItems();
-    if(days.indexOf(currentPlanTimelineDay) === -1){ currentPlanTimelineDay = days[0] || null; }
+    var days = DATA.programm.map(function(d){ return d.id; });
+    if(!currentPlanTimelineDay || days.indexOf(currentPlanTimelineDay) === -1){
+      var withItems = planDaysWithItems();
+      currentPlanTimelineDay = withItems[0] || days[0] || null;
+    }
     days.forEach(function(dayId){
       var dayObj = DATA.programm.find(function(d){ return d.id === dayId; });
       var b = document.createElement('div');
