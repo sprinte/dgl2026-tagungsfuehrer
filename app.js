@@ -242,6 +242,24 @@
     }
     return { start: start, end: end };
   }
+  function minutesToHHMM(min){
+    var h = Math.floor(min/60), m = min%60;
+    return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+  }
+  function computeTalkTimeRange(sTalks, idx, blockTimeStr){
+    var startRange = parseTimeRangeMinutes(sTalks[idx].time);
+    if(!startRange) return sTalks[idx].time;
+    var start = startRange.start;
+    var end;
+    if(idx+1 < sTalks.length){
+      var nextRange = parseTimeRangeMinutes(sTalks[idx+1].time);
+      end = nextRange ? nextRange.start : start+15;
+    } else {
+      var blockRange = parseTimeRangeMinutes(blockTimeStr);
+      end = (blockRange && blockRange.end > start) ? blockRange.end : start+15;
+    }
+    return sTalks[idx].time + ' – ' + minutesToHHMM(end);
+  }
   function blockDateRange(dayId, timeStr){
     var range = parseTimeRangeMinutes(timeStr);
     if(!range) return null;
@@ -801,8 +819,8 @@
                 } else if(!allAdded && !currentlyIn){
                   plan.push({
                     id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
-                    time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room,
-                    abstract: talk.abstract || '', code: s.code
+                    time: computeTalkTimeRange(s.talks, idx, block.time), title: talk.title, subtitle: talk.authors + ' · ' + s.code, room: s.room,
+                    abstract: talk.abstract || '', code: s.code, authors: talk.authors
                   });
                 }
               });
@@ -879,8 +897,8 @@
                 ev.stopPropagation();
                 togglePlan({
                   id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
-                  time: talk.time, title: talk.title, subtitle: talk.authors + ' · ' + s.code + ' (' + s.room + ')', room: s.room,
-                  abstract: talk.abstract || '', code: s.code
+                  time: computeTalkTimeRange(s.talks, idx, block.time), title: talk.title, subtitle: talk.authors + ' · ' + s.code, room: s.room,
+                  abstract: talk.abstract || '', code: s.code, authors: talk.authors
                 });
               });
               talkList.appendChild(trow);
@@ -1392,7 +1410,7 @@
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(item.room) + '">' + esc(item.room) + '</span>' : '') + '</div>' +
               '<div class="block-title">' + esc(item.title) + '</div>' +
-              (item.subtitle ? '<div class="block-subtitle">' + esc(item.subtitle) + '</div>' : '') +
+              (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
               '<button class="remove-btn" data-id="' + item.id + '">&times;</button>' +
@@ -1411,6 +1429,12 @@
             showFloorplanRoom(item.room);
           });
         }
+        mainDiv.querySelectorAll('.author-link').forEach(function(el){
+          el.addEventListener('click', function(ev){
+            ev.stopPropagation();
+            searchForAuthor(el.getAttribute('data-author'));
+          });
+        });
         mainDiv.querySelector('.remove-btn').addEventListener('click', function(ev){
           ev.stopPropagation();
           togglePlan(item);
@@ -1418,7 +1442,7 @@
         });
         if(hasDetails){
           mainDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('.remove-btn') || ev.target.closest('.room-link')) return;
+            if(ev.target.closest('.remove-btn') || ev.target.closest('.room-link') || ev.target.closest('.author-link')) return;
             var wasOpen = !!expandedPlanItems[item.id];
             expandedPlanItems = {};
             if(!wasOpen){ expandedPlanItems[item.id] = true; }
@@ -1556,6 +1580,21 @@
 
     if(!currentPlanTimelineDay) return;
     var dayItems = plan.filter(function(p){ return p.dayId === currentPlanTimelineDay; });
+
+    var dayObj = DATA.programm.find(function(d){ return d.id === currentPlanTimelineDay; });
+    if(dayObj){
+      dayObj.blocks.forEach(function(block){
+        if(block.type === 'info' && block.noPlan){
+          var fixedTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
+          dayItems.push({
+            id: 'fixed_' + block.time + '_' + block.title,
+            time: block.time, title: fixedTitle, subtitle: '', room: '',
+            _fixed: true
+          });
+        }
+      });
+    }
+
     var laidOut = dayItems.map(function(p){
       var range = parseTimeRangeMinutes(p.time);
       var start = range ? range.start : PT_START_HOUR*60;
@@ -1564,11 +1603,12 @@
     });
     laidOut = computeOverlapLayout(laidOut);
 
-    // conflict flags (reuse simple pairwise overlap check)
+    // conflict flags (reuse simple pairwise overlap check, ignore fixed break blocks)
     var conflictIds = {};
     for(var i=0;i<laidOut.length;i++){
+      if(laidOut[i].item._fixed) continue;
       for(var j=0;j<laidOut.length;j++){
-        if(i===j) continue;
+        if(i===j || laidOut[j].item._fixed) continue;
         if(laidOut[i]._start < laidOut[j]._end && laidOut[j]._start < laidOut[i]._end){
           conflictIds[laidOut[i].item.id] = true;
         }
@@ -1582,7 +1622,7 @@
       var colFrac = entry._col / entry._totalCols;
       var widthFrac = 1 / entry._totalCols;
       var el = document.createElement('div');
-      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '');
+      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '') + (p._fixed ? ' pt-fixed' : '');
       el.style.top = top + 'px';
       el.style.height = height + 'px';
       el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
@@ -1590,9 +1630,11 @@
       el.innerHTML =
         '<div class="pt-item-time">' + esc(p.time) + '</div>' +
         '<div class="pt-item-title">' + esc(p.title) + '</div>';
-      el.addEventListener('click', function(){
-        openPlanItemDetail(p);
-      });
+      if(!p._fixed){
+        el.addEventListener('click', function(){
+          openPlanItemDetail(p);
+        });
+      }
       container.appendChild(el);
     });
   }
@@ -1603,7 +1645,7 @@
     content.innerHTML =
       '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span' + (roomClickable ? ' class="room-link" id="ptDetailRoom"' : '') + '>' + esc(item.room) + '</span>' : '') + '</div>' +
       '<div class="block-title" style="margin-top:4px;">' + esc(item.title) + '</div>' +
-      (item.subtitle ? '<div class="block-subtitle">' + esc(item.subtitle) + '</div>' : '') +
+      (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '') +
       (item.abstract ? '<div class="abstract-box" style="margin-top:10px;">' + esc(item.abstract) + '</div>' : '') +
       (item.bio ? '<div class="bio-heading">' + t('aboutSpeaker') + '</div><div class="abstract-box">' + esc(item.bio) + '</div>' : '');
     if(roomClickable){
@@ -1611,6 +1653,12 @@
         showFloorplanRoom(item.room);
       });
     }
+    content.querySelectorAll('.author-link').forEach(function(el){
+      el.addEventListener('click', function(){
+        document.getElementById('planItemOverlay').style.display = 'none';
+        searchForAuthor(el.getAttribute('data-author'));
+      });
+    });
     document.getElementById('planItemOverlay').style.display = 'flex';
   }
   document.getElementById('planItemOverlayCloseBtn').addEventListener('click', function(){
