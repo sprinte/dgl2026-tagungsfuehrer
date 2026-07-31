@@ -103,6 +103,61 @@
     -webkit-overflow-scrolling:touch;
   }
   .day-tabs::-webkit-scrollbar{display:none;}
+
+  /* Plan timeline view */
+  .plan-timeline{
+    position:relative;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    margin-top:4px;
+    overflow:hidden;
+  }
+  .pt-hour-line{
+    position:absolute;
+    left:44px; right:0;
+    border-top:1px solid var(--border);
+  }
+  .pt-hour-label{
+    position:absolute;
+    left:0; width:38px;
+    font-size:10px;
+    color:var(--text-muted);
+    text-align:right;
+    transform:translateY(-6px);
+  }
+  .pt-item{
+    position:absolute;
+    background:var(--card);
+    border:1px solid var(--accent);
+    border-left:4px solid var(--accent);
+    border-radius:6px;
+    padding:4px 6px;
+    overflow:hidden;
+    cursor:pointer;
+    box-sizing:border-box;
+  }
+  .pt-item.pt-conflict{
+    border-color:#c98a1f;
+    border-left-color:#c98a1f;
+    background:#fff8ec;
+  }
+  body.dark .pt-item.pt-conflict{ background:#3a2c10; }
+  .pt-item-time{
+    font-size:9.5px;
+    font-weight:700;
+    color:var(--accent);
+    line-height:1.2;
+  }
+  .pt-item-title{
+    font-size:11px;
+    font-weight:600;
+    color:var(--text);
+    line-height:1.25;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
   .category-filter-row{
     display:flex;
     gap:6px;
@@ -1243,11 +1298,26 @@
         <span id="sharePlanBtnText">Teilen</span>
       </button>
     </div>
+    <div class="lunch-view-toggle" id="planViewToggle">
+      <button id="planViewListBtn" class="active" data-view="list"><span id="planViewListText">Liste</span></button>
+      <button id="planViewTimelineBtn" data-view="timeline"><span id="planViewTimelineText">Zeitplan</span></button>
+    </div>
     <div id="planList"></div>
+    <div id="planTimelineWrap" style="display:none;">
+      <div class="day-tabs" id="planTimelineDayTabs"></div>
+      <div id="planTimeline" class="plan-timeline"></div>
+    </div>
     <p class="note-inline" id="planNote">Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar.</p>
   </section>
 
 </main>
+
+<div id="planItemOverlay" class="announcement-overlay" style="display:none;">
+  <div class="announcement-card">
+    <button class="announcement-close" id="planItemOverlayCloseBtn">&times;</button>
+    <div id="planItemOverlayContent"></div>
+  </div>
+</div>
 
 <nav class="bottom-nav">
   <button data-view="programm" class="active"><span class="ic">&#128197;</span><span id="navProgramm">Programm</span></button>

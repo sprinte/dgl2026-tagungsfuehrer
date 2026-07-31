@@ -35,7 +35,9 @@
       posterBoard: 'Stellwand',
       organizersLabel: 'Veranstalter',
       floorplanTitle: 'Gebäudeplan',
-      venueCardTitle: 'Tagungsort'
+      venueCardTitle: 'Tagungsort',
+      planViewList: 'Liste',
+      planViewTimeline: 'Zeitplan'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Info', navPlan: 'My Plan',
@@ -71,7 +73,9 @@
       posterBoard: 'Board',
       organizersLabel: 'Organizers',
       floorplanTitle: 'Building plan',
-      venueCardTitle: 'Venue'
+      venueCardTitle: 'Venue',
+      planViewList: 'List',
+      planViewTimeline: 'Timeline'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -95,6 +99,8 @@
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
     document.getElementById('sharePlanBtnText').textContent = t('shareBtnLabel');
+    document.getElementById('planViewListText').textContent = t('planViewList');
+    document.getElementById('planViewTimelineText').textContent = t('planViewTimeline');
     document.getElementById('lunchViewListText').textContent = t('lunchViewList');
     document.getElementById('lunchViewMapText').textContent = t('lunchViewMap');
     document.getElementById('programmSearch').placeholder = t('searchPlaceholder');
@@ -1440,7 +1446,176 @@
         box.appendChild(card);
       });
     });
+    renderPlanTimelineDayTabs();
+    renderPlanTimeline();
   }
+
+  // ---------- Plan timeline view ----------
+  var currentPlanTimelineDay = null;
+  var PT_START_HOUR = 8;
+  var PT_END_HOUR = 20;
+  var PT_PX_PER_MIN = 1.1;
+
+  function setPlanView(mode){
+    document.getElementById('planViewListBtn').classList.toggle('active', mode === 'list');
+    document.getElementById('planViewTimelineBtn').classList.toggle('active', mode === 'timeline');
+    document.getElementById('planList').style.display = mode === 'list' ? '' : 'none';
+    document.getElementById('planTimelineWrap').style.display = mode === 'timeline' ? '' : 'none';
+    if(mode === 'timeline'){ renderPlanTimelineDayTabs(); renderPlanTimeline(); }
+  }
+  document.getElementById('planViewListBtn').addEventListener('click', function(){ setPlanView('list'); });
+  document.getElementById('planViewTimelineBtn').addEventListener('click', function(){ setPlanView('timeline'); });
+
+  function planDaysWithItems(){
+    var order = DATA.programm.map(function(d){ return d.id; });
+    var present = {};
+    plan.forEach(function(p){ present[p.dayId] = true; });
+    return order.filter(function(id){ return present[id]; });
+  }
+
+  function renderPlanTimelineDayTabs(){
+    var wrap = document.getElementById('planTimelineDayTabs');
+    wrap.innerHTML = '';
+    var days = planDaysWithItems();
+    if(days.indexOf(currentPlanTimelineDay) === -1){ currentPlanTimelineDay = days[0] || null; }
+    days.forEach(function(dayId){
+      var dayObj = DATA.programm.find(function(d){ return d.id === dayId; });
+      var b = document.createElement('div');
+      b.className = 'day-tab' + (dayId === currentPlanTimelineDay ? ' active' : '');
+      var dayLabel = lang === 'en' ? dayObj.label_en : dayObj.label;
+      var dayNum = dayObj.date.split('.')[0];
+      var dateLabel = lang === 'en' ? (dayNum + ordinalSuffix(parseInt(dayNum,10))) : (dayNum + '.');
+      b.textContent = dayLabel + ' ' + dateLabel;
+      b.addEventListener('click', function(){
+        currentPlanTimelineDay = dayId;
+        renderPlanTimelineDayTabs();
+        renderPlanTimeline();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  function computeOverlapLayout(items){
+    var sorted = items.slice().sort(function(a,b){ return a._start - b._start; });
+    var result = [];
+    var clusterItems = [];
+    var clusterEnd = -1;
+
+    function flushCluster(){
+      if(!clusterItems.length) return;
+      var columns = [];
+      clusterItems.forEach(function(it){
+        var placed = false;
+        for(var c=0;c<columns.length;c++){
+          if(columns[c] <= it._start){
+            columns[c] = it._end;
+            it._col = c;
+            placed = true;
+            break;
+          }
+        }
+        if(!placed){
+          columns.push(it._end);
+          it._col = columns.length-1;
+        }
+      });
+      clusterItems.forEach(function(it){ it._totalCols = columns.length; });
+      clusterItems = [];
+    }
+
+    sorted.forEach(function(it){
+      if(clusterItems.length && it._start >= clusterEnd){
+        flushCluster();
+        clusterEnd = -1;
+      }
+      clusterItems.push(it);
+      clusterEnd = Math.max(clusterEnd, it._end);
+    });
+    flushCluster();
+    return sorted;
+  }
+
+  function renderPlanTimeline(){
+    var container = document.getElementById('planTimeline');
+    container.innerHTML = '';
+    var totalMin = (PT_END_HOUR - PT_START_HOUR) * 60;
+    container.style.height = (totalMin * PT_PX_PER_MIN + 20) + 'px';
+
+    for(var h = PT_START_HOUR; h <= PT_END_HOUR; h++){
+      var y = (h - PT_START_HOUR) * 60 * PT_PX_PER_MIN;
+      var line = document.createElement('div');
+      line.className = 'pt-hour-line';
+      line.style.top = y + 'px';
+      container.appendChild(line);
+      var label = document.createElement('div');
+      label.className = 'pt-hour-label';
+      label.style.top = y + 'px';
+      label.textContent = (h < 10 ? '0'+h : h) + ':00';
+      container.appendChild(label);
+    }
+
+    if(!currentPlanTimelineDay) return;
+    var dayItems = plan.filter(function(p){ return p.dayId === currentPlanTimelineDay; });
+    var laidOut = dayItems.map(function(p){
+      var range = parseTimeRangeMinutes(p.time);
+      var start = range ? range.start : PT_START_HOUR*60;
+      var end = range ? range.end : start+45;
+      return { item: p, _start: start, _end: end };
+    });
+    laidOut = computeOverlapLayout(laidOut);
+
+    // conflict flags (reuse simple pairwise overlap check)
+    var conflictIds = {};
+    for(var i=0;i<laidOut.length;i++){
+      for(var j=0;j<laidOut.length;j++){
+        if(i===j) continue;
+        if(laidOut[i]._start < laidOut[j]._end && laidOut[j]._start < laidOut[i]._end){
+          conflictIds[laidOut[i].item.id] = true;
+        }
+      }
+    }
+
+    laidOut.forEach(function(entry){
+      var p = entry.item;
+      var top = Math.max(0, (entry._start - PT_START_HOUR*60)) * PT_PX_PER_MIN;
+      var height = Math.max(24, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
+      var colFrac = entry._col / entry._totalCols;
+      var widthFrac = 1 / entry._totalCols;
+      var el = document.createElement('div');
+      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '');
+      el.style.top = top + 'px';
+      el.style.height = height + 'px';
+      el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
+      el.style.width = 'calc((100% - 44px) * ' + widthFrac + ' - 4px)';
+      el.innerHTML =
+        '<div class="pt-item-time">' + esc(p.time) + '</div>' +
+        '<div class="pt-item-title">' + esc(p.title) + '</div>';
+      el.addEventListener('click', function(){
+        openPlanItemDetail(p);
+      });
+      container.appendChild(el);
+    });
+  }
+
+  function openPlanItemDetail(item){
+    var roomClickable = item.room && FLOORPLAN_ROOM_MAP[item.room];
+    var content = document.getElementById('planItemOverlayContent');
+    content.innerHTML =
+      '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span' + (roomClickable ? ' class="room-link" id="ptDetailRoom"' : '') + '>' + esc(item.room) + '</span>' : '') + '</div>' +
+      '<div class="block-title" style="margin-top:4px;">' + esc(item.title) + '</div>' +
+      (item.subtitle ? '<div class="block-subtitle">' + esc(item.subtitle) + '</div>' : '') +
+      (item.abstract ? '<div class="abstract-box" style="margin-top:10px;">' + esc(item.abstract) + '</div>' : '') +
+      (item.bio ? '<div class="bio-heading">' + t('aboutSpeaker') + '</div><div class="abstract-box">' + esc(item.bio) + '</div>' : '');
+    if(roomClickable){
+      document.getElementById('ptDetailRoom').addEventListener('click', function(){
+        showFloorplanRoom(item.room);
+      });
+    }
+    document.getElementById('planItemOverlay').style.display = 'flex';
+  }
+  document.getElementById('planItemOverlayCloseBtn').addEventListener('click', function(){
+    document.getElementById('planItemOverlay').style.display = 'none';
+  });
 
   function showToast(msg){
     var el = document.createElement('div');
