@@ -120,6 +120,32 @@
   });
   applyTheme();
 
+  // ---------- Font size ----------
+  var FONT_KEY = 'dgl2026_fontscale_v1';
+  var fontScale = (function(){
+    try{ return parseInt(localStorage.getItem(FONT_KEY), 10) || 100; }catch(e){ return 100; }
+  })();
+  function applyFontScale(){
+    document.body.style.zoom = fontScale + '%';
+  }
+  function setFontScale(delta){
+    fontScale = Math.max(85, Math.min(145, fontScale + delta));
+    try{ localStorage.setItem(FONT_KEY, fontScale); }catch(e){}
+    applyFontScale();
+  }
+  document.getElementById('fontDecBtn').addEventListener('click', function(){ setFontScale(-15); });
+  document.getElementById('fontIncBtn').addEventListener('click', function(){ setFontScale(15); });
+  applyFontScale();
+
+  // ---------- Back to top ----------
+  var backToTopBtn = document.getElementById('backToTopBtn');
+  window.addEventListener('scroll', function(){
+    backToTopBtn.style.display = window.scrollY > 400 ? 'block' : 'none';
+  });
+  backToTopBtn.addEventListener('click', function(){
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
 
   var PLAN_KEY = 'dgl2026_plan_v1';
 
@@ -370,7 +396,7 @@
             renderExkursionen();
             setTimeout(function(){
               var el = document.getElementById('exk-' + block.linkExk);
-              if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+              if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
             }, 50);
           });
         }
@@ -575,7 +601,7 @@
     renderProgrammList();
     setTimeout(function(){
       var el = document.getElementById('row-' + m.jumpId);
-      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
     }, 50);
   }
 
@@ -742,11 +768,16 @@
     }).addTo(lunchMapInstance);
 
     var venueIcon = L.divIcon({
-      className: '', html: '<div style="background:#003d73;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">&#127963;</div>',
-      iconSize: [28,28], iconAnchor: [14,14]
+      className: '', html:
+        '<div style="position:relative;width:36px;height:36px;">' +
+          '<div class="venue-pulse"></div>' +
+          '<div style="position:relative;background:#003d73;color:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);">&#127963;</div>' +
+        '</div>',
+      iconSize: [36,36], iconAnchor: [18,18]
     });
-    L.marker([venue.lat, venue.lng], { icon: venueIcon }).addTo(lunchMapInstance)
-      .bindPopup('<strong>' + esc(venue.name) + '</strong>');
+    L.marker([venue.lat, venue.lng], { icon: venueIcon, zIndexOffset: 1000 }).addTo(lunchMapInstance)
+      .bindPopup('<strong>' + esc(venue.name) + '</strong>')
+      .bindTooltip(venue.name, { permanent: true, direction: 'top', offset: [0, -18], className: 'venue-tooltip' });
 
     var lunchIcon = L.divIcon({
       className: '', html: '<div style="background:#1d6f5c;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">&#127869;</div>',
