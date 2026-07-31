@@ -728,35 +728,14 @@
   }
 
   // ---------- Lunch map view ----------
-  var GEOCODE_CACHE_KEY = 'dgl2026_geocode_cache_v1';
-  var geocodeCache = (function(){
-    try{ return JSON.parse(localStorage.getItem(GEOCODE_CACHE_KEY) || '{}'); }catch(e){ return {}; }
-  })();
-  function saveGeocodeCache(){
-    try{ localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(geocodeCache)); }catch(e){}
-  }
   var lunchMapInstance = null;
   var lunchMapLoaded = false;
-
-  function geocodeAddress(address){
-    if(geocodeCache[address]) return Promise.resolve(geocodeCache[address]);
-    var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(address + ', Berlin, Germany');
-    return fetch(url, { headers: { 'Accept-Language': lang } }).then(function(res){ return res.json(); }).then(function(results){
-      if(results && results[0]){
-        var coords = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
-        geocodeCache[address] = coords;
-        saveGeocodeCache();
-        return coords;
-      }
-      return null;
-    }).catch(function(){ return null; });
-  }
 
   function initLunchMap(){
     if(lunchMapLoaded || typeof L === 'undefined') return;
     lunchMapLoaded = true;
     var venue = DATA.venue;
-    lunchMapInstance = L.map('lunchMap').setView([52.4344, 13.5375], 15);
+    lunchMapInstance = L.map('lunchMap').setView([venue.lat, venue.lng], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
@@ -766,39 +745,20 @@
       className: '', html: '<div style="background:#003d73;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">&#127963;</div>',
       iconSize: [28,28], iconAnchor: [14,14]
     });
-    L.marker([52.4344, 13.5375], { icon: venueIcon }).addTo(lunchMapInstance)
+    L.marker([venue.lat, venue.lng], { icon: venueIcon }).addTo(lunchMapInstance)
       .bindPopup('<strong>' + esc(venue.name) + '</strong>');
-
-    var noteEl = document.getElementById('lunchMapNote');
-    noteEl.style.display = 'block';
-    noteEl.textContent = lang === 'en' ? 'Loading locations…' : 'Lade Standorte…';
 
     var lunchIcon = L.divIcon({
       className: '', html: '<div style="background:#1d6f5c;color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">&#127869;</div>',
       iconSize: [24,24], iconAnchor: [12,12]
     });
 
-    var items = DATA.lunch.slice();
-    var loaded = 0;
-    function geocodeNext(i){
-      if(i >= items.length){
-        noteEl.style.display = 'none';
-        return;
-      }
-      var l = items[i];
-      var address = l.address || l.name;
-      geocodeAddress(address).then(function(coords){
-        loaded++;
-        noteEl.textContent = (lang === 'en' ? 'Loading locations… ' : 'Lade Standorte… ') + loaded + '/' + items.length;
-        if(coords){
-          var typDisplay = lang === 'en' ? l.typ_en : l.typ;
-          var popupHtml = '<strong>' + esc(l.name) + '</strong><br>' + esc(typDisplay) + (l.hours ? ' · ' + esc(l.hours) : '') + '<br>' + l.distMin + ' ' + t('min') + ' · ' + l.distM + ' m';
-          L.marker([coords.lat, coords.lng], { icon: lunchIcon }).addTo(lunchMapInstance).bindPopup(popupHtml);
-        }
-        setTimeout(function(){ geocodeNext(i+1); }, 300);
-      });
-    }
-    geocodeNext(0);
+    DATA.lunch.forEach(function(l){
+      if(l.lat == null || l.lng == null) return;
+      var typDisplay = lang === 'en' ? l.typ_en : l.typ;
+      var popupHtml = '<strong>' + esc(l.name) + '</strong><br>' + esc(typDisplay) + (l.hours ? ' · ' + esc(l.hours) : '') + '<br>' + l.distMin + ' ' + t('min') + ' · ' + l.distM + ' m';
+      L.marker([l.lat, l.lng], { icon: lunchIcon }).addTo(lunchMapInstance).bindPopup(popupHtml);
+    });
   }
 
   function setLunchView(mode){
