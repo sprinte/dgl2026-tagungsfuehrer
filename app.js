@@ -1616,6 +1616,14 @@
     return sorted;
   }
 
+  function formatAuthorsCompact(authorsStr){
+    if(!authorsStr) return '';
+    var namesPart = authorsStr.split(' — ')[0];
+    var names = namesPart.split(/,\s*/).filter(Boolean);
+    if(!names.length) return '';
+    return names[0] + (names.length > 1 ? ' et al.' : '');
+  }
+
   function renderPlanTimeline(){
     var container = document.getElementById('planTimeline');
     container.innerHTML = '';
@@ -1702,9 +1710,17 @@
       el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
       el.style.width = 'calc((100% - 44px) * ' + widthFrac + ' - 4px)';
       var displayPtTime = (p.authors && !p._fixed) ? p.time.split(' – ')[0] : p.time;
+      var secondLine;
+      if(p._fixed){
+        secondLine = esc(p.title);
+      } else if(p.authors){
+        secondLine = esc(formatAuthorsCompact(p.authors));
+      } else {
+        secondLine = esc(p.title);
+      }
       el.innerHTML =
-        '<div class="pt-item-time">' + esc(displayPtTime) + '</div>' +
-        '<div class="pt-item-title">' + esc(p.title) + '</div>';
+        '<div class="pt-item-time">' + esc(displayPtTime) + (p.room ? ' <span class="pt-item-room">· ' + esc(p.room) + '</span>' : '') + '</div>' +
+        '<div class="pt-item-title">' + secondLine + '</div>';
       if(!p._fixed){
         el.addEventListener('click', function(){
           openPlanItemDetail(p);
