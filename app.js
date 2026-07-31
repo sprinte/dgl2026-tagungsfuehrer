@@ -30,7 +30,9 @@
       lunchViewMap: 'Auf Karte anzeigen',
       catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catSocial: 'Social',
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
-      followUs: 'Folgt uns'
+      followUs: 'Folgt uns',
+      posterListLabel: 'Poster',
+      posterBoard: 'Stellwand'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -61,7 +63,9 @@
       lunchViewMap: 'Show on map',
       catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catSocial: 'Social',
       noItemsInCategory: 'No programme items in this category.',
-      followUs: 'Follow us'
+      followUs: 'Follow us',
+      posterListLabel: 'Posters',
+      posterBoard: 'Board'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -410,7 +414,7 @@
         var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
         var showAddBtn = !block.noPlan;
-        var hasInfoDetails = !!(block.abstract || block.bio_de || block.bio_en);
+        var hasInfoDetails = !!(block.abstract || block.bio_de || block.bio_en || (block.posters && block.posters.length));
         var isClickable = hasInfoDetails || !!block.linkView || !!block.linkExk;
         var infoOpen = !!expandedSessions[id];
         if(blockIsNow){
@@ -502,6 +506,32 @@
             infoBox.appendChild(bioP);
           }
           card.appendChild(infoBox);
+        }
+        if(hasInfoDetails && infoOpen && block.posters && block.posters.length){
+          var posterList = document.createElement('div');
+          posterList.className = 'talk-list';
+          var posterHeading = document.createElement('div');
+          posterHeading.className = 'bio-heading';
+          posterHeading.textContent = t('posterListLabel') + ' (' + block.posters.length + ')';
+          posterList.appendChild(posterHeading);
+          block.posters.forEach(function(p){
+            var prow = document.createElement('div');
+            prow.className = 'talk-row';
+            prow.innerHTML =
+              '<div class="talk-main" style="cursor:default;">' +
+                '<div class="talk-time">' + esc(p.code) + (p.board ? ' · ' + t('posterBoard') + ' ' + esc(p.board) : '') + '</div>' +
+                '<div class="talk-title">' + esc(p.title) + '</div>' +
+                '<div class="talk-authors">' + renderAuthorsHtml(p.authorsDisplay) + '</div>' +
+              '</div>';
+            posterList.appendChild(prow);
+            prow.querySelectorAll('.author-link').forEach(function(el){
+              el.addEventListener('click', function(ev){
+                ev.stopPropagation();
+                searchForAuthor(el.getAttribute('data-author'));
+              });
+            });
+          });
+          card.appendChild(posterList);
         }
       } else {
         if(blockIsNow){
@@ -635,9 +665,10 @@
       day.blocks.forEach(function(block){
         if(block.type === 'info'){
           var id = planIdForBlock(day.id, block);
+          var posterText = (block.posters || []).map(function(p){ return p.title + ' ' + p.authorsDisplay; }).join(' ');
           searchIndex.push({
             kind: 'info', dayId: day.id, jumpId: id, timeLabel: block.time,
-            text: [block.title, block.title_en, block.subtitle, block.subtitle_en, block.abstract, block.bio_de, block.bio_en].filter(Boolean).join(' '),
+            text: [block.title, block.title_en, block.subtitle, block.subtitle_en, block.abstract, block.bio_de, block.bio_en, posterText].filter(Boolean).join(' '),
             title: block.title, title_en: block.title_en
           });
         } else {
@@ -883,7 +914,7 @@
         className: '', html:
           '<div style="position:relative;width:34px;height:34px;">' +
             '<div class="venue-pulse" style="background:rgba(155,89,20,.35);"></div>' +
-            '<div style="position:relative;background:#9b5914;color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);">&#127942;</div>' +
+            '<div style="position:relative;background:#9b5914;color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);">&#127925;</div>' +
           '</div>',
         iconSize: [34,34], iconAnchor: [17,17]
       });
