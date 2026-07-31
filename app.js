@@ -301,6 +301,19 @@
     fpZoomState.scale = 1; fpZoomState.tx = 0; fpZoomState.ty = 0;
     fpApplyTransform();
   }
+  function fpZoomAt(clientX, clientY, newScale){
+    var container = document.getElementById('floorplanZoomContainer');
+    var rect = container.getBoundingClientRect();
+    newScale = Math.min(6, Math.max(1, newScale));
+    var localX = clientX - rect.left;
+    var localY = clientY - rect.top;
+    var px = (localX - fpZoomState.tx) / fpZoomState.scale;
+    var py = (localY - fpZoomState.ty) / fpZoomState.scale;
+    fpZoomState.scale = newScale;
+    fpZoomState.tx = localX - px * newScale;
+    fpZoomState.ty = localY - py * newScale;
+    fpApplyTransform();
+  }
   (function initFloorplanZoom(){
     var container = document.getElementById('floorplanZoomContainer');
     container.addEventListener('pointerdown', function(e){
@@ -319,10 +332,10 @@
       } else if(ids.length === 2){
         var p1 = fpZoomState.pointers[ids[0]], p2 = fpZoomState.pointers[ids[1]];
         var dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        var mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
         if(fpZoomState.lastDist){
           var delta = dist / fpZoomState.lastDist;
-          fpZoomState.scale = Math.min(6, Math.max(1, fpZoomState.scale * delta));
-          fpApplyTransform();
+          fpZoomAt(mid.x, mid.y, fpZoomState.scale * delta);
         }
         fpZoomState.lastDist = dist;
       }
@@ -335,8 +348,7 @@
     container.addEventListener('pointercancel', releasePointer);
     container.addEventListener('wheel', function(e){
       e.preventDefault();
-      fpZoomState.scale = Math.min(6, Math.max(1, fpZoomState.scale - e.deltaY * 0.0015));
-      fpApplyTransform();
+      fpZoomAt(e.clientX, e.clientY, fpZoomState.scale - e.deltaY * 0.0015 * fpZoomState.scale);
     }, { passive: false });
   })();
 
@@ -356,11 +368,7 @@
     document.getElementById('floorplanOverlay').style.display = 'block';
   }
   document.getElementById('floorplanTrigger').addEventListener('click', function(){
-    var highlighted = [];
-    document.querySelectorAll('#floorplanSvg .fp-room.fp-highlight').forEach(function(el){
-      highlighted.push(el.id.replace('fp-', ''));
-    });
-    openFloorplanLightbox(highlighted);
+    openFloorplanLightbox([]);
   });
   document.getElementById('floorplanTrigger').addEventListener('keydown', function(e){
     if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); this.click(); }
@@ -372,11 +380,6 @@
   function showFloorplanRoom(roomStr){
     var ids = FLOORPLAN_ROOM_MAP[roomStr];
     if(!ids) return;
-    document.querySelectorAll('#floorplanSvg .fp-room').forEach(function(el){ el.classList.remove('fp-highlight'); });
-    ids.forEach(function(id){
-      var el = document.getElementById('fp-' + id);
-      if(el) el.classList.add('fp-highlight');
-    });
     openFloorplanLightbox(ids);
   }
 
