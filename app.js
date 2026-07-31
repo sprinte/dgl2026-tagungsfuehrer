@@ -301,14 +301,13 @@
       b.classList.toggle('active', b.getAttribute('data-view') === target);
     });
     if(target === 'plan') renderPlan();
-    if(target !== 'programm'){
-      var backBtn = document.getElementById('searchBackBtn');
-      if(backBtn) backBtn.style.display = 'none';
-    }
     window.scrollTo(0,0);
   }
   document.querySelectorAll('nav.bottom-nav button').forEach(function(btn){
     btn.addEventListener('click', function(){
+      var backBtn = document.getElementById('searchBackBtn');
+      if(backBtn) backBtn.style.display = 'none';
+      searchBackState = null;
       switchToView(btn.getAttribute('data-view'));
     });
   });
@@ -551,7 +550,7 @@
   }
 
   var searchBackState = null;
-  function searchForAuthor(name, originView){
+  function saveNavBackState(originView){
     searchBackState = {
       originView: originView || 'programm',
       day: currentDay,
@@ -562,6 +561,9 @@
       scrollY: window.scrollY
     };
     document.getElementById('searchBackBtn').style.display = 'block';
+  }
+  function searchForAuthor(name, originView){
+    saveNavBackState(originView);
     var input = document.getElementById('programmSearch');
     input.value = name;
     document.getElementById('searchClearBtn').style.display = 'block';
@@ -1657,9 +1659,13 @@
               if(nextRange) displayTime = block.time + ' – ' + minutesToHHMM(nextRange.start);
             }
           }
+          var breakIcon = '';
+          if(block.title === 'Kaffeepause') breakIcon = '☕ ';
+          else if(block.title === 'Mittagspause') breakIcon = '🍽 ';
+          else if(block.title === 'Registrierung') breakIcon = '📋 ';
           dayItems.push({
             id: 'fixed_' + block.time + '_' + block.title,
-            time: displayTime, title: fixedTitle, subtitle: '', room: '',
+            time: displayTime, title: breakIcon + fixedTitle, subtitle: '', room: '',
             _fixed: true,
             _linkView: block.linkView || null,
             _linkExk: block.linkExk || null,
@@ -1723,8 +1729,10 @@
           if(p._linkFloorplan){
             openFloorplanLightbox([p._linkFloorplan]);
           } else if(p._linkView){
+            saveNavBackState('plan');
             switchToView(p._linkView);
           } else if(p._linkExk){
+            saveNavBackState('plan');
             switchToView('exkursionen');
             expandedExk = {};
             expandedExk[p._linkExk] = true;
