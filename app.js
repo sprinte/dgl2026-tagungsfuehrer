@@ -2,8 +2,8 @@
 
   var I18N = {
     de: {
-      navProgramm: 'Programm', navLunch: 'Mittagessen', navExk: 'Exkursionen', navVenue: 'Tagungsort', navPlan: 'Mein Plan',
-      titleProgramm: 'Programm', titleLunch: 'Mittagessen in der Nähe', titleExk: 'Exkursionen', titleVenue: 'Tagungsort', titlePlan: 'Mein Plan',
+      navProgramm: 'Programm', navLunch: 'Mittagessen', navExk: 'Exkursionen', navVenue: 'Info', navPlan: 'Mein Plan',
+      titleProgramm: 'Programm', titleLunch: 'Mittagessen in der Nähe', titleExk: 'Exkursionen', titleVenue: 'Info', titlePlan: 'Mein Plan',
       mod: 'Mod.:', noAbstract: 'Kein Abstract verfügbar.',
       planEmpty: 'Noch nichts geplant.<br>Tippe im Programm auf das + Symbol, um Sessions oder Beiträge hinzuzufügen.',
       planNote: 'Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar.',
@@ -32,11 +32,12 @@
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
       followUs: 'Folgt uns',
       posterListLabel: 'Poster',
-      posterBoard: 'Stellwand'
+      posterBoard: 'Stellwand',
+      organizersLabel: 'Veranstalter'
     },
     en: {
-      navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
-      titleProgramm: 'Programme', titleLunch: 'Lunch nearby', titleExk: 'Excursions', titleVenue: 'Venue', titlePlan: 'My Plan',
+      navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Info', navPlan: 'My Plan',
+      titleProgramm: 'Programme', titleLunch: 'Lunch nearby', titleExk: 'Excursions', titleVenue: 'Info', titlePlan: 'My Plan',
       mod: 'Chairs:', noAbstract: 'No abstract available.',
       planEmpty: 'Nothing planned yet.<br>Tap the + icon in the programme to add sessions or talks.',
       planNote: 'Your plan is stored locally in this browser. It is not visible on another device or in another browser.',
@@ -65,7 +66,8 @@
       noItemsInCategory: 'No programme items in this category.',
       followUs: 'Follow us',
       posterListLabel: 'Posters',
-      posterBoard: 'Board'
+      posterBoard: 'Board',
+      organizersLabel: 'Organizers'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -1005,6 +1007,19 @@
     var box = document.getElementById('venueBox');
     var oepnv = lang === 'en' ? v.oepnv_en : v.oepnv;
     box.innerHTML =
+      '<div class="card">' +
+        '<div class="lunch-name" style="margin-bottom:10px;">' + t('organizersLabel') + '</div>' +
+        '<div class="org-links">' +
+          '<a class="org-link" href="https://dgl-jahrestagungen.de/" target="_blank" rel="noopener">' +
+            '<div class="org-logo-placeholder">DGL</div>' +
+            '<span>DGL</span>' +
+          '</a>' +
+          '<a class="org-link" href="https://watersciencealliance.org/wrch" target="_blank" rel="noopener">' +
+            '<div class="org-logo-placeholder">WSA</div>' +
+            '<span>WSA</span>' +
+          '</a>' +
+        '</div>' +
+      '</div>' +
       '<div class="card">' +
         '<div class="lunch-name">' + esc(v.name) + '</div>' +
         '<div class="lunch-meta" style="margin-top:6px;">' + esc(v.address) + '</div>' +

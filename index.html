@@ -788,6 +788,40 @@
     font-weight:600;
   }
   body.dark .social-link{ background:#233042; }
+  .org-links{
+    display:flex;
+    gap:10px;
+  }
+  .org-link{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    padding:12px 6px;
+    border-radius:12px;
+    background:#f4f6f5;
+    color:var(--navy);
+    text-decoration:none;
+    font-size:11.5px;
+    font-weight:600;
+  }
+  body.dark .org-link{ background:#233042; }
+  .org-logo-placeholder{
+    width:44px; height:44px;
+    border-radius:10px;
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    font-weight:700;
+  }
+  .org-link img{
+    width:44px; height:44px;
+    object-fit:contain;
+  }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -883,7 +917,7 @@
   <button data-view="programm" class="active"><span class="ic">&#128197;</span><span id="navProgramm">Programm</span></button>
   <button data-view="lunch"><span class="ic">&#127869;</span><span id="navLunch">Mittagessen</span></button>
   <button data-view="exkursionen"><span class="ic">&#128506;</span><span id="navExk">Exkursionen</span></button>
-  <button data-view="venue"><span class="ic">&#128205;</span><span id="navVenue">Tagungsort</span></button>
+  <button data-view="venue"><span class="ic">&#8505;&#65039;</span><span id="navVenue">Tagungsort</span></button>
   <button data-view="plan"><span class="ic">&#11088;</span><span id="navPlan">Mein Plan</span></button>
 </nav>
 
