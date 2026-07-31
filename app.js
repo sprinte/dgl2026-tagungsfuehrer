@@ -255,8 +255,7 @@
       var nextRange = parseTimeRangeMinutes(sTalks[idx+1].time);
       end = nextRange ? nextRange.start : start+15;
     } else {
-      var blockRange = parseTimeRangeMinutes(blockTimeStr);
-      end = (blockRange && blockRange.end > start) ? blockRange.end : start+15;
+      end = start + 15;
     }
     return sTalks[idx].time + ' – ' + minutesToHHMM(end);
   }
@@ -1370,7 +1369,7 @@
     return item.code ? (baseTitle + ' (' + item.code + ')') : baseTitle;
   }
 
-  var currentPlanListDayFilter = (function(){
+  var currentPlanDay = (function(){
     var todayDay = DATA.programm.find(function(d){ return isToday(d.id); });
     return (todayDay || DATA.programm[0]).id;
   })();
@@ -1379,14 +1378,15 @@
     wrap.innerHTML = '';
     DATA.programm.forEach(function(dayObj){
       var b = document.createElement('div');
-      b.className = 'day-tab' + (currentPlanListDayFilter === dayObj.id ? ' active' : '');
+      b.className = 'day-tab' + (currentPlanDay === dayObj.id ? ' active' : '');
       var dayLabel = lang === 'en' ? dayObj.label_en : dayObj.label;
       var dayNum = dayObj.date.split('.')[0];
       var dateLabel = lang === 'en' ? (dayNum + ordinalSuffix(parseInt(dayNum,10))) : (dayNum + '.');
       b.textContent = dayLabel + ' ' + dateLabel;
       b.addEventListener('click', function(){
-        currentPlanListDayFilter = dayObj.id;
+        currentPlanDay = dayObj.id;
         renderPlanListDayTabs();
+        renderPlanTimelineDayTabs();
         renderPlan();
       });
       wrap.appendChild(b);
@@ -1398,7 +1398,7 @@
     renderPlanListDayTabs();
     var box = document.getElementById('planList');
     box.innerHTML = '';
-    var visiblePlan = plan.filter(function(p){ return p.dayId === currentPlanListDayFilter; });
+    var visiblePlan = plan.filter(function(p){ return p.dayId === currentPlanDay; });
     if(plan.length === 0){
       box.innerHTML = '<div class="empty-state">' + t('planEmpty') + '</div>';
       renderPlanTimelineDayTabs();
@@ -1519,7 +1519,6 @@
   }
 
   // ---------- Plan timeline view ----------
-  var currentPlanTimelineDay = null;
   var PT_START_HOUR = 9;
   var PT_END_HOUR = 20;
   var PT_PX_PER_MIN = 2.6;
@@ -1548,20 +1547,17 @@
     var wrap = document.getElementById('planTimelineDayTabs');
     wrap.innerHTML = '';
     var days = DATA.programm.map(function(d){ return d.id; });
-    if(!currentPlanTimelineDay || days.indexOf(currentPlanTimelineDay) === -1){
-      var withItems = planDaysWithItems();
-      currentPlanTimelineDay = withItems[0] || days[0] || null;
-    }
     days.forEach(function(dayId){
       var dayObj = DATA.programm.find(function(d){ return d.id === dayId; });
       var b = document.createElement('div');
-      b.className = 'day-tab' + (dayId === currentPlanTimelineDay ? ' active' : '');
+      b.className = 'day-tab' + (dayId === currentPlanDay ? ' active' : '');
       var dayLabel = lang === 'en' ? dayObj.label_en : dayObj.label;
       var dayNum = dayObj.date.split('.')[0];
       var dateLabel = lang === 'en' ? (dayNum + ordinalSuffix(parseInt(dayNum,10))) : (dayNum + '.');
       b.textContent = dayLabel + ' ' + dateLabel;
       b.addEventListener('click', function(){
-        currentPlanTimelineDay = dayId;
+        currentPlanDay = dayId;
+        renderPlanListDayTabs();
         renderPlanTimelineDayTabs();
         renderPlanTimeline();
       });
@@ -1643,10 +1639,10 @@
       }
     }
 
-    if(!currentPlanTimelineDay) return;
-    var dayItems = plan.filter(function(p){ return p.dayId === currentPlanTimelineDay; });
+    if(!currentPlanDay) return;
+    var dayItems = plan.filter(function(p){ return p.dayId === currentPlanDay; });
 
-    var dayObj = DATA.programm.find(function(d){ return d.id === currentPlanTimelineDay; });
+    var dayObj = DATA.programm.find(function(d){ return d.id === currentPlanDay; });
     if(dayObj){
       dayObj.blocks.forEach(function(block, blockIdx){
         if(block.type === 'info' && block.noPlan){
