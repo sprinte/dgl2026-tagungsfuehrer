@@ -30,7 +30,9 @@
       sharedPlanConfirmPrefix: 'Geteilten Plan mit ',
       sharedPlanConfirmSuffix: ' Einträgen laden? Das ersetzt deinen aktuellen Plan.',
       lunchViewList: 'Liste',
-      lunchViewMap: 'Auf Karte anzeigen'
+      lunchViewMap: 'Auf Karte anzeigen',
+      catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catSocial: 'Social',
+      noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.'
     },
     en: {
       navProgramm: 'Programme', navLunch: 'Lunch', navExk: 'Excursions', navVenue: 'Venue', navPlan: 'My Plan',
@@ -61,7 +63,9 @@
       sharedPlanConfirmPrefix: 'Load shared plan with ',
       sharedPlanConfirmSuffix: ' items? This will replace your current plan.',
       lunchViewList: 'List',
-      lunchViewMap: 'Show on map'
+      lunchViewMap: 'Show on map',
+      catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catSocial: 'Social',
+      noItemsInCategory: 'No programme items in this category.'
     }
   };
   var LANG_KEY = 'dgl2026_lang_v1';
@@ -238,6 +242,14 @@
     var now = nowDate();
     return now >= r.start && now <= r.end;
   }
+  function ordinalSuffix(n){
+    var j = n % 10, k = n % 100;
+    if(j === 1 && k !== 11) return 'st';
+    if(j === 2 && k !== 12) return 'nd';
+    if(j === 3 && k !== 13) return 'rd';
+    return 'th';
+  }
+
   function isToday(dayId){
     var ds = dateForDay(dayId);
     var now = nowDate();
@@ -266,6 +278,42 @@
 
   // ---------- Programm ----------
   var currentDay = DATA.programm[0].id;
+  var currentCategoryFilter = 'alle';
+
+  var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together'];
+  var PLENARY_TITLES = ['Plenarvortrag', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession und Arbeitskreise', 'DGL Praxispreisvergabe', "Schwoerbel-Benndorf-Nachwuchspreis der DGL"];
+
+  function blockCategory(block){
+    if(block.type === 'parallel') return 'sessions';
+    if(SOCIAL_TITLES.indexOf(block.title) !== -1) return 'social';
+    if(PLENARY_TITLES.indexOf(block.title) !== -1) return 'plenary';
+    return 'other';
+  }
+
+  function renderCategoryFilter(){
+    document.getElementById('dayTabs').style.display = currentCategoryFilter === 'alle' ? '' : 'none';
+    var wrap = document.getElementById('categoryFilter');
+    var cats = [
+      { key: 'alle', label: t('catAll') },
+      { key: 'sessions', label: t('catSessions') },
+      { key: 'plenary', label: t('catPlenary') },
+      { key: 'social', label: t('catSocial') }
+    ];
+    wrap.innerHTML = '';
+    cats.forEach(function(c){
+      var chip = document.createElement('div');
+      chip.className = 'category-chip' + (currentCategoryFilter === c.key ? ' active' : '');
+      chip.textContent = c.label;
+      chip.addEventListener('click', function(){
+        currentCategoryFilter = c.key;
+        expandedSessions = {};
+        expandedTalks = {};
+        renderCategoryFilter();
+        renderProgrammList();
+      });
+      wrap.appendChild(chip);
+    });
+  }
 
   function renderDayTabs(){
     var wrap = document.getElementById('dayTabs');
@@ -274,7 +322,9 @@
       var b = document.createElement('div');
       b.className = 'day-tab' + (day.id === currentDay ? ' active' : '');
       var dayLabel = lang === 'en' ? day.label_en : day.label;
-      b.innerHTML = esc(dayLabel + ' ' + day.date.split('.')[0] + '.') + (isToday(day.id) ? '<span class="day-tab-dot"></span>' : '');
+      var dayNum = day.date.split('.')[0];
+      var dateLabel = lang === 'en' ? (dayNum + ordinalSuffix(parseInt(dayNum,10))) : (dayNum + '.');
+      b.innerHTML = esc(dayLabel + ' ' + dateLabel) + (isToday(day.id) ? '<span class="day-tab-dot"></span>' : '');
       b.addEventListener('click', function(){
         currentDay = day.id;
         expandedSessions = {};
@@ -321,10 +371,37 @@
   }
 
   function renderProgrammList(){
-    var day = DATA.programm.find(function(d){ return d.id === currentDay; });
     var list = document.getElementById('programmList');
     list.innerHTML = '';
-    day.blocks.forEach(function(block){
+
+    var pairs = [];
+    if(currentCategoryFilter === 'alle'){
+      var singleDay = DATA.programm.find(function(d){ return d.id === currentDay; });
+      singleDay.blocks.forEach(function(b){ pairs.push({ day: singleDay, block: b }); });
+    } else {
+      DATA.programm.forEach(function(d){
+        d.blocks.forEach(function(b){
+          if(blockCategory(b) === currentCategoryFilter){ pairs.push({ day: d, block: b }); }
+        });
+      });
+    }
+
+    if(pairs.length === 0){
+      list.innerHTML = '<div class="empty-state">' + t('noItemsInCategory') + '</div>';
+      return;
+    }
+
+    var lastHeadingDayId = null;
+    pairs.forEach(function(pair){
+      var day = pair.day, block = pair.block;
+      if(currentCategoryFilter !== 'alle' && day.id !== lastHeadingDayId){
+        lastHeadingDayId = day.id;
+        var heading = document.createElement('div');
+        heading.className = 'plan-day-heading';
+        var headingDayLabel = lang === 'en' ? day.label_en : day.label;
+        heading.textContent = headingDayLabel + ', ' + day.date;
+        list.appendChild(heading);
+      }
       var card = document.createElement('div');
       var blockIsNow = isToday(day.id) && isBlockNow(day.id, block.time);
       card.className = 'card' + (blockIsNow ? ' now-live' : '');
@@ -587,6 +664,7 @@
 
   function jumpToEntry(m){
     currentDay = m.dayId;
+    currentCategoryFilter = 'alle';
     expandedSessions = {};
     expandedTalks = {};
     if(m.kind === 'session' && m.hasTalks){ expandedSessions[m.sid] = true; }
@@ -594,10 +672,11 @@
     document.getElementById('programmSearch').value = '';
     document.getElementById('searchClearBtn').style.display = 'none';
     document.getElementById('searchResults').style.display = 'none';
-    document.getElementById('dayTabs').style.display = '';
+    document.getElementById('categoryFilter').style.display = '';
     document.getElementById('programmList').style.display = '';
     document.getElementById('topicJump').value = '';
     renderDayTabs();
+    renderCategoryFilter();
     renderProgrammList();
     setTimeout(function(){
       var el = document.getElementById('row-' + m.jumpId);
@@ -610,11 +689,13 @@
     var q = query.trim().toLowerCase();
     if(!q){
       wrap.style.display = 'none';
-      document.getElementById('dayTabs').style.display = '';
+      document.getElementById('dayTabs').style.display = currentCategoryFilter === 'alle' ? '' : 'none';
+      document.getElementById('categoryFilter').style.display = '';
       document.getElementById('programmList').style.display = '';
       return;
     }
     document.getElementById('dayTabs').style.display = 'none';
+    document.getElementById('categoryFilter').style.display = 'none';
     document.getElementById('programmList').style.display = 'none';
     wrap.style.display = 'block';
     wrap.innerHTML = '';
@@ -1086,6 +1167,7 @@
 
   function renderAll(){
     renderDayTabs();
+    renderCategoryFilter();
     renderProgrammList();
     renderTopicJump();
     renderLunchFilters();

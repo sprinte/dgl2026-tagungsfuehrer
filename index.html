@@ -102,6 +102,32 @@
     -webkit-overflow-scrolling:touch;
   }
   .day-tabs::-webkit-scrollbar{display:none;}
+  .category-filter-row{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    margin-bottom:12px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .category-filter-row::-webkit-scrollbar{display:none;}
+  .category-chip{
+    flex:0 0 auto;
+    padding:5px 11px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:11.5px;
+    color:var(--text-muted);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .category-chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+    font-weight:600;
+  }
   .day-tab{
     flex:0 0 auto;
     padding:8px 14px;
@@ -819,6 +845,7 @@
       <option value="">—</option>
     </select>
     <div class="day-tabs" id="dayTabs"></div>
+    <div class="category-filter-row" id="categoryFilter"></div>
     <div id="programmList"></div>
   </section>
 
