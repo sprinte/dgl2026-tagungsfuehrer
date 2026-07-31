@@ -1524,7 +1524,7 @@
   var currentPlanTimelineDay = null;
   var PT_START_HOUR = 9;
   var PT_END_HOUR = 20;
-  var PT_PX_PER_MIN = 1.6;
+  var PT_PX_PER_MIN = 2.6;
 
   var currentPlanViewMode = 'list';
   function setPlanView(mode){
@@ -1695,7 +1695,7 @@
     laidOut.forEach(function(entry){
       var p = entry.item;
       var top = Math.max(0, (entry._start - PT_START_HOUR*60)) * PT_PX_PER_MIN;
-      var height = Math.max(24, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
+      var height = Math.max(38, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
       var colFrac = entry._col / entry._totalCols;
       var widthFrac = 1 / entry._totalCols;
       var el = document.createElement('div');
