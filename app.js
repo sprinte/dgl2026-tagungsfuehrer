@@ -1432,10 +1432,6 @@
         }
       }
 
-      var heading = document.createElement('div');
-      heading.className = 'plan-day-heading';
-      heading.textContent = dayLabel + ', ' + group.date;
-      box.appendChild(heading);
       group.items.forEach(function(item, idx){
        try {
         var card = document.createElement('div');
@@ -1622,13 +1618,14 @@
   function renderPlanTimeline(){
     var container = document.getElementById('planTimeline');
     container.innerHTML = '';
+    var PT_TOP_OFFSET = 12;
     var totalMin = (PT_END_HOUR - PT_START_HOUR) * 60;
-    container.style.height = (totalMin * PT_PX_PER_MIN + 20) + 'px';
+    container.style.height = (totalMin * PT_PX_PER_MIN + PT_TOP_OFFSET + 10) + 'px';
 
     var totalQuarters = (PT_END_HOUR - PT_START_HOUR) * 4;
     for(var q = 0; q <= totalQuarters; q++){
       var minFromStart = q * 15;
-      var y = minFromStart * PT_PX_PER_MIN;
+      var y = minFromStart * PT_PX_PER_MIN + PT_TOP_OFFSET;
       var isHour = (minFromStart % 60) === 0;
       var line = document.createElement('div');
       line.className = 'pt-hour-line' + (isHour ? ' pt-hour-line-full' : ' pt-hour-line-quarter');
@@ -1694,7 +1691,7 @@
 
     laidOut.forEach(function(entry){
       var p = entry.item;
-      var top = Math.max(0, (entry._start - PT_START_HOUR*60)) * PT_PX_PER_MIN;
+      var top = Math.max(0, (entry._start - PT_START_HOUR*60)) * PT_PX_PER_MIN + PT_TOP_OFFSET;
       var height = Math.max(38, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
       var colFrac = entry._col / entry._totalCols;
       var widthFrac = 1 / entry._totalCols;
