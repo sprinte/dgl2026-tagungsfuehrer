@@ -1964,24 +1964,28 @@
     renderLunchList();
   }
 
+  function safeRun(fn, label){
+    try { fn(); } catch(e){ console.error('Render error in ' + label + ':', e); }
+  }
+
   function renderAll(){
-    renderDayTabs();
-    renderCategoryFilter();
-    renderProgrammList();
-    renderTopicJump();
-    renderLunchFilters();
-    renderLunchList();
-    renderExkursionen();
-    renderVenue();
-    renderPlan();
+    safeRun(renderDayTabs, 'renderDayTabs');
+    safeRun(renderCategoryFilter, 'renderCategoryFilter');
+    safeRun(renderProgrammList, 'renderProgrammList');
+    safeRun(renderTopicJump, 'renderTopicJump');
+    safeRun(renderLunchFilters, 'renderLunchFilters');
+    safeRun(renderLunchList, 'renderLunchList');
+    safeRun(renderExkursionen, 'renderExkursionen');
+    safeRun(renderVenue, 'renderVenue');
+    safeRun(renderPlan, 'renderPlan');
   }
 
   applyStaticI18n();
   renderAll();
   setInterval(function(){
-    renderDayTabs();
-    renderProgrammList();
-    renderPlan();
+    safeRun(renderDayTabs, 'renderDayTabs');
+    safeRun(renderProgrammList, 'renderProgrammList');
+    safeRun(renderPlan, 'renderPlan');
   }, 60000);
 
   // ---------- Announcement popup ----------
