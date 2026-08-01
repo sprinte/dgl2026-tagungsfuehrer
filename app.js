@@ -755,11 +755,13 @@
         } else if(block.linkView){
           headerDiv.addEventListener('click', function(ev){
             if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
+            saveNavBackState('programm');
             switchToView(block.linkView);
           });
         } else if(block.linkExk){
           headerDiv.addEventListener('click', function(ev){
             if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
+            saveNavBackState('programm');
             switchToView('exkursionen');
             expandedExk = {};
             expandedExk[block.linkExk] = true;
@@ -803,7 +805,9 @@
           posterHeading.className = 'bio-heading';
           posterHeading.textContent = t('posterListLabel') + ' (' + block.posters.length + ')';
           posterList.appendChild(posterHeading);
-          block.posters.forEach(function(p){
+          block.posters.forEach(function(p, pidx){
+            var posterId = 'poster_' + id + '_' + pidx;
+            var padded = isInPlan(posterId);
             var prow = document.createElement('div');
             prow.className = 'talk-row';
             prow.innerHTML =
@@ -811,13 +815,24 @@
                 '<div class="talk-time">' + esc(p.code) + (p.board ? ' · ' + t('posterBoard') + ' ' + esc(p.board) : '') + '</div>' +
                 '<div class="talk-title">' + esc(p.title) + '</div>' +
                 '<div class="talk-authors">' + renderAuthorsHtml(p.authorsDisplay) + '</div>' +
-              '</div>';
+              '</div>' +
+              '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="poster-add">' + (padded ? '&#10003;' : '+') + '</button>';
             posterList.appendChild(prow);
             prow.querySelectorAll('.author-link').forEach(function(el){
               el.addEventListener('click', function(ev){
                 ev.stopPropagation();
                 searchForAuthor(el.getAttribute('data-author'));
               });
+            });
+            prow.querySelector('[data-role="poster-add"]').addEventListener('click', function(ev){
+              ev.stopPropagation();
+              var boardText = p.board ? (' · ' + t('posterBoard') + ' ' + p.board) : '';
+              togglePlan({
+                id: posterId, dayId: day.id, dayLabel: day.label, date: day.date,
+                time: block.time, title: p.title, subtitle: p.authorsDisplay + ' · ' + p.code + boardText,
+                room: '', authors: p.authorsDisplay, isPoster: true
+              });
+              renderProgrammList();
             });
           });
           card.appendChild(posterList);
@@ -1467,8 +1482,9 @@
       var ranges = group.items.map(function(it){ return parseTimeRangeMinutes(it.time); });
       var conflicts = group.items.map(function(){ return []; });
       for(var i = 0; i < group.items.length; i++){
+        if(group.items[i].isPoster) continue;
         for(var j = 0; j < group.items.length; j++){
-          if(i === j) continue;
+          if(i === j || group.items[j].isPoster) continue;
           var ra = ranges[i], rb = ranges[j];
           if(ra && rb && ra.start < rb.end && rb.start < ra.end){
             conflicts[i].push(conflictLabel(group.items[j]));
@@ -1724,14 +1740,18 @@
       var end = range ? range.end : start+45;
       return { item: p, _start: start, _end: end };
     });
-    laidOut = computeOverlapLayout(laidOut);
+    var posterEntries = laidOut.filter(function(e){ return e.item.isPoster; });
+    var nonPosterEntries = laidOut.filter(function(e){ return !e.item.isPoster; });
+    nonPosterEntries = computeOverlapLayout(nonPosterEntries);
+    posterEntries.forEach(function(e){ e._col = 0; e._totalCols = 1; });
+    laidOut = nonPosterEntries.concat(posterEntries);
 
     // conflict flags (reuse simple pairwise overlap check, ignore fixed break blocks)
     var conflictIds = {};
     for(var i=0;i<laidOut.length;i++){
-      if(laidOut[i].item._fixed) continue;
+      if(laidOut[i].item._fixed || laidOut[i].item.isPoster) continue;
       for(var j=0;j<laidOut.length;j++){
-        if(i===j || laidOut[j].item._fixed) continue;
+        if(i===j || laidOut[j].item._fixed || laidOut[j].item.isPoster) continue;
         if(laidOut[i]._start < laidOut[j]._end && laidOut[j]._start < laidOut[i]._end){
           conflictIds[laidOut[i].item.id] = true;
         }
