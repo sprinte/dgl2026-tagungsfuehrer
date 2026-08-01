@@ -850,7 +850,7 @@
             prow.innerHTML =
               '<div class="talk-main" style="cursor:default;">' +
                 '<div class="talk-time">' + esc(p.code) + (p.board ? ' · ' + t('posterBoard') + ' ' + esc(p.board) : '') + '</div>' +
-                '<div class="talk-title">' + esc(p.title) + '</div>' +
+                '<div class="talk-title"><span class="session-tag">' + t('posterListLabel') + '</span> ' + esc(p.title) + '</div>' +
                 '<div class="talk-authors">' + renderAuthorsHtml(p.authorsDisplay) + '</div>' +
               '</div>' +
               '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="poster-add">' + (padded ? '&#10003;' : '+') + '</button>';
