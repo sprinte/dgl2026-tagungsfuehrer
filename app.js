@@ -1025,7 +1025,8 @@
               searchIndex.push({
                 kind: 'talk', dayId: day.id, jumpId: tid, sid: sid, timeLabel: talk.time,
                 text: [talk.title, talk.authors, s.code].filter(Boolean).join(' '),
-                title: talk.title, sub: talk.authors
+                title: talk.title, sub: talk.authors,
+                authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code
               });
             });
           });
@@ -1090,13 +1091,53 @@
       var dl = dayLabelMap[m.dayId];
       var dayLabel = dl ? (lang === 'en' ? dl.en : dl.de) : '';
       var title = (m.kind === 'info' && lang === 'en' && m.title_en) ? m.title_en : m.title;
-      item.innerHTML =
-        '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + '</div>' +
-        '<div class="search-result-title">' + esc(title) + '</div>' +
-        (m.sub ? '<div class="search-result-sub">' + esc(m.sub) + '</div>' : '');
-      item.addEventListener('click', function(){
-        jumpToEntry(m);
-      });
+      var roomClickable = m.room && FLOORPLAN_ROOM_MAP[m.room];
+      var isOpen = m.kind === 'talk' && !!expandedTalks[m.jumpId];
+
+      if(m.kind === 'talk'){
+        item.innerHTML =
+          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
+          '<div class="search-result-title">' + esc(title) + '</div>' +
+          '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>';
+        item.style.cursor = 'pointer';
+        if(roomClickable){
+          item.querySelector('.room-link').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            showFloorplanRoom(m.room);
+          });
+        }
+        item.querySelectorAll('.author-link').forEach(function(el){
+          el.addEventListener('click', function(ev){
+            ev.stopPropagation();
+            searchForAuthor(el.getAttribute('data-author'));
+          });
+        });
+        if(isOpen){
+          var abBox = document.createElement('div');
+          if(m.abstract){
+            abBox.className = 'abstract-box';
+            abBox.textContent = m.abstract;
+          } else {
+            abBox.className = 'abstract-empty';
+            abBox.textContent = t('noAbstract');
+          }
+          item.appendChild(abBox);
+        }
+        item.addEventListener('click', function(ev){
+          if(ev.target.closest('.room-link') || ev.target.closest('.author-link')) return;
+          var wasOpen = !!expandedTalks[m.jumpId];
+          expandedTalks[m.jumpId] = !wasOpen;
+          renderSearchResults(query);
+        });
+      } else {
+        item.innerHTML =
+          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + '</div>' +
+          '<div class="search-result-title">' + esc(title) + '</div>' +
+          (m.sub ? '<div class="search-result-sub">' + esc(m.sub) + '</div>' : '');
+        item.addEventListener('click', function(){
+          jumpToEntry(m);
+        });
+      }
       wrap.appendChild(item);
     });
   }
