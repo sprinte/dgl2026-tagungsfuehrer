@@ -557,7 +557,7 @@
   }
 
   var searchBackState = null;
-  function saveNavBackState(originView){
+  function saveNavBackState(originView, extra){
     searchBackState = {
       originView: originView || 'programm',
       day: currentDay,
@@ -567,6 +567,7 @@
       planViewMode: currentPlanViewMode,
       scrollY: window.scrollY
     };
+    if(extra){ for(var k in extra){ searchBackState[k] = extra[k]; } }
     document.getElementById('searchBackBtn').style.display = 'block';
   }
   function searchForAuthor(name, originView){
@@ -579,13 +580,22 @@
   }
   document.getElementById('searchBackBtn').addEventListener('click', function(){
     if(!searchBackState) return;
-    document.getElementById('programmSearch').value = '';
-    document.getElementById('searchClearBtn').style.display = 'none';
-    renderSearchResults('');
     if(searchBackState.originView === 'plan'){
+      document.getElementById('programmSearch').value = '';
+      document.getElementById('searchClearBtn').style.display = 'none';
+      renderSearchResults('');
       switchToView('plan');
       setPlanView(searchBackState.planViewMode || 'list');
+    } else if(searchBackState.originView === 'search'){
+      switchToView('programm');
+      var restoredQuery = searchBackState.query || '';
+      document.getElementById('programmSearch').value = restoredQuery;
+      document.getElementById('searchClearBtn').style.display = restoredQuery ? 'block' : 'none';
+      renderSearchResults(restoredQuery);
     } else {
+      document.getElementById('programmSearch').value = '';
+      document.getElementById('searchClearBtn').style.display = 'none';
+      renderSearchResults('');
       switchToView('programm');
       currentDay = searchBackState.day;
       currentCategoryFilter = searchBackState.categoryFilter;
@@ -1135,6 +1145,7 @@
           '<div class="search-result-title">' + esc(title) + '</div>' +
           (m.sub ? '<div class="search-result-sub">' + esc(m.sub) + '</div>' : '');
         item.addEventListener('click', function(){
+          saveNavBackState('search', { query: query });
           jumpToEntry(m);
         });
       }
