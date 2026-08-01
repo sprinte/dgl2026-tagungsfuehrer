@@ -1078,7 +1078,7 @@
     currentCategoryFilter = 'alle';
     expandedSessions = {};
     expandedTalks = {};
-    if(m.kind === 'session' && m.hasTalks){ expandedSessions[m.sid] = true; }
+    if(m.kind === 'session'){ expandedSessions[m.sid] = true; }
     if(m.kind === 'talk'){ expandedSessions[m.sid] = true; expandedTalks[m.jumpId] = true; }
     document.getElementById('programmSearch').value = '';
     document.getElementById('searchClearBtn').style.display = 'none';
@@ -1207,8 +1207,9 @@
   (function buildTopicList(){
     var seen = {};
     searchIndex.forEach(function(entry){
-      if(entry.kind === 'session' && !entry.isContinuation && entry.code && !seen[entry.code]){
-        seen[entry.code] = true;
+      var dedupKey = entry.code + '|' + entry.title;
+      if(entry.kind === 'session' && !entry.isContinuation && entry.code && !seen[dedupKey]){
+        seen[dedupKey] = true;
         topicList.push(entry);
       }
     });
