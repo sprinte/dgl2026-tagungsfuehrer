@@ -28,7 +28,7 @@
       sharedPlanConfirmSuffix: ' Einträgen laden? Das ersetzt deinen aktuellen Plan.',
       lunchViewList: 'Liste',
       lunchViewMap: 'Auf Karte anzeigen',
-      catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catSocial: 'Social',
+      catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catWorkshop: 'Workshops', catSocial: 'Social',
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
       followUs: 'Social Media',
       posterListLabel: 'Poster',
@@ -66,7 +66,7 @@
       sharedPlanConfirmSuffix: ' items? This will replace your current plan.',
       lunchViewList: 'List',
       lunchViewMap: 'Show on map',
-      catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catSocial: 'Social',
+      catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catWorkshop: 'Workshops', catSocial: 'Social',
       noItemsInCategory: 'No programme items in this category.',
       followUs: 'Social Media',
       posterListLabel: 'Posters',
@@ -464,7 +464,8 @@
   var currentCategoryFilter = 'alle';
 
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together'];
-  var PLENARY_TITLES = ['Plenarvortrag', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession und Arbeitskreise', 'DGL Praxispreisvergabe', "Schwoerbel-Benndorf-Nachwuchspreis der DGL"];
+  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'Arbeitskreise', 'DGL Praxispreisvergabe', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Award Ceremony / WSA General Assembly'];
+  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'plenary', 'S21': 'workshop' };
 
   function blockCategory(block){
     if(block.type === 'parallel') return 'sessions';
@@ -473,12 +474,19 @@
     return 'other';
   }
 
+  function sessionCategory(session){
+    if(SESSION_CATEGORY_OVERRIDE[session.code]) return SESSION_CATEGORY_OVERRIDE[session.code];
+    if(/Workshop/i.test(session.title || '')) return 'workshop';
+    return 'sessions';
+  }
+
   function renderCategoryFilter(){
     var wrap = document.getElementById('categoryFilter');
     var cats = [
       { key: 'alle', label: t('catAll') },
       { key: 'sessions', label: t('catSessions') },
       { key: 'plenary', label: t('catPlenary') },
+      { key: 'workshop', label: t('catWorkshop') },
       { key: 'social', label: t('catSocial') }
     ];
     wrap.innerHTML = '';
@@ -604,6 +612,21 @@
     }
   }
 
+  function computeInfoBlockDisplayTime(day, block){
+    if(block.time.indexOf('–') !== -1) return block.time;
+    var idx = day.blocks.indexOf(block);
+    var ownStart = parseTimeRangeMinutes(block.time);
+    if(idx !== -1 && ownStart){
+      for(var j = idx+1; j < day.blocks.length; j++){
+        var nextRange = parseTimeRangeMinutes(day.blocks[j].time);
+        if(nextRange && nextRange.start > ownStart.start){
+          return block.time + ' – ' + minutesToHHMM(nextRange.start);
+        }
+      }
+    }
+    return block.time;
+  }
+
   function renderProgrammList(){
     var list = document.getElementById('programmList');
     list.innerHTML = '';
@@ -615,7 +638,17 @@
     } else {
       DATA.programm.forEach(function(d){
         d.blocks.forEach(function(b){
-          if(blockCategory(b) === currentCategoryFilter){ pairs.push({ day: d, block: b }); }
+          if(b.type === 'parallel'){
+            var matchingSessions = b.sessions.filter(function(s){ return sessionCategory(s) === currentCategoryFilter; });
+            if(matchingSessions.length){
+              var clonedBlock = {};
+              for(var k in b){ clonedBlock[k] = b[k]; }
+              clonedBlock.sessions = matchingSessions;
+              pairs.push({ day: d, block: clonedBlock });
+            }
+          } else if(blockCategory(b) === currentCategoryFilter){
+            pairs.push({ day: d, block: b });
+          }
         });
       });
     }
@@ -665,8 +698,8 @@
         if(isClickable) headerDiv.style.cursor = 'pointer';
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
-              '<div class="block-time">' + esc(block.time) + '</div>' +
-              '<div class="block-title">' + esc(blockTitle) + '</div>' +
+              '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
+              '<div class="block-title">' + esc(blockTitle) + (block.isWSA ? ' <span class="session-tag-wsa wsa-badge">WSA</span>' : '') + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.room ? '<div class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</div>' : '') +
             '</div>' +
@@ -809,7 +842,7 @@
           var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
           header.innerHTML =
             '<div class="session-main">' +
-              '<span class="session-tag">' + esc(s.code) + '</span><span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
+              '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span><span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
               '<div class="session-title">' + esc(s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
@@ -1610,7 +1643,7 @@
     var namesPart = authorsStr.split(' — ')[0];
     var names = namesPart.split(/,\s*/).filter(Boolean);
     if(!names.length) return '';
-    return names[0] + (names.length > 1 ? ' et al.' : '');
+    return names[0];
   }
 
   function renderPlanTimeline(){
@@ -1649,10 +1682,15 @@
           var fixedTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
           var displayTime = block.time;
           if(block.time.indexOf('–') === -1){
-            var nextBlock = dayObj.blocks[blockIdx+1];
-            if(nextBlock){
-              var nextRange = parseTimeRangeMinutes(nextBlock.time);
-              if(nextRange) displayTime = block.time + ' – ' + minutesToHHMM(nextRange.start);
+            var ownStart = parseTimeRangeMinutes(block.time);
+            if(ownStart){
+              for(var nj = blockIdx+1; nj < dayObj.blocks.length; nj++){
+                var nextRange = parseTimeRangeMinutes(dayObj.blocks[nj].time);
+                if(nextRange && nextRange.start > ownStart.start){
+                  displayTime = block.time + ' – ' + minutesToHHMM(nextRange.start);
+                  break;
+                }
+              }
             }
           }
           var breakIcon = '';
