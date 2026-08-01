@@ -476,6 +476,7 @@
   }
 
   function sessionCategory(session){
+    if(session.category) return session.category;
     if(SESSION_CATEGORY_OVERRIDE[session.code]) return SESSION_CATEGORY_OVERRIDE[session.code];
     if(/Workshop/i.test(session.title || '')) return 'workshop';
     return 'sessions';
@@ -713,7 +714,7 @@
       }
       var card = document.createElement('div');
       var blockIsNow = isToday(day.id) && isBlockNow(day.id, block.time);
-      card.className = 'card' + (blockIsNow ? ' now-live' : '') + (block.isWSA ? ' wsa-card' : '');
+      card.className = 'card' + (blockIsNow ? ' now-live' : '');
       var liveBadgeHtml = blockIsNow ? '<div class="live-badge"><span class="dot"></span>' + t('liveNow') + '</div>' : '';
 
       if(block.type === 'info'){
