@@ -1742,6 +1742,17 @@
     return names[0];
   }
 
+  function abbreviateAuthorName(authorsStr){
+    if(!authorsStr) return '';
+    var namesPart = authorsStr.split(' — ')[0];
+    var firstAuthor = (namesPart.split(/,\s*/)[0] || '').trim();
+    var words = firstAuthor.split(/\s+/).filter(Boolean);
+    if(words.length < 2) return firstAuthor;
+    var last = words[words.length - 1];
+    var first = words[0];
+    return first.charAt(0) + '. ' + last;
+  }
+
   function renderPlanTimeline(){
     var container = document.getElementById('planTimeline');
     container.innerHTML = '';
@@ -1769,7 +1780,25 @@
     }
 
     if(!currentPlanDay) return;
-    var dayItems = plan.filter(function(p){ return p.dayId === currentPlanDay; });
+    var dayItemsRaw = plan.filter(function(p){ return p.dayId === currentPlanDay; });
+    var posterGroups = {};
+    var dayItems = [];
+    dayItemsRaw.forEach(function(p){
+      if(p.isPoster){
+        (posterGroups[p.time] = posterGroups[p.time] || []).push(p);
+      } else {
+        dayItems.push(p);
+      }
+    });
+    Object.keys(posterGroups).forEach(function(time){
+      dayItems.push({
+        id: 'postergroup_' + time,
+        time: time,
+        title: (lang === 'en' ? 'Poster session' : 'Postersession'),
+        _isPosterGroup: true,
+        _posters: posterGroups[time]
+      });
+    });
 
     var dayObj = DATA.programm.find(function(d){ return d.id === currentPlanDay; });
     if(dayObj){
@@ -1811,18 +1840,14 @@
       var end = range ? range.end : start+45;
       return { item: p, _start: start, _end: end };
     });
-    var posterEntries = laidOut.filter(function(e){ return e.item.isPoster; });
-    var nonPosterEntries = laidOut.filter(function(e){ return !e.item.isPoster; });
-    nonPosterEntries = computeOverlapLayout(nonPosterEntries);
-    posterEntries.forEach(function(e){ e._col = 0; e._totalCols = 1; });
-    laidOut = nonPosterEntries.concat(posterEntries);
+    laidOut = computeOverlapLayout(laidOut);
 
     // conflict flags (reuse simple pairwise overlap check, ignore fixed break blocks)
     var conflictIds = {};
     for(var i=0;i<laidOut.length;i++){
-      if(laidOut[i].item._fixed || laidOut[i].item.isPoster) continue;
+      if(laidOut[i].item._fixed || laidOut[i].item._isPosterGroup) continue;
       for(var j=0;j<laidOut.length;j++){
-        if(i===j || laidOut[j].item._fixed || laidOut[j].item.isPoster) continue;
+        if(i===j || laidOut[j].item._fixed || laidOut[j].item._isPosterGroup) continue;
         if(laidOut[i]._start < laidOut[j]._end && laidOut[j]._start < laidOut[i]._end){
           conflictIds[laidOut[i].item.id] = true;
         }
@@ -1832,10 +1857,37 @@
     laidOut.forEach(function(entry){
       var p = entry.item;
       var top = Math.max(0, (entry._start - PT_START_HOUR*60)) * PT_PX_PER_MIN + PT_TOP_OFFSET;
-      var height = Math.max(38, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
       var colFrac = entry._col / entry._totalCols;
       var widthFrac = 1 / entry._totalCols;
       var el = document.createElement('div');
+
+      if(p._isPosterGroup){
+        var lineHeight = 15;
+        var groupHeight = Math.max(38, 20 + p._posters.length * lineHeight);
+        el.className = 'pt-item pt-item-block';
+        el.style.top = top + 'px';
+        el.style.height = groupHeight + 'px';
+        el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
+        el.style.width = 'calc((100% - 44px) * ' + widthFrac + ' - 4px)';
+        var posterLines = p._posters.map(function(poster, pidx){
+          var boardText = poster.subtitle ? poster.subtitle.split(' · ').slice(2).join(' · ') : '';
+          return '<div class="pt-poster-line" data-poster-idx="' + pidx + '">' + esc(abbreviateAuthorName(poster.authors)) + (boardText ? ' <span class="pt-item-room">' + esc(boardText) + '</span>' : '') + '</div>';
+        }).join('');
+        el.innerHTML =
+          '<div class="pt-item-time">' + esc(p.time) + ' · ' + esc(p.title) + '</div>' +
+          posterLines;
+        el.querySelectorAll('.pt-poster-line').forEach(function(lineEl, pidx){
+          lineEl.style.cursor = 'pointer';
+          lineEl.addEventListener('click', function(ev){
+            ev.stopPropagation();
+            openPlanItemDetail(p._posters[pidx]);
+          });
+        });
+        container.appendChild(el);
+        return;
+      }
+
+      var height = Math.max(38, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
       el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '') + (p._fixed ? ' pt-fixed' : (!p.authors ? ' pt-item-block' : ''));
       el.style.top = top + 'px';
       el.style.height = height + 'px';
