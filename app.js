@@ -586,6 +586,7 @@
       switchToView('plan');
       setPlanView(searchBackState.planViewMode || 'list');
     } else {
+      switchToView('programm');
       currentDay = searchBackState.day;
       currentCategoryFilter = searchBackState.categoryFilter;
       expandedSessions = searchBackState.expandedSessions;
@@ -851,6 +852,8 @@
         block.sessions.forEach(function(s){
           var sid = planIdForSession(day.id, block, s);
           var hasTalks = s.talks && s.talks.length > 0;
+          var sessionAbstractText = lang === 'en' ? s.abstract_en : s.abstract_de;
+          var hasExpandableContent = hasTalks || !!sessionAbstractText;
           var sadded = hasTalks
             ? s.talks.every(function(talk, idx){ return isInPlan(planIdForTalk(day.id, block, s, talk, idx)); })
             : isInPlan(sid);
@@ -872,7 +875,7 @@
             '</div>' +
             '<div class="session-btns">' +
               '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add">' + (sadded ? '&#10003;' : '+') + '</button>' +
-              (hasTalks ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+              (hasExpandableContent ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '') +
             '</div>';
           row.appendChild(header);
 
@@ -897,7 +900,6 @@
               savePlan(plan);
               render();
             } else {
-              var sessionAbstractText = lang === 'en' ? s.abstract_en : s.abstract_de;
               togglePlan({
                 id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
                 time: block.time, title: s.code + ' · ' + s.title + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room,
@@ -913,7 +915,7 @@
             });
           }
 
-          if(hasTalks){
+          if(hasExpandableContent){
             header.style.cursor = 'pointer';
             header.addEventListener('click', function(ev){
               if(ev.target.closest('[data-role="session-add"]') || ev.target.closest('.room-link')) return;
@@ -924,18 +926,18 @@
             });
           }
 
-          if(hasTalks && isOpen){
+          if(hasExpandableContent && isOpen){
             var talkList = document.createElement('div');
             talkList.className = 'talk-list';
 
-            var sessionAbstract = lang === 'en' ? s.abstract_en : s.abstract_de;
-            if(sessionAbstract){
+            if(sessionAbstractText){
               var sAbBox = document.createElement('div');
               sAbBox.className = 'abstract-box';
-              sAbBox.textContent = sessionAbstract;
+              sAbBox.textContent = sessionAbstractText;
               talkList.appendChild(sAbBox);
             }
 
+            if(hasTalks){
             s.talks.forEach(function(talk, idx){
               var tid = planIdForTalk(day.id, block, s, talk, idx);
               var tadded = isInPlan(tid);
@@ -984,6 +986,7 @@
                 talkList.appendChild(abBox);
               }
             });
+            }
             row.appendChild(talkList);
           }
 
