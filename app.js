@@ -627,6 +627,15 @@
     return block.time;
   }
 
+  var FLAG_DE_SVG = '<svg class="mini-flag" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" y="0" fill="#000"/><rect width="30" height="13.33" y="6.67" fill="#DD0000"/><rect width="30" height="6.67" y="13.33" fill="#FFCE00"/></svg>';
+  var FLAG_EN_SVG = '<svg class="mini-flag" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#00247d"/><path d="M0,0 L30,20 M30,0 L0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 L30,20 M30,0 L0,20" stroke="#cf142b" stroke-width="1.5"/><path d="M15,0 V20 M0,10 H30" stroke="#fff" stroke-width="6"/><path d="M15,0 V20 M0,10 H30" stroke="#cf142b" stroke-width="3"/></svg>';
+  function sessionLangFlags(sessLang){
+    if(sessLang === 'bilingual') return '<span class="session-lang-flags" title="DE/EN">' + FLAG_DE_SVG + FLAG_EN_SVG + '</span>';
+    if(sessLang === 'de') return '<span class="session-lang-flags" title="DE">' + FLAG_DE_SVG + '</span>';
+    if(sessLang === 'en') return '<span class="session-lang-flags" title="EN">' + FLAG_EN_SVG + '</span>';
+    return '';
+  }
+
   function renderProgrammList(){
     var list = document.getElementById('programmList');
     list.innerHTML = '';
@@ -842,7 +851,7 @@
           var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
           header.innerHTML =
             '<div class="session-main">' +
-              '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span><span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
+              '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
               '<div class="session-title">' + esc(s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
