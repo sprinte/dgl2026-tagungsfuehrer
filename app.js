@@ -469,6 +469,7 @@
 
   function blockCategory(block){
     if(block.type === 'parallel') return 'sessions';
+    if(block.isPlenary) return 'plenary';
     if(SOCIAL_TITLES.indexOf(block.title) !== -1) return 'social';
     if(PLENARY_TITLES.indexOf(block.title) !== -1) return 'plenary';
     return 'other';
@@ -719,7 +720,7 @@
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
-              '<div class="block-title">' + esc(blockTitle) + '</div>' +
+              '<div class="block-title">' + (block.tag ? '<span class="session-tag' + (block.isWSA ? ' session-tag-wsa' : '') + '">' + esc(lang === 'en' ? (block.tag_en || block.tag) : block.tag) + '</span> ' : '') + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.room ? '<div class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</div>' : '') +
             '</div>' +
@@ -1036,7 +1037,9 @@
                 kind: 'talk', dayId: day.id, jumpId: tid, sid: sid, timeLabel: talk.time,
                 text: [talk.title, talk.authors, s.code].filter(Boolean).join(' '),
                 title: talk.title, sub: talk.authors,
-                authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code
+                authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code,
+                dayLabel: day.label, date: day.date,
+                planTime: computeTalkTimeRange(s.talks, idx, block.time)
               });
             });
           });
@@ -1105,11 +1108,14 @@
       var isOpen = m.kind === 'talk' && !!expandedTalks[m.jumpId];
 
       if(m.kind === 'talk'){
+        var padded = isInPlan(m.jumpId);
         item.innerHTML =
           '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
-          '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>';
+          '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
+          '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
         item.style.cursor = 'pointer';
+        item.style.position = 'relative';
         if(roomClickable){
           item.querySelector('.room-link').addEventListener('click', function(ev){
             ev.stopPropagation();
@@ -1121,6 +1127,15 @@
             ev.stopPropagation();
             searchForAuthor(el.getAttribute('data-author'));
           });
+        });
+        item.querySelector('[data-role="search-add"]').addEventListener('click', function(ev){
+          ev.stopPropagation();
+          togglePlan({
+            id: m.jumpId, dayId: m.dayId, dayLabel: m.dayLabel, date: m.date,
+            time: m.planTime, title: m.title, subtitle: m.authors + ' · ' + m.code, room: m.room,
+            abstract: m.abstract || '', code: m.code, authors: m.authors
+          });
+          renderSearchResults(query);
         });
         if(isOpen){
           var abBox = document.createElement('div');
@@ -1134,7 +1149,7 @@
           item.appendChild(abBox);
         }
         item.addEventListener('click', function(ev){
-          if(ev.target.closest('.room-link') || ev.target.closest('.author-link')) return;
+          if(ev.target.closest('.room-link') || ev.target.closest('.author-link') || ev.target.closest('[data-role="search-add"]')) return;
           var wasOpen = !!expandedTalks[m.jumpId];
           expandedTalks[m.jumpId] = !wasOpen;
           renderSearchResults(query);
