@@ -648,6 +648,27 @@
     return '';
   }
 
+  function appendAbstractWithKeynote(container, text){
+    var m = /^(Keynote:[^\n]*)\n\n([\s\S]*)$/.exec(text);
+    if(m){
+      var kBox = document.createElement('div');
+      kBox.className = 'keynote-box';
+      kBox.textContent = m[1];
+      container.appendChild(kBox);
+      if(m[2]){
+        var abBox = document.createElement('div');
+        abBox.className = 'abstract-box';
+        abBox.textContent = m[2];
+        container.appendChild(abBox);
+      }
+    } else {
+      var abBox2 = document.createElement('div');
+      abBox2.className = 'abstract-box';
+      abBox2.textContent = text;
+      container.appendChild(abBox2);
+    }
+  }
+
   function renderProgrammList(){
     var list = document.getElementById('programmList');
     list.innerHTML = '';
@@ -942,10 +963,7 @@
             talkList.className = 'talk-list';
 
             if(sessionAbstractText){
-              var sAbBox = document.createElement('div');
-              sAbBox.className = 'abstract-box';
-              sAbBox.textContent = sessionAbstractText;
-              talkList.appendChild(sAbBox);
+              appendAbstractWithKeynote(talkList, sessionAbstractText);
             }
 
             if(hasTalks){
@@ -1620,10 +1638,7 @@
           });
           if(isOpen){
             if(item.abstract){
-              var abP = document.createElement('div');
-              abP.className = 'abstract-box';
-              abP.textContent = item.abstract;
-              card.appendChild(abP);
+              appendAbstractWithKeynote(card, item.abstract);
             }
             if(item.bio){
               var bioHeading = document.createElement('div');
@@ -1934,6 +1949,15 @@
     });
   }
 
+  function abstractHtmlWithKeynote(text){
+    if(!text) return '';
+    var m = /^(Keynote:[^\n]*)\n\n([\s\S]*)$/.exec(text);
+    if(m){
+      return '<div class="keynote-box">' + esc(m[1]) + '</div>' + (m[2] ? '<div class="abstract-box" style="margin-top:10px;">' + esc(m[2]) + '</div>' : '');
+    }
+    return '<div class="abstract-box" style="margin-top:10px;">' + esc(text) + '</div>';
+  }
+
   function openPlanItemDetail(item){
     var roomClickable = item.room && FLOORPLAN_ROOM_MAP[item.room];
     var content = document.getElementById('planItemOverlayContent');
@@ -1941,7 +1965,7 @@
       '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span' + (roomClickable ? ' class="room-link" id="ptDetailRoom"' : '') + '>' + esc(item.room) + '</span>' : '') + '</div>' +
       '<div class="block-title" style="margin-top:4px;">' + esc(item.title) + '</div>' +
       (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '') +
-      (item.abstract ? '<div class="abstract-box" style="margin-top:10px;">' + esc(item.abstract) + '</div>' : '') +
+      abstractHtmlWithKeynote(item.abstract) +
       (item.bio ? '<div class="bio-heading">' + t('aboutSpeaker') + '</div><div class="abstract-box">' + esc(item.bio) + '</div>' : '');
     if(roomClickable){
       document.getElementById('ptDetailRoom').addEventListener('click', function(){
