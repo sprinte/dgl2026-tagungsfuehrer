@@ -465,7 +465,7 @@
 
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together'];
   var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'Arbeitskreise', 'DGL Praxispreisvergabe', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Award Ceremony / WSA General Assembly'];
-  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'plenary', 'S21': 'workshop' };
+  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'plenary', 'S21': 'workshop', 'S13': 'workshop' };
 
   function blockCategory(block){
     if(block.type === 'parallel') return 'sessions';
