@@ -534,11 +534,14 @@
   function planIdForBlock(dayId, block){
     return 'b_' + dayId + '_' + block.time;
   }
+  function slug(str){
+    return (str || '').replace(/[^a-zA-Z0-9]+/g, '').slice(0, 24);
+  }
   function planIdForSession(dayId, block, s){
-    return 's_' + dayId + '_' + block.time + '_' + s.room;
+    return 's_' + dayId + '_' + block.time + '_' + s.room + '_' + s.code + '_' + slug(s.title);
   }
   function planIdForTalk(dayId, block, s, talk, idx){
-    return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + idx;
+    return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + s.code + '_' + slug(s.title) + '_' + idx;
   }
 
   var expandedSessions = {};
