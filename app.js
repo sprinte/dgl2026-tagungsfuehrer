@@ -1602,7 +1602,7 @@
         mainDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(item.room) + '">' + esc(item.room) + '</span>' : '') + '</div>' +
-              '<div class="block-title">' + esc(item.title) + '</div>' +
+              '<div class="block-title">' + (item.isPoster ? '<span class="session-tag">' + t('posterListLabel') + '</span> ' : '') + esc(item.title) + '</div>' +
               (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
