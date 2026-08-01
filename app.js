@@ -428,6 +428,11 @@
         if(baseRect){
           var ring = baseRect.cloneNode(false);
           ring.setAttribute('class', 'fp-pulse-ring');
+          var rx = parseFloat(baseRect.getAttribute('x')) || 0;
+          var ry = parseFloat(baseRect.getAttribute('y')) || 0;
+          var rw = parseFloat(baseRect.getAttribute('width')) || 0;
+          var rh = parseFloat(baseRect.getAttribute('height')) || 0;
+          ring.style.transformOrigin = (rx + rw/2) + 'px ' + (ry + rh/2) + 'px';
           el.appendChild(ring);
         }
       }
