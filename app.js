@@ -671,7 +671,7 @@
       }
       var card = document.createElement('div');
       var blockIsNow = isToday(day.id) && isBlockNow(day.id, block.time);
-      card.className = 'card' + (blockIsNow ? ' now-live' : '');
+      card.className = 'card' + (blockIsNow ? ' now-live' : '') + (block.isWSA ? ' wsa-card' : '');
       var liveBadgeHtml = blockIsNow ? '<div class="live-badge"><span class="dot"></span>' + t('liveNow') + '</div>' : '';
 
       if(block.type === 'info'){
@@ -699,7 +699,7 @@
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
-              '<div class="block-title">' + esc(blockTitle) + (block.isWSA ? ' <span class="session-tag-wsa wsa-badge">WSA</span>' : '') + '</div>' +
+              '<div class="block-title">' + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.room ? '<div class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</div>' : '') +
             '</div>' +
