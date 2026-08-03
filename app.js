@@ -1037,11 +1037,18 @@
       day.blocks.forEach(function(block){
         if(block.type === 'info'){
           var id = planIdForBlock(day.id, block);
-          var posterText = (block.posters || []).map(function(p){ return p.title + ' ' + p.authorsDisplay; }).join(' ');
           searchIndex.push({
             kind: 'info', dayId: day.id, jumpId: id, timeLabel: block.time,
-            text: [block.title, block.title_en, block.subtitle, block.subtitle_en, block.abstract, block.bio_de, block.bio_en, posterText].filter(Boolean).join(' '),
+            text: [block.title, block.title_en, block.subtitle, block.subtitle_en, block.abstract, block.bio_de, block.bio_en].filter(Boolean).join(' '),
             title: block.title, title_en: block.title_en
+          });
+          (block.posters || []).forEach(function(p, pidx){
+            searchIndex.push({
+              kind: 'poster', dayId: day.id, jumpId: 'poster_' + id + '_' + pidx, blockId: id, timeLabel: block.time,
+              text: [p.title, p.authorsDisplay, p.code].filter(Boolean).join(' '),
+              title: p.title, authors: p.authorsDisplay, board: p.board, code: p.code,
+              dayLabel: day.label, date: day.date
+            });
           });
         } else {
           block.sessions.forEach(function(s){
@@ -1174,6 +1181,30 @@
           if(ev.target.closest('.room-link') || ev.target.closest('.author-link') || ev.target.closest('[data-role="search-add"]')) return;
           var wasOpen = !!expandedTalks[m.jumpId];
           expandedTalks[m.jumpId] = !wasOpen;
+          renderSearchResults(query);
+        });
+      } else if(m.kind === 'poster'){
+        var posterPadded = isInPlan(m.jumpId);
+        item.innerHTML =
+          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
+          '<div class="search-result-title"><span class="session-tag">' + t('posterListLabel') + '</span> ' + esc(title) + '</div>' +
+          '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
+          '<button class="add-btn small' + (posterPadded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (posterPadded ? '&#10003;' : '+') + '</button>';
+        item.style.position = 'relative';
+        item.querySelectorAll('.author-link').forEach(function(el){
+          el.addEventListener('click', function(ev){
+            ev.stopPropagation();
+            searchForAuthor(el.getAttribute('data-author'));
+          });
+        });
+        item.querySelector('[data-role="search-add"]').addEventListener('click', function(ev){
+          ev.stopPropagation();
+          var boardText = m.board ? (' · ' + t('posterBoard') + ' ' + m.board) : '';
+          togglePlan({
+            id: m.jumpId, dayId: m.dayId, dayLabel: m.dayLabel, date: m.date,
+            time: m.timeLabel, title: m.title, subtitle: m.authors + ' · ' + m.code + boardText,
+            room: '', authors: m.authors, isPoster: true
+          });
           renderSearchResults(query);
         });
       } else {
