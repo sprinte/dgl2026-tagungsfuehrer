@@ -1040,7 +1040,8 @@
           searchIndex.push({
             kind: 'info', dayId: day.id, jumpId: id, timeLabel: block.time,
             text: [block.title, block.title_en, block.subtitle, block.subtitle_en, block.abstract, block.bio_de, block.bio_en].filter(Boolean).join(' '),
-            title: block.title, title_en: block.title_en
+            title: block.title, title_en: block.title_en,
+            isPlenary: !!block.isPlenary, tag: block.tag, tag_en: block.tag_en
           });
           (block.posters || []).forEach(function(p, pidx){
             searchIndex.push({
@@ -1242,6 +1243,18 @@
       if(entry.kind === 'session' && !entry.isContinuation && entry.code && !seen[dedupKey]){
         seen[dedupKey] = true;
         topicList.push(entry);
+      }
+      if(entry.kind === 'info' && entry.isPlenary){
+        var plenaryDedupKey = 'plenary|' + entry.jumpId;
+        if(!seen[plenaryDedupKey]){
+          seen[plenaryDedupKey] = true;
+          topicList.push({
+            kind: 'info', dayId: entry.dayId, jumpId: entry.jumpId, code: '',
+            title: (entry.tag || '') + ' ' + entry.title,
+            title_en: (entry.tag_en || entry.tag || '') + ' ' + (entry.title_en || entry.title),
+            _isPlenaryTopic: true
+          });
+        }
       }
     });
     function codeSortKey(code){
