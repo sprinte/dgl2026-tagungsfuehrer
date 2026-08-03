@@ -50,7 +50,7 @@
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Oprei',
-      presentersAutoInfo: 'Session, Tag und Uhrzeit werden automatisch anhand deines Namens erkannt. Den generierten Dateinamen kannst du unten direkt kopieren.',
+      presentersAutoInfo: 'Session, Tag und Uhrzeit werden automatisch anhand des Namens des gemeldeten Erstautors/der gemeldeten Erstautorin erkannt. Der generierte Dateiname kann unten direkt kopiert werden.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
       presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte prüfen Sie die Schreibweise oder wenden Sie sich ans Tagungsbüro.',
@@ -1596,13 +1596,10 @@
         '<div style="margin-top:14px;">' +
           '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
-          '<input type="text" id="presenterLastName" class="search-input" style="margin-top:4px;margin-bottom:10px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
-          '<div id="presenterPickWrap" style="display:none;">' +
-            '<label class="filter-label" for="presenterPickSelect">' + t('presentersPickTalk') + '</label>' +
-            '<select id="presenterPickSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;"><option value="">' + t('presentersPickPlaceholder') + '</option></select>' +
-          '</div>' +
+          '<input type="text" id="presenterLastName" class="search-input" autocomplete="off" style="margin-top:4px;margin-bottom:6px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
+          '<div id="presenterResultsList"></div>' +
           '<div id="presenterNotFound" class="lunch-meta" style="display:none;color:var(--text-muted);">' + t('presentersNotFound') + '</div>' +
-          '<div id="presenterFilenameBox" style="display:none;margin-top:6px;">' +
+          '<div id="presenterFilenameBox" style="display:none;margin-top:10px;">' +
             '<div class="lunch-meta"><strong style="color:var(--text)">' + t('presentersFilename') + '</strong></div>' +
             '<div style="display:flex;gap:8px;align-items:center;margin-top:4px;">' +
               '<code id="presenterFilenameOutput" style="flex:1;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;word-break:break-all;"></code>' +
@@ -1656,12 +1653,11 @@
   function setupPresenterForm(){
     var nameInput = document.getElementById('presenterLastName');
     if(!nameInput) return;
-    var pickWrap = document.getElementById('presenterPickWrap');
-    var pickSel = document.getElementById('presenterPickSelect');
+    var resultsList = document.getElementById('presenterResultsList');
     var notFoundBox = document.getElementById('presenterNotFound');
     var filenameBox = document.getElementById('presenterFilenameBox');
 
-    var byLastName = {};
+    var allEntries = [];
     DATA.programm.forEach(function(day){
       day.blocks.forEach(function(block){
         if(block.type !== 'parallel') return;
@@ -1672,10 +1668,7 @@
             if(!firstAuthor) return;
             var words = firstAuthor.split(/\s+/).filter(Boolean);
             var lastName = words[words.length - 1];
-            var key = lastName.toLowerCase();
-            (byLastName[key] = byLastName[key] || []).push({
-              code: s.code, title: talk.title, dayId: day.id, dayLabel: day.label, time: talk.time, lastName: lastName
-            });
+            allEntries.push({ lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
           });
         });
       });
@@ -1686,42 +1679,34 @@
       return entry.code + '_' + entry.dayLabel + '_' + entry.lastName + '_' + timeSlug + '.pptx';
     }
 
-    function showFilename(entry){
+    function selectEntry(entry){
+      nameInput.value = entry.lastName;
+      resultsList.innerHTML = '';
       document.getElementById('presenterFilenameOutput').textContent = buildFilename(entry);
       filenameBox.style.display = '';
-    }
-
-    function reset(){
-      pickWrap.style.display = 'none';
-      pickSel.innerHTML = '<option value="">' + t('presentersPickPlaceholder') + '</option>';
       notFoundBox.style.display = 'none';
-      filenameBox.style.display = 'none';
     }
 
     nameInput.addEventListener('input', function(){
-      reset();
-      var typed = nameInput.value.trim();
+      resultsList.innerHTML = '';
+      notFoundBox.style.display = 'none';
+      filenameBox.style.display = 'none';
+      var typed = nameInput.value.trim().toLowerCase();
       if(!typed) return;
-      var matches = byLastName[typed.toLowerCase()];
-      if(!matches || !matches.length){
+      var matches = allEntries.filter(function(e){ return e.lastName.toLowerCase().indexOf(typed) === 0; });
+      if(!matches.length){
         notFoundBox.style.display = '';
         return;
       }
-      if(matches.length === 1){
-        showFilename(matches[0]);
-      } else {
-        matches.forEach(function(entry, idx){
-          var opt = document.createElement('option');
-          opt.value = idx;
-          opt.textContent = entry.code + ' · ' + entry.title.slice(0, 60) + ' (' + entry.dayLabel + ' ' + entry.time + ')';
-          pickSel.appendChild(opt);
+      matches.slice(0, 15).forEach(function(entry){
+        var row = document.createElement('div');
+        row.className = 'presenter-result-row';
+        row.textContent = entry.lastName + ', ' + entry.code + ', ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40) + '…';
+        row.addEventListener('click', function(){
+          selectEntry(entry);
         });
-        pickWrap.style.display = '';
-        pickSel.addEventListener('change', function(){
-          if(pickSel.value === ''){ filenameBox.style.display = 'none'; return; }
-          showFilename(matches[pickSel.value]);
-        });
-      }
+        resultsList.appendChild(row);
+      });
     });
 
     var copyBtn = document.getElementById('presenterCopyBtn');
