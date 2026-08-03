@@ -104,8 +104,10 @@
     document.getElementById('lunchViewListText').textContent = t('lunchViewList');
     document.getElementById('lunchViewMapText').textContent = t('lunchViewMap');
     document.getElementById('programmSearch').placeholder = t('searchPlaceholder');
-    document.getElementById('floorplanSvg').style.display = lang === 'en' ? 'none' : '';
-    document.getElementById('floorplanSvgEn').style.display = lang === 'en' ? '' : 'none';
+    var fpDe = document.getElementById('floorplanSvg');
+    var fpEn = document.getElementById('floorplanSvgEn');
+    if(fpDe) fpDe.style.display = lang === 'en' ? 'none' : '';
+    if(fpEn) fpEn.style.display = lang === 'en' ? '' : 'none';
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
@@ -412,6 +414,7 @@
 
   function openFloorplanLightbox(highlightIds){
     var master = document.getElementById(lang === 'en' ? 'floorplanSvgEn' : 'floorplanSvg');
+    if(!master){ console.warn('Floor plan not loaded yet'); return; }
     var clone = master.cloneNode(true);
     clone.removeAttribute('id');
     clone.style.display = '';
@@ -2113,6 +2116,23 @@
     safeRun(renderVenue, 'renderVenue');
     safeRun(renderPlan, 'renderPlan');
   }
+
+  function loadFloorplanSVGs(){
+    Promise.all([
+      fetch('floorplan_de.svg').then(function(r){ return r.text(); }),
+      fetch('floorplan_en.svg').then(function(r){ return r.text(); })
+    ]).then(function(results){
+      document.getElementById('floorplanSlotDe').innerHTML = results[0];
+      document.getElementById('floorplanSlotEn').innerHTML = results[1];
+      var fpDe = document.getElementById('floorplanSvg');
+      var fpEn = document.getElementById('floorplanSvgEn');
+      if(fpDe) fpDe.style.display = lang === 'en' ? 'none' : '';
+      if(fpEn) fpEn.style.display = lang === 'en' ? '' : 'none';
+    }).catch(function(e){
+      console.error('Failed to load floor plan:', e);
+    });
+  }
+  loadFloorplanSVGs();
 
   applyStaticI18n();
   renderAll();
