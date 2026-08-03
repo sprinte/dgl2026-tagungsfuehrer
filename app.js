@@ -30,7 +30,7 @@
       lunchViewMap: 'Auf Karte anzeigen',
       catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catWorkshop: 'Workshops', catSocial: 'Social',
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
-      followUs: 'Social Media',
+      followUs: 'DGL auf Social Media',
       posterListLabel: 'Poster',
       posterBoard: 'Stellwand',
       organizersLabel: 'Veranstalter',
@@ -45,7 +45,7 @@
       officeHoursFr: 'Freitag: geschlossen',
       presentersCardTitle: 'Für Vortragende',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
-      presentersExample: 'Beispiel: „Musterfrau_A01_Montag_11-30.pptx"',
+      presentersExample: 'Beispiel: „Musterfrau_A01_Montag.pptx"',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Musterfrau',
@@ -88,7 +88,7 @@
       lunchViewMap: 'Show on map',
       catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catWorkshop: 'Workshops', catSocial: 'Social',
       noItemsInCategory: 'No programme items in this category.',
-      followUs: 'Social Media',
+      followUs: 'DGL on Social Media',
       posterListLabel: 'Posters',
       posterBoard: 'Board',
       organizersLabel: 'Organizers',
@@ -103,7 +103,7 @@
       officeHoursFr: 'Friday: closed',
       presentersCardTitle: 'For Presenters',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
-      presentersExample: 'Example: "Musterfrau_A01_Monday_11-30.pptx"',
+      presentersExample: 'Example: "Musterfrau_A01_Monday.pptx"',
       presentersUploadLink: 'Go to upload folder',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Musterfrau',
@@ -1578,6 +1578,28 @@
         '<div class="lunch-meta">' + t('officeHoursDo') + '</div>' +
         '<div class="lunch-meta">' + t('officeHoursFr') + '</div>' +
       '</div>' +
+      '<div class="card">' +
+        '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
+        '<div class="lunch-meta">' + t('presentersNamingInfo') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:6px;"><code>Name_Session_Tag.pptx</code></div>' +
+        '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
+        '<div style="margin-top:14px;">' +
+          '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
+          '<input type="text" id="presenterLastName" class="search-input" style="margin-top:4px;margin-bottom:10px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
+          '<label class="filter-label" for="presenterSessionSelect">' + t('presentersSession') + '</label>' +
+          '<select id="presenterSessionSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;"><option value="">' + t('presentersSessionPlaceholder') + '</option></select>' +
+          '<label class="filter-label" for="presenterTimeSelect">' + t('presentersTime') + '</label>' +
+          '<select id="presenterTimeSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;" disabled><option value="">' + t('presentersTimePlaceholder') + '</option></select>' +
+          '<div id="presenterFilenameBox" style="display:none;margin-top:6px;">' +
+            '<div class="lunch-meta"><strong style="color:var(--text)">' + t('presentersFilename') + '</strong></div>' +
+            '<div style="display:flex;gap:8px;align-items:center;margin-top:4px;">' +
+              '<code id="presenterFilenameOutput" style="flex:1;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;word-break:break-all;"></code>' +
+              '<button class="btn-secondary" id="presenterCopyBtn" style="white-space:nowrap;">' + t('presentersCopy') + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
+      '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
         '<div class="social-links">' +
@@ -1611,28 +1633,6 @@
             '<img src="logo_hu_berlin.png" alt="HU Berlin">' +
           '</a>' +
         '</div>' +
-      '</div>' +
-      '<div class="card">' +
-        '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
-        '<div class="lunch-meta">' + t('presentersNamingInfo') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:6px;"><code>Name_Session_Tag_Zeit.pptx</code></div>' +
-        '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
-        '<div style="margin-top:14px;">' +
-          '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
-          '<input type="text" id="presenterLastName" class="search-input" style="margin-top:4px;margin-bottom:10px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
-          '<label class="filter-label" for="presenterSessionSelect">' + t('presentersSession') + '</label>' +
-          '<select id="presenterSessionSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;"><option value="">' + t('presentersSessionPlaceholder') + '</option></select>' +
-          '<label class="filter-label" for="presenterTimeSelect">' + t('presentersTime') + '</label>' +
-          '<select id="presenterTimeSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;" disabled><option value="">' + t('presentersTimePlaceholder') + '</option></select>' +
-          '<div id="presenterFilenameBox" style="display:none;margin-top:6px;">' +
-            '<div class="lunch-meta"><strong style="color:var(--text)">' + t('presentersFilename') + '</strong></div>' +
-            '<div style="display:flex;gap:8px;align-items:center;margin-top:4px;">' +
-              '<code id="presenterFilenameOutput" style="flex:1;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;word-break:break-all;"></code>' +
-              '<button class="btn-secondary" id="presenterCopyBtn" style="white-space:nowrap;">' + t('presentersCopy') + '</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
-        (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
       '</div>';
     document.getElementById('officeCardLink').addEventListener('click', function(){
       openFloorplanLightbox(['tagungsbuero']);
@@ -1646,23 +1646,26 @@
     var nameInput = document.getElementById('presenterLastName');
     if(!sessionSel) return;
 
-    var sessionOptions = [];
-    var seen = {};
+    var byCode = {};
+    var order = [];
     DATA.programm.forEach(function(day){
       day.blocks.forEach(function(block){
         if(block.type !== 'parallel') return;
         block.sessions.forEach(function(s){
           if(!s.code || s.code === 'WRHC' || s.code === 'Preisvortrag') return;
           if(!s.talks || !s.talks.length) return;
-          if(seen[s.code]) return;
-          seen[s.code] = true;
-          sessionOptions.push({ code: s.code, title: s.title, dayId: day.id, dayLabel: day.label, talks: s.talks });
+          if(!byCode[s.code]){
+            byCode[s.code] = { code: s.code, title: s.title, talks: [] };
+            order.push(s.code);
+          }
+          s.talks.forEach(function(talk){
+            byCode[s.code].talks.push({ time: talk.time, dayId: day.id, dayLabel: day.label });
+          });
         });
       });
     });
-    sessionOptions.sort(function(a, b){
-      return a.code < b.code ? -1 : (a.code > b.code ? 1 : 0);
-    });
+    order.sort();
+    var sessionOptions = order.map(function(code){ return byCode[code]; });
 
     sessionOptions.forEach(function(so, idx){
       var opt = document.createElement('option');
@@ -1674,15 +1677,15 @@
     function updateFilename(){
       var lastName = (nameInput.value || '').trim().replace(/\s+/g, '');
       var sIdx = sessionSel.value;
-      var tVal = timeSel.value;
+      var tIdx = timeSel.value;
       var box = document.getElementById('presenterFilenameBox');
-      if(!lastName || sIdx === '' || !tVal){
+      if(!lastName || sIdx === '' || tIdx === ''){
         box.style.display = 'none';
         return;
       }
       var so = sessionOptions[sIdx];
-      var timeSlug = tVal.replace(':', '-');
-      var filename = lastName + '_' + so.code + '_' + so.dayLabel + '_' + timeSlug + '.pptx';
+      var talk = so.talks[tIdx];
+      var filename = lastName + '_' + so.code + '_' + talk.dayLabel + '.pptx';
       document.getElementById('presenterFilenameOutput').textContent = filename;
       box.style.display = '';
     }
@@ -1694,10 +1697,11 @@
         timeSel.disabled = true;
       } else {
         var so = sessionOptions[sIdx];
-        so.talks.forEach(function(talk){
+        var multiDay = so.talks.some(function(tk){ return tk.dayId !== so.talks[0].dayId; });
+        so.talks.forEach(function(talk, tIdx){
           var opt = document.createElement('option');
-          opt.value = talk.time;
-          opt.textContent = talk.time + ' Uhr';
+          opt.value = tIdx;
+          opt.textContent = multiDay ? (talk.dayLabel + ' ' + talk.time + ' Uhr') : (talk.time + ' Uhr');
           timeSel.appendChild(opt);
         });
         timeSel.disabled = false;
