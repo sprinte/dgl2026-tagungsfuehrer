@@ -52,8 +52,8 @@
       presentersLastNamePlaceholder: 'z. B. Musterfrau',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Session auswählen…',
-      presentersTime: 'Uhrzeit Ihres Vortrags',
-      presentersTimePlaceholder: 'Zeit auswählen…',
+      presentersTime: 'Tag Ihres Vortrags',
+      presentersTimePlaceholder: 'Tag auswählen…',
       presentersFilename: 'Ihr Dateiname:',
       presentersCopy: 'Kopieren',
       presentersCopied: 'Dateiname kopiert!',
@@ -111,8 +111,8 @@
       presentersLastNamePlaceholder: 'e.g. Musterfrau',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Select session…',
-      presentersTime: 'Time of your talk',
-      presentersTimePlaceholder: 'Select time…',
+      presentersTime: 'Day of your talk',
+      presentersTimePlaceholder: 'Select day…',
       presentersFilename: 'Your file name:',
       presentersCopy: 'Copy',
       presentersCopied: 'File name copied!',
@@ -1645,7 +1645,7 @@
 
   function setupPresenterForm(){
     var sessionSel = document.getElementById('presenterSessionSelect');
-    var timeSel = document.getElementById('presenterTimeSelect');
+    var daySel = document.getElementById('presenterTimeSelect');
     var nameInput = document.getElementById('presenterLastName');
     if(!sessionSel) return;
 
@@ -1658,12 +1658,13 @@
           if(!s.code || s.code === 'WRHC' || s.code === 'Preisvortrag') return;
           if(!s.talks || !s.talks.length) return;
           if(!byCode[s.code]){
-            byCode[s.code] = { code: s.code, title: s.title, talks: [] };
+            byCode[s.code] = { code: s.code, title: s.title, days: [] };
             order.push(s.code);
           }
-          s.talks.forEach(function(talk){
-            byCode[s.code].talks.push({ time: talk.time, dayId: day.id, dayLabel: day.label });
-          });
+          var so = byCode[s.code];
+          if(!so.days.some(function(d){ return d.dayId === day.id; })){
+            so.days.push({ dayId: day.id, dayLabel: day.label });
+          }
         });
       });
     });
@@ -1680,38 +1681,42 @@
     function updateFilename(){
       var lastName = (nameInput.value || '').trim().replace(/\s+/g, '');
       var sIdx = sessionSel.value;
-      var tIdx = timeSel.value;
+      var dIdx = daySel.value;
       var box = document.getElementById('presenterFilenameBox');
-      if(!lastName || sIdx === '' || tIdx === ''){
+      if(!lastName || sIdx === '' || dIdx === ''){
         box.style.display = 'none';
         return;
       }
       var so = sessionOptions[sIdx];
-      var talk = so.talks[tIdx];
-      var filename = lastName + '_' + so.code + '_' + talk.dayLabel + '.pptx';
+      var dayLabel = so.days[dIdx].dayLabel;
+      var filename = so.code + '_' + dayLabel + '_' + lastName + '.pptx';
       document.getElementById('presenterFilenameOutput').textContent = filename;
       box.style.display = '';
     }
 
     sessionSel.addEventListener('change', function(){
       var sIdx = sessionSel.value;
-      timeSel.innerHTML = '<option value="">' + t('presentersTimePlaceholder') + '</option>';
+      daySel.innerHTML = '<option value="">' + t('presentersTimePlaceholder') + '</option>';
       if(sIdx === ''){
-        timeSel.disabled = true;
+        daySel.disabled = true;
       } else {
         var so = sessionOptions[sIdx];
-        var multiDay = so.talks.some(function(tk){ return tk.dayId !== so.talks[0].dayId; });
-        so.talks.forEach(function(talk, tIdx){
+        so.days.forEach(function(d, dIdx){
           var opt = document.createElement('option');
-          opt.value = tIdx;
-          opt.textContent = multiDay ? (talk.dayLabel + ' ' + talk.time + ' Uhr') : (talk.time + ' Uhr');
-          timeSel.appendChild(opt);
+          opt.value = dIdx;
+          opt.textContent = d.dayLabel;
+          daySel.appendChild(opt);
         });
-        timeSel.disabled = false;
+        if(so.days.length === 1){
+          daySel.value = 0;
+          daySel.disabled = true;
+        } else {
+          daySel.disabled = false;
+        }
       }
       updateFilename();
     });
-    timeSel.addEventListener('change', updateFilename);
+    daySel.addEventListener('change', updateFilename);
     nameInput.addEventListener('input', updateFilename);
 
     var copyBtn = document.getElementById('presenterCopyBtn');
