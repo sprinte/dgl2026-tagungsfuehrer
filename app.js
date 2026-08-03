@@ -45,11 +45,15 @@
       officeHoursFr: 'Freitag: geschlossen',
       presentersCardTitle: 'Für Vortragende',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
-      presentersExample: 'Beispiel: „Musterfrau_A01_Montag.pptx"',
+      presentersExample: 'Beispiel: „A01_Montag_Oprei_13-45.pptx"',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
-      presentersLastNamePlaceholder: 'z. B. Musterfrau',
+      presentersLastNamePlaceholder: 'z. B. Oprei',
+      presentersAutoInfo: 'Session, Tag und Uhrzeit werden automatisch anhand deines Namens erkannt. Den generierten Dateinamen kannst du unten direkt kopieren.',
+      presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
+      presentersPickPlaceholder: 'Beitrag auswählen…',
+      presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte prüfen Sie die Schreibweise oder wenden Sie sich ans Tagungsbüro.',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Session auswählen…',
       presentersTime: 'Tag Ihres Vortrags',
@@ -104,11 +108,15 @@
       officeHoursFr: 'Friday: closed',
       presentersCardTitle: 'For Presenters',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
-      presentersExample: 'Example: "Musterfrau_A01_Monday.pptx"',
+      presentersExample: 'Example: "A01_Monday_Oprei_13-45.pptx"',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
-      presentersLastNamePlaceholder: 'e.g. Musterfrau',
+      presentersLastNamePlaceholder: 'e.g. Oprei',
+      presentersAutoInfo: 'Session, day and time are detected automatically from your name. You can copy the generated file name below.',
+      presentersPickTalk: 'Several contributions found – which one is yours?',
+      presentersPickPlaceholder: 'Select contribution…',
+      presentersNotFound: 'No contribution found under this name. Please check the spelling or contact the conference office.',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Select session…',
       presentersTime: 'Day of your talk',
@@ -1583,15 +1591,17 @@
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
         '<div class="lunch-meta">' + t('presentersNamingInfo') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:6px;"><code>Name_Session_Tag.pptx</code></div>' +
+        '<div class="lunch-meta" style="margin-top:6px;"><code>Session_Tag_Name_Uhrzeit.pptx</code></div>' +
         '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
         '<div style="margin-top:14px;">' +
+          '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
           '<input type="text" id="presenterLastName" class="search-input" style="margin-top:4px;margin-bottom:10px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
-          '<label class="filter-label" for="presenterSessionSelect">' + t('presentersSession') + '</label>' +
-          '<select id="presenterSessionSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;"><option value="">' + t('presentersSessionPlaceholder') + '</option></select>' +
-          '<label class="filter-label" for="presenterTimeSelect">' + t('presentersTime') + '</label>' +
-          '<select id="presenterTimeSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;" disabled><option value="">' + t('presentersTimePlaceholder') + '</option></select>' +
+          '<div id="presenterPickWrap" style="display:none;">' +
+            '<label class="filter-label" for="presenterPickSelect">' + t('presentersPickTalk') + '</label>' +
+            '<select id="presenterPickSelect" class="topic-jump" style="margin-top:4px;margin-bottom:10px;"><option value="">' + t('presentersPickPlaceholder') + '</option></select>' +
+          '</div>' +
+          '<div id="presenterNotFound" class="lunch-meta" style="display:none;color:var(--text-muted);">' + t('presentersNotFound') + '</div>' +
           '<div id="presenterFilenameBox" style="display:none;margin-top:6px;">' +
             '<div class="lunch-meta"><strong style="color:var(--text)">' + t('presentersFilename') + '</strong></div>' +
             '<div style="display:flex;gap:8px;align-items:center;margin-top:4px;">' +
@@ -1644,80 +1654,75 @@
   }
 
   function setupPresenterForm(){
-    var sessionSel = document.getElementById('presenterSessionSelect');
-    var daySel = document.getElementById('presenterTimeSelect');
     var nameInput = document.getElementById('presenterLastName');
-    if(!sessionSel) return;
+    if(!nameInput) return;
+    var pickWrap = document.getElementById('presenterPickWrap');
+    var pickSel = document.getElementById('presenterPickSelect');
+    var notFoundBox = document.getElementById('presenterNotFound');
+    var filenameBox = document.getElementById('presenterFilenameBox');
 
-    var byCode = {};
-    var order = [];
+    var byLastName = {};
     DATA.programm.forEach(function(day){
       day.blocks.forEach(function(block){
         if(block.type !== 'parallel') return;
         block.sessions.forEach(function(s){
           if(!s.code || s.code === 'WRHC' || s.code === 'Preisvortrag') return;
-          if(!s.talks || !s.talks.length) return;
-          if(!byCode[s.code]){
-            byCode[s.code] = { code: s.code, title: s.title, days: [] };
-            order.push(s.code);
-          }
-          var so = byCode[s.code];
-          if(!so.days.some(function(d){ return d.dayId === day.id; })){
-            so.days.push({ dayId: day.id, dayLabel: day.label });
-          }
+          (s.talks || []).forEach(function(talk){
+            var firstAuthor = (talk.authors || '').split(' — ')[0].split(',')[0].trim();
+            if(!firstAuthor) return;
+            var words = firstAuthor.split(/\s+/).filter(Boolean);
+            var lastName = words[words.length - 1];
+            var key = lastName.toLowerCase();
+            (byLastName[key] = byLastName[key] || []).push({
+              code: s.code, title: talk.title, dayId: day.id, dayLabel: day.label, time: talk.time, lastName: lastName
+            });
+          });
         });
       });
     });
-    order.sort();
-    var sessionOptions = order.map(function(code){ return byCode[code]; });
 
-    sessionOptions.forEach(function(so, idx){
-      var opt = document.createElement('option');
-      opt.value = idx;
-      opt.textContent = so.code + ' · ' + so.title;
-      sessionSel.appendChild(opt);
-    });
-
-    function updateFilename(){
-      var lastName = (nameInput.value || '').trim().replace(/\s+/g, '');
-      var sIdx = sessionSel.value;
-      var dIdx = daySel.value;
-      var box = document.getElementById('presenterFilenameBox');
-      if(!lastName || sIdx === '' || dIdx === ''){
-        box.style.display = 'none';
-        return;
-      }
-      var so = sessionOptions[sIdx];
-      var dayLabel = so.days[dIdx].dayLabel;
-      var filename = so.code + '_' + dayLabel + '_' + lastName + '.pptx';
-      document.getElementById('presenterFilenameOutput').textContent = filename;
-      box.style.display = '';
+    function buildFilename(entry){
+      var timeSlug = entry.time.replace(':', '-');
+      return entry.code + '_' + entry.dayLabel + '_' + entry.lastName + '_' + timeSlug + '.pptx';
     }
 
-    sessionSel.addEventListener('change', function(){
-      var sIdx = sessionSel.value;
-      daySel.innerHTML = '<option value="">' + t('presentersTimePlaceholder') + '</option>';
-      if(sIdx === ''){
-        daySel.disabled = true;
-      } else {
-        var so = sessionOptions[sIdx];
-        so.days.forEach(function(d, dIdx){
-          var opt = document.createElement('option');
-          opt.value = dIdx;
-          opt.textContent = d.dayLabel;
-          daySel.appendChild(opt);
-        });
-        if(so.days.length === 1){
-          daySel.value = 0;
-          daySel.disabled = true;
-        } else {
-          daySel.disabled = false;
-        }
+    function showFilename(entry){
+      document.getElementById('presenterFilenameOutput').textContent = buildFilename(entry);
+      filenameBox.style.display = '';
+    }
+
+    function reset(){
+      pickWrap.style.display = 'none';
+      pickSel.innerHTML = '<option value="">' + t('presentersPickPlaceholder') + '</option>';
+      notFoundBox.style.display = 'none';
+      filenameBox.style.display = 'none';
+    }
+
+    nameInput.addEventListener('input', function(){
+      reset();
+      var typed = nameInput.value.trim();
+      if(!typed) return;
+      var matches = byLastName[typed.toLowerCase()];
+      if(!matches || !matches.length){
+        notFoundBox.style.display = '';
+        return;
       }
-      updateFilename();
+      if(matches.length === 1){
+        showFilename(matches[0]);
+      } else {
+        matches.forEach(function(entry, idx){
+          var opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = entry.code + ' · ' + entry.title.slice(0, 60) + ' (' + entry.dayLabel + ' ' + entry.time + ')';
+          pickSel.appendChild(opt);
+        });
+        pickWrap.style.display = '';
+        pickSel.addEventListener('change', function(){
+          if(pickSel.value === ''){ filenameBox.style.display = 'none'; return; }
+          showFilename(matches[pickSel.value]);
+        });
+      }
     });
-    daySel.addEventListener('change', updateFilename);
-    nameInput.addEventListener('input', updateFilename);
 
     var copyBtn = document.getElementById('presenterCopyBtn');
     if(copyBtn){
