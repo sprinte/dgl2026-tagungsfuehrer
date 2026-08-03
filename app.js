@@ -47,6 +47,7 @@
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
       presentersExample: 'Beispiel: „Musterfrau_A01_Montag.pptx"',
       presentersUploadLink: 'Zum Upload-Ordner',
+      presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Musterfrau',
       presentersSession: 'Session',
@@ -105,6 +106,7 @@
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
       presentersExample: 'Example: "Musterfrau_A01_Monday.pptx"',
       presentersUploadLink: 'Go to upload folder',
+      presentersPassword: 'Password:',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Musterfrau',
       presentersSession: 'Session',
@@ -1598,7 +1600,8 @@
             '</div>' +
           '</div>' +
         '</div>' +
-        (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
+        (presenterUploadUrl ? ('<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' +
+          '<div class="lunch-meta" style="margin-top:8px;text-align:center;">' + t('presentersPassword') + ' <code>dgl2026-zukunft-wasser-gestalten</code></div>') : '') +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
