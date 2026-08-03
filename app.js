@@ -43,6 +43,10 @@
       officeHoursDiMi: 'Dienstag und Mittwoch: 8:00–18:00 Uhr',
       officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
+      presentersCardTitle: 'Für Vortragende',
+      presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
+      presentersExample: 'Beispiel: „Musterfrau_A01_Montag_11-30.pptx"',
+      presentersUploadLink: 'Zum Upload-Ordner',
       planViewList: 'Liste',
       planViewTimeline: 'Zeitplan'
     },
@@ -88,6 +92,10 @@
       officeHoursDiMi: 'Tuesday and Wednesday: 8:00 am–6:00 pm',
       officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
       officeHoursFr: 'Friday: closed',
+      presentersCardTitle: 'For Presenters',
+      presentersNamingInfo: 'Please give your file a unique name following this pattern:',
+      presentersExample: 'Example: "Musterfrau_A01_Monday_11-30.pptx"',
+      presentersUploadLink: 'Go to upload folder',
       planViewList: 'List',
       planViewTimeline: 'Timeline'
     }
@@ -1541,7 +1549,10 @@
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('oepnvLabel') + '</strong> ' + esc(oepnv) + '</div>' +
       '</div>' +
       '<div class="card" id="officeCardLink" style="cursor:pointer;">' +
-        '<div class="card-section-heading">' + t('officeCardTitle') + ' <span class="chevron link-arrow" style="display:inline-block;">&#8594;</span></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">' +
+          '<div class="card-section-heading" style="margin:0;">' + t('officeCardTitle') + '</div>' +
+          '<div class="chevron link-arrow">&#8594;</div>' +
+        '</div>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('officeContact') + '</strong> Dr. Hildegard Feldmann (F&U confirm)</div>' +
         '<div class="lunch-meta" style="margin-top:6px;"><strong style="color:var(--text)">' + t('officeHours') + '</strong></div>' +
         '<div class="lunch-meta">' + t('officeHoursMo') + '</div>' +
@@ -1582,6 +1593,13 @@
             '<img src="logo_hu_berlin.png" alt="HU Berlin">' +
           '</a>' +
         '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
+        '<div class="lunch-meta">' + t('presentersNamingInfo') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:6px;"><code>Name_Session_Tag_Zeit.pptx</code></div>' +
+        '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
+        (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener">' + t('presentersUploadLink') + '</a>' : '') +
       '</div>';
     document.getElementById('officeCardLink').addEventListener('click', function(){
       openFloorplanLightbox(['tagungsbuero']);
@@ -2165,6 +2183,25 @@
     safeRun(renderPlan, 'renderPlan');
   }
 
+  var presenterUploadUrl = '';
+  function loadPresenterUploadLink(){
+    fetch('presenter_upload_link.txt').then(function(r){
+      return r.ok ? r.text() : '';
+    }).then(function(text){
+      var lines = (text || '').split('\n');
+      for(var i = 0; i < lines.length; i++){
+        var line = lines[i].trim();
+        if(line && line.indexOf('#') !== 0){
+          presenterUploadUrl = line;
+          break;
+        }
+      }
+      safeRun(renderVenue, 'renderVenue');
+    }).catch(function(e){
+      console.error('Failed to load presenter upload link:', e);
+    });
+  }
+
   function loadFloorplanSVGs(){
     Promise.all([
       fetch('floorplan_de.svg').then(function(r){ return r.text(); }),
@@ -2181,6 +2218,7 @@
     });
   }
   loadFloorplanSVGs();
+  loadPresenterUploadLink();
 
   safeRun(applyStaticI18n, 'applyStaticI18n');
   renderAll();

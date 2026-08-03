@@ -1,0 +1,5 @@
+# Trage hier in der ersten Zeile den Link zum Cloud-Ordner ein (z.B. Nimbus-Link),
+# in dem Vortragende ihre Präsentation hochladen können.
+# Alles ab der Raute (#) wird ignoriert. Nur die erste Zeile ohne # zählt.
+# Beispiel: https://nimbus.tu-berlin.de/s/AbCdEfGhIjKlMnOp
+
