@@ -36,6 +36,13 @@
       organizersLabel: 'Veranstalter',
       floorplanTitle: 'Gebäudeplan',
       venueCardTitle: 'Tagungsort',
+      officeCardTitle: 'Tagungsbüro',
+      officeContact: 'Ansprechpartnerin:',
+      officeHours: 'Öffnungszeiten:',
+      officeHoursMo: 'Montag: 9:00–18:00 Uhr',
+      officeHoursDiMi: 'Dienstag und Mittwoch: 8:00–18:00 Uhr',
+      officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
+      officeHoursFr: 'Freitag: geschlossen',
       planViewList: 'Liste',
       planViewTimeline: 'Zeitplan'
     },
@@ -74,6 +81,13 @@
       organizersLabel: 'Organizers',
       floorplanTitle: 'Building plan',
       venueCardTitle: 'Venue',
+      officeCardTitle: 'Conference Office',
+      officeContact: 'Contact:',
+      officeHours: 'Opening hours:',
+      officeHoursMo: 'Monday: 9:00 am–6:00 pm',
+      officeHoursDiMi: 'Tuesday and Wednesday: 8:00 am–6:00 pm',
+      officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
+      officeHoursFr: 'Friday: closed',
       planViewList: 'List',
       planViewTimeline: 'Timeline'
     }
@@ -1526,6 +1540,15 @@
         '<a class="venue-map-link" href="' + esc(v.maps) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('oepnvLabel') + '</strong> ' + esc(oepnv) + '</div>' +
       '</div>' +
+      '<div class="card" id="officeCardLink" style="cursor:pointer;">' +
+        '<div class="card-section-heading">' + t('officeCardTitle') + ' <span class="chevron link-arrow" style="display:inline-block;">&#8594;</span></div>' +
+        '<div class="lunch-meta"><strong style="color:var(--text)">' + t('officeContact') + '</strong> Dr. Hildegard Feldmann (F&U confirm)</div>' +
+        '<div class="lunch-meta" style="margin-top:6px;"><strong style="color:var(--text)">' + t('officeHours') + '</strong></div>' +
+        '<div class="lunch-meta">' + t('officeHoursMo') + '</div>' +
+        '<div class="lunch-meta">' + t('officeHoursDiMi') + '</div>' +
+        '<div class="lunch-meta">' + t('officeHoursDo') + '</div>' +
+        '<div class="lunch-meta">' + t('officeHoursFr') + '</div>' +
+      '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
         '<div class="social-links">' +
@@ -1560,6 +1583,9 @@
           '</a>' +
         '</div>' +
       '</div>';
+    document.getElementById('officeCardLink').addEventListener('click', function(){
+      openFloorplanLightbox(['tagungsbuero']);
+    });
   }
 
   // ---------- Mein Plan ----------
