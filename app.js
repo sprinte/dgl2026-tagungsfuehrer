@@ -1254,19 +1254,27 @@
     var seen = {};
     searchIndex.forEach(function(entry){
       var dedupKey = entry.code + '|' + entry.title;
-      if(entry.kind === 'session' && !entry.isContinuation && entry.code && !seen[dedupKey]){
+      if(entry.kind === 'session' && !entry.isContinuation && entry.code && entry.title.indexOf('Closing Remarks') === -1 && !seen[dedupKey]){
         seen[dedupKey] = true;
+        var group;
+        if(entry.code === 'WRHC') group = 2;
+        else if(entry.code === 'Preisvortrag') group = 4;
+        else if(/^A/.test(entry.code)) group = 0;
+        else group = 1;
+        entry._group = group;
         topicList.push(entry);
       }
       if(entry.kind === 'info' && entry.isPlenary){
         var plenaryDedupKey = 'plenary|' + entry.jumpId;
         if(!seen[plenaryDedupKey]){
           seen[plenaryDedupKey] = true;
+          var isAward = entry.tag === 'Preisvortrag';
           topicList.push({
             kind: 'info', dayId: entry.dayId, jumpId: entry.jumpId, code: '',
             title: (entry.tag || '') + ' ' + entry.title,
             title_en: (entry.tag_en || entry.tag || '') + ' ' + (entry.title_en || entry.title),
-            _isPlenaryTopic: true
+            _isPlenaryTopic: true,
+            _group: isAward ? 4 : 3
           });
         }
       }
@@ -1276,7 +1284,18 @@
       if(m) return [m[1], parseInt(m[2], 10)];
       return [code, 0];
     }
+    function wrhcSortKey(title){
+      var m = title.match(/Session (\d+)/);
+      return m ? parseInt(m[1], 10) : 99;
+    }
     topicList.sort(function(a, b){
+      if(a._group !== b._group) return a._group - b._group;
+      if(a._group === 2){
+        return wrhcSortKey(a.title) - wrhcSortKey(b.title);
+      }
+      if(a._group === 3 || a._group === 4){
+        return a.title < b.title ? -1 : (a.title > b.title ? 1 : 0);
+      }
       var ka = codeSortKey(a.code), kb = codeSortKey(b.code);
       if(ka[0] !== kb[0]) return ka[0] < kb[0] ? -1 : 1;
       return ka[1] - kb[1];
