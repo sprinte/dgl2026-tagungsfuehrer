@@ -1055,14 +1055,16 @@
             title: block.title, title_en: block.title_en,
             isPlenary: !!block.isPlenary, tag: block.tag, tag_en: block.tag_en
           });
-          (block.posters || []).forEach(function(p, pidx){
-            searchIndex.push({
-              kind: 'poster', dayId: day.id, jumpId: 'poster_' + id + '_' + pidx, blockId: id, timeLabel: block.time,
-              text: [p.title, p.authorsDisplay, p.code].filter(Boolean).join(' '),
-              title: p.title, authors: p.authorsDisplay, board: p.board, code: p.code,
-              dayLabel: day.label, date: day.date
+          if(block.title !== 'Poster Speed Talks'){
+            (block.posters || []).forEach(function(p, pidx){
+              searchIndex.push({
+                kind: 'poster', dayId: day.id, jumpId: 'poster_' + id + '_' + pidx, blockId: id, timeLabel: block.time,
+                text: [p.title, p.authorsDisplay, p.code].filter(Boolean).join(' '),
+                title: p.title, authors: p.authorsDisplay, board: p.board, code: p.code,
+                dayLabel: day.label, date: day.date
+              });
             });
-          });
+          }
         } else {
           block.sessions.forEach(function(s){
             var sid = planIdForSession(day.id, block, s);
@@ -2134,7 +2136,7 @@
   }
   loadFloorplanSVGs();
 
-  applyStaticI18n();
+  safeRun(applyStaticI18n, 'applyStaticI18n');
   renderAll();
   setInterval(function(){
     safeRun(renderDayTabs, 'renderDayTabs');
