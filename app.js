@@ -464,13 +464,15 @@
   var currentCategoryFilter = 'alle';
 
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together'];
-  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'Arbeitskreise', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Award Ceremony / WSA General Assembly'];
+  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Award Ceremony / WSA General Assembly'];
+  var WORKSHOP_TITLES = ['Arbeitskreise'];
   var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop' };
 
   function blockCategory(block){
     if(block.type === 'parallel') return 'sessions';
     if(block.isPlenary) return 'plenary';
     if(SOCIAL_TITLES.indexOf(block.title) !== -1) return 'social';
+    if(WORKSHOP_TITLES.indexOf(block.title) !== -1) return 'workshop';
     if(PLENARY_TITLES.indexOf(block.title) !== -1) return 'plenary';
     return 'other';
   }
@@ -763,6 +765,13 @@
             (block.linkMapsUrl ? '<a class="pill-link" href="' + esc(block.linkMapsUrl) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' : '') +
             (block.linkUrl ? '<a class="pill-link" href="' + esc(block.linkUrl) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '');
           card.appendChild(linksDiv);
+        }
+        if(block.route){
+          var routeDiv = document.createElement('div');
+          routeDiv.className = 'lunch-meta';
+          routeDiv.style.marginTop = '6px';
+          routeDiv.textContent = (lang === 'en' && block.route_en) ? block.route_en : block.route;
+          card.appendChild(routeDiv);
         }
         if(headerDiv.querySelector('.room-link')){
           headerDiv.querySelector('.room-link').addEventListener('click', function(ev){
