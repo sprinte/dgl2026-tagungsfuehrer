@@ -54,7 +54,7 @@
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
       tourBack: 'Zurück',
-      tourIntroText: '👋 Neu hier? Kurze Einführung in die wichtigsten Funktionen gefällig?',
+      tourIntroText: '👋 Neu hier? Dann lass mich dir kurz zeigen, wie du diese App nutzt.',
       tourStart: 'Tour starten',
       tourHelpBtn: '👋 Neu hier?',
       presentersCardTitle: 'Für Vortragende',
@@ -136,7 +136,7 @@
       tourDone: 'Done',
       tourSkip: 'Skip',
       tourBack: 'Back',
-      tourIntroText: '👋 New here? Want a quick tour of the main features?',
+      tourIntroText: '👋 New here? Let us quickly show you how to use this app.',
       tourStart: 'Start tour',
       tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'For Presenters',
@@ -2659,6 +2659,15 @@
     if(activeNav) activeNav.classList.remove('tour-parent-active');
     document.getElementById('tourBackdrop').style.display = 'none';
     document.getElementById('tourTooltip').style.display = 'none';
+
+    // Leave the app in a clean starting state, not wherever the tour's demo happened to land.
+    currentDay = DATA.programm[0].id;
+    currentCategoryFilter = 'alle';
+    expandedSessions = {};
+    expandedTalks = {};
+    switchToView('programm');
+    renderAll();
+    window.scrollTo(0, 0);
   }
 
   function startTour(){
@@ -2679,9 +2688,11 @@
     document.getElementById('tourIntroText').textContent = t('tourIntroText');
     document.getElementById('tourIntroSkipBtn').textContent = t('tourSkip');
     document.getElementById('tourIntroStartBtn').textContent = t('tourStart');
+    document.getElementById('tourIntroBackdrop').style.display = 'block';
     document.getElementById('tourIntroCard').style.display = 'block';
   }
   function hideTourIntro(){
+    document.getElementById('tourIntroBackdrop').style.display = 'none';
     document.getElementById('tourIntroCard').style.display = 'none';
   }
 
