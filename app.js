@@ -1622,9 +1622,9 @@
         '<div class="lunch-meta" style="margin-top:6px;">' + esc(v.address) + '</div>' +
         '<a class="venue-map-link" href="' + esc(v.maps) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('oepnvLabel') + '</strong> ' + esc(oepnv) + '</div>' +
-        '<a href="https://sbahn.berlin/liniennetz/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;margin-top:10px;text-decoration:none;color:var(--text);">' +
-          '<img src="logo_sbahn.svg" alt="S-Bahn Berlin" style="width:24px;height:24px;flex-shrink:0;">' +
-          '<span style="font-size:13px;font-weight:600;">' + t('sbahnMapLink') + '</span>' +
+        '<a class="venue-map-link" href="https://sbahn.berlin/liniennetz/" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;">' +
+          '<img src="logo_sbahn.svg" alt="" style="width:20px;height:20px;flex-shrink:0;">' +
+          '<span>' + t('sbahnMapLink') + '</span>' +
         '</a>' +
       '</div>' +
       '<div class="card" id="officeCardLink" style="cursor:pointer;">' +
@@ -2574,8 +2574,8 @@
       text_en: 'Tap "+" to add a talk to your personal plan.'
     },
     {
-      text: 'Viel Spaß bei der DGL-Tagung und der WRHC! 🎉',
-      text_en: 'Have a great time at the DGL conference and the WRHC! 🎉'
+      text: 'Das war\'s schon! Viel Spaß bei der DGL-Tagung und der WRHC! 🎉',
+      text_en: 'That\'s it! Have a great time at the DGL conference and the WRHC! 🎉'
     }
   ];
   var tourStepIndex = 0;
