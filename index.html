@@ -577,19 +577,21 @@
     border-top:1px solid var(--border);
     display:flex;
     justify-content:space-between;
-    padding:0 14px;
+    padding:0 10px;
     z-index:10;
   }
   nav.bottom-nav button{
-    flex:0 0 auto;
+    flex:0 1 auto;
+    min-width:0;
     background:none;
     border:none;
-    padding:6px 6px 14px;
+    padding:6px 4px 14px;
     font-size:10.5px;
     color:var(--text-muted);
     display:flex;flex-direction:column;align-items:center;gap:3px;
     white-space:nowrap;
     cursor:pointer;
+    overflow:hidden;
   }
   nav.bottom-nav button .ic{font-size:19px;}
   .nav-label-wrap{
