@@ -50,7 +50,8 @@
       tourNext: 'Weiter',
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
-      tourReplay: 'Kurze Einführung erneut anzeigen',
+      tourIntroText: '👋 Neu hier? Kurze Einführung in die wichtigsten Funktionen gefällig?',
+      tourStart: 'Tour starten',
       presentersCardTitle: 'Für Vortragende',
       presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
@@ -123,7 +124,8 @@
       tourNext: 'Next',
       tourDone: 'Done',
       tourSkip: 'Skip',
-      tourReplay: 'Show quick tour again',
+      tourIntroText: '👋 New here? Want a quick tour of the main features?',
+      tourStart: 'Start tour',
       presentersCardTitle: 'For Presenters',
       presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
@@ -1676,19 +1678,11 @@
             '<img src="logo_hu_berlin.png" alt="HU Berlin">' +
           '</a>' +
         '</div>' +
-      '</div>' +
-      '<div style="text-align:center;margin-top:4px;">' +
-        '<button class="tour-replay-link" id="tourReplayBtn">' + t('tourReplay') + '</button>' +
       '</div>';
     document.getElementById('officeCardLink').addEventListener('click', function(){
       openFloorplanLightbox(['tagungsbuero']);
     });
     setupPresenterForm();
-    var replayBtn = document.getElementById('tourReplayBtn');
-    if(replayBtn) replayBtn.addEventListener('click', function(){
-      switchToView('programm');
-      startTour();
-    });
   }
 
   function setupPresenterForm(){
@@ -2441,6 +2435,12 @@
     return (lang === 'en' && step.text_en) ? step.text_en : step.text;
   }
 
+  function isFixedPositioned(el){
+    try{
+      return window.getComputedStyle(el).position === 'fixed';
+    }catch(e){ return false; }
+  }
+
   function positionTourStep(){
     var step = TOUR_STEPS[tourStepIndex];
     var target = document.querySelector(step.selector);
@@ -2448,8 +2448,8 @@
     var highlight = document.getElementById('tourHighlight');
     var tooltip = document.getElementById('tourTooltip');
     if(!target){ tourNext(); return; }
-    if(target.scrollIntoView) target.scrollIntoView({ block: 'center', behavior: 'instant' });
-    setTimeout(function(){
+
+    function applyPosition(){
       var r = target.getBoundingClientRect();
       var pad = 8;
       highlight.style.top = (r.top - pad) + 'px';
@@ -2470,7 +2470,7 @@
       if(spaceBelow > 180){
         top = r.bottom + 16;
       } else {
-        top = null; // will position from bottom instead
+        top = null;
       }
       var left = Math.min(Math.max(r.left, 12), viewportW - tooltipWidth - 12);
       tooltip.style.left = left + 'px';
@@ -2482,7 +2482,19 @@
         tooltip.style.bottom = (viewportH - r.top + 16) + 'px';
       }
       overlay.style.display = 'block';
-    }, 50);
+    }
+
+    // Fixed-position elements (like the bottom nav) are always in place and
+    // don't need scrolling; scrolling them "into view" can trigger mobile
+    // browser toolbar animations that shift the viewport and cause the
+    // highlight to be measured before layout has settled.
+    if(!isFixedPositioned(target) && target.scrollIntoView){
+      target.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+    // Wait two animation frames so scroll/layout has fully settled before measuring.
+    requestAnimationFrame(function(){
+      requestAnimationFrame(applyPosition);
+    });
   }
 
   function tourNext(){
@@ -2496,7 +2508,6 @@
 
   function tourEnd(){
     document.getElementById('tourOverlay').style.display = 'none';
-    try{ localStorage.setItem(TOUR_DISMISS_KEY, '1'); }catch(e){}
   }
 
   function startTour(){
@@ -2510,12 +2521,44 @@
   window.addEventListener('resize', function(){
     if(document.getElementById('tourOverlay').style.display === 'block') positionTourStep();
   });
+  window.addEventListener('scroll', function(){
+    if(document.getElementById('tourOverlay').style.display === 'block') positionTourStep();
+  }, true);
 
-  (function maybeStartTour(){
+  function markTourIntroSeen(){
+    try{ localStorage.setItem(TOUR_DISMISS_KEY, '1'); }catch(e){}
+  }
+
+  function showTourIntro(){
+    document.getElementById('tourIntroText').textContent = t('tourIntroText');
+    document.getElementById('tourIntroSkipBtn').textContent = t('tourSkip');
+    document.getElementById('tourIntroStartBtn').textContent = t('tourStart');
+    document.getElementById('tourIntroCard').style.display = 'block';
+  }
+  function hideTourIntro(){
+    document.getElementById('tourIntroCard').style.display = 'none';
+  }
+
+  document.getElementById('tourIntroStartBtn').addEventListener('click', function(){
+    hideTourIntro();
+    markTourIntroSeen();
+    startTour();
+  });
+  document.getElementById('tourIntroSkipBtn').addEventListener('click', function(){
+    hideTourIntro();
+    markTourIntroSeen();
+  });
+  document.getElementById('tourHelpBtn').addEventListener('click', function(){
+    hideTourIntro();
+    switchToView('programm');
+    startTour();
+  });
+
+  (function maybeShowTourIntro(){
     var done = null;
     try{ done = localStorage.getItem(TOUR_DISMISS_KEY); }catch(e){}
     if(done) return;
-    setTimeout(startTour, 600);
+    setTimeout(showTourIntro, 600);
   })();
 
   // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
