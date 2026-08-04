@@ -1008,6 +1008,7 @@
 
           var header = document.createElement('div');
           header.className = 'session-header';
+          header.setAttribute('data-sid', sid);
           var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
           header.innerHTML =
             '<div class="session-main">' +
@@ -2433,6 +2434,8 @@
   safeRun(applyStaticI18n, 'applyStaticI18n');
   renderAll();
   setInterval(function(){
+    var tourActive = document.getElementById('tourBackdrop').style.display === 'block';
+    if(tourActive) return;
     safeRun(renderDayTabs, 'renderDayTabs');
     safeRun(renderProgrammList, 'renderProgrammList');
     safeRun(renderPlan, 'renderPlan');
@@ -2474,7 +2477,33 @@
     renderProgrammList();
   }
 
+  function tourSetupExpandedSession(){
+    currentDay = 'mo';
+    currentCategoryFilter = 'alle';
+    expandedTalks = {};
+    renderProgrammList();
+    var chevronEl = document.querySelector('.session-header .chevron');
+    var headerEl = chevronEl ? chevronEl.closest('.session-header') : null;
+    if(headerEl){
+      var sid = headerEl.getAttribute('data-sid');
+      if(sid){
+        expandedSessions = {};
+        expandedSessions[sid] = true;
+        renderProgrammList();
+      }
+    }
+  }
+
   var TOUR_STEPS = [
+    {
+      text: 'Wir zeigen dir jetzt kurz die wichtigsten Funktionen der App.',
+      text_en: 'We\'ll now quickly show you the app\'s main features.'
+    },
+    {
+      selector: '#langSwitch',
+      text: 'Hier wechselst du die Sprache (DE/EN), schaltest auf den Dunkelmodus um und kannst die Schriftgröße ändern.',
+      text_en: 'Switch the language (DE/EN), switch to dark mode and change the text size here.'
+    },
     {
       selector: 'nav.bottom-nav button[data-view="programm"]',
       text: 'Hier findest du das gesamte Vortragsprogramm aller Tage.',
@@ -2492,8 +2521,8 @@
     },
     {
       selector: 'nav.bottom-nav button[data-view="venue"]',
-      text: 'Hier findest du Infos zum Tagungsort, Gebäudeplan, Tagungsbüro und mehr.',
-      text_en: 'Here you\'ll find info on the venue, floor plan, conference office and more.'
+      text: 'Hier findest du Infos zum Tagungsort, Gebäudeplan, Tagungsbüro, WLAN und den Datei-Upload für Vortragende.',
+      text_en: 'Here you\'ll find info on the venue, floor plan, conference office, Wi-Fi and the file upload for presenters.'
     },
     {
       selector: 'nav.bottom-nav button[data-view="plan"]',
@@ -2511,27 +2540,40 @@
       text_en: 'Use "Jump to topic/session..." to go straight to a specific session or plenary talk.'
     },
     {
-      selector: '#langSwitch',
-      text: 'Hier wechselst du die Sprache (DE/EN) und schaltest den Dunkelmodus um.',
-      text_en: 'Switch the language (DE/EN) and toggle dark mode here.'
+      selector: '#dayTabs',
+      beforeStep: tourSetupProgrammeExample,
+      text: 'Hier wählst du den Tagungstag aus.',
+      text_en: 'Choose the conference day here.'
+    },
+    {
+      selector: '#categoryFilter',
+      text: 'Und hier kannst du nach Art des Programmpunkts filtern, z. B. nur Sessions oder nur Plenarvorträge.',
+      text_en: 'And here you can filter by type, e.g. only sessions or only plenary talks.'
     },
     {
       selector: '.session-room.room-link',
-      beforeStep: tourSetupProgrammeExample,
       text: 'Klicke auf einen Raum, um ihn im Gebäudeplan hervorgehoben zu sehen.',
       text_en: 'Click a room to see it highlighted on the floor plan.'
     },
     {
       selector: '.add-btn.small[data-id]',
-      beforeStep: tourSetupProgrammeExample,
       text: 'Mit "+" fügst du einen Vortrag zu deinem persönlichen Plan hinzu.',
       text_en: 'Tap "+" to add a talk to your personal plan.'
     },
     {
       selector: '.session-header .chevron',
-      beforeStep: tourSetupProgrammeExample,
       text: 'Klicke hier, um die einzelnen Vorträge dieser Session zu sehen.',
       text_en: 'Click here to see the individual talks in this session.'
+    },
+    {
+      selector: '.author-link',
+      beforeStep: tourSetupExpandedSession,
+      text: 'Klicke auf einen Namen, um alle Beiträge dieser Person auf der Tagung zu sehen.',
+      text_en: 'Click a name to see all of that person\'s contributions to the conference.'
+    },
+    {
+      text: 'Viel Spaß bei der DGL-Tagung und der WRHC! 🎉',
+      text_en: 'Have a great time at the DGL conference and the WRHC! 🎉'
     }
   ];
   var tourStepIndex = 0;
@@ -2545,31 +2587,35 @@
   function positionTourStep(){
     var step = TOUR_STEPS[tourStepIndex];
     if(step.beforeStep) step.beforeStep();
-    var target = document.querySelector(step.selector);
-    if(!target){ tourNext(); return; }
 
     if(tourCurrentTarget) tourCurrentTarget.classList.remove('tour-target-active', 'tour-needs-relative');
     var prevNav = document.querySelector('nav.bottom-nav.tour-parent-active');
     if(prevNav) prevNav.classList.remove('tour-parent-active');
-    tourCurrentTarget = target;
-    target.classList.add('tour-target-active');
-    // Only force position:relative on elements that are normally static —
-    // doing this to elements that rely on position:fixed/sticky/absolute
-    // (like the bottom nav) would rip them out of their pinned position.
-    var currentPosition = '';
-    try{ currentPosition = window.getComputedStyle(target).position; }catch(e){}
-    if(currentPosition === 'static' || currentPosition === ''){
-      target.classList.add('tour-needs-relative');
-    }
-    // The bottom nav itself has a low z-index (10) and establishes its own
-    // stacking context (position:fixed). A high z-index on a button *inside*
-    // it only competes with its siblings there — the whole bar (and thus the
-    // button) would still render below the backdrop (z-index 299) unless the
-    // bar itself is also lifted.
-    var navAncestor = target.closest('nav.bottom-nav');
-    if(navAncestor) navAncestor.classList.add('tour-parent-active');
-    if(target.scrollIntoView){
-      target.scrollIntoView({ block: 'center', behavior: 'instant' });
+    tourCurrentTarget = null;
+
+    if(step.selector){
+      var target = document.querySelector(step.selector);
+      if(!target){ tourNext(); return; }
+      tourCurrentTarget = target;
+      target.classList.add('tour-target-active');
+      // Only force position:relative on elements that are normally static —
+      // doing this to elements that rely on position:fixed/sticky/absolute
+      // (like the bottom nav) would rip them out of their pinned position.
+      var currentPosition = '';
+      try{ currentPosition = window.getComputedStyle(target).position; }catch(e){}
+      if(currentPosition === 'static' || currentPosition === ''){
+        target.classList.add('tour-needs-relative');
+      }
+      // The bottom nav itself has a low z-index (10) and establishes its own
+      // stacking context (position:fixed). A high z-index on a button *inside*
+      // it only competes with its siblings there — the whole bar (and thus the
+      // button) would still render below the backdrop (z-index 299) unless the
+      // bar itself is also lifted.
+      var navAncestor = target.closest('nav.bottom-nav');
+      if(navAncestor) navAncestor.classList.add('tour-parent-active');
+      if(target.scrollIntoView){
+        target.scrollIntoView({ block: 'center', behavior: 'instant' });
+      }
     }
 
     document.getElementById('tourTooltipText').textContent = tourText(step);

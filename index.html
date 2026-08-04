@@ -895,14 +895,19 @@
     inset:0;
     background:rgba(0,0,0,.6);
     z-index:299;
-    pointer-events:none;
+    pointer-events:auto;
   }
   .tour-target-active{
     z-index:301 !important;
-    outline:3px solid #f5a623;
-    outline-offset:4px;
     border-radius:10px;
     background:var(--card);
+    pointer-events:none !important;
+    animation:tourPulse 1.8s ease-out infinite;
+  }
+  @keyframes tourPulse{
+    0%{ box-shadow:0 0 0 6px var(--card), 0 0 0 6px rgba(245,166,35,.9); }
+    70%{ box-shadow:0 0 0 6px var(--card), 0 0 0 20px rgba(245,166,35,0); }
+    100%{ box-shadow:0 0 0 6px var(--card), 0 0 0 6px rgba(245,166,35,0); }
   }
   nav.bottom-nav.tour-parent-active{
     z-index:301 !important;
