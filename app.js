@@ -76,6 +76,9 @@
       presentersFilename: 'Ihr Dateiname:',
       presentersCopy: 'Kopieren',
       presentersCopied: 'Dateiname kopiert!',
+      presentersRenameInfo: 'Alternativ: Datei auswählen, wir laden eine umbenannte Kopie herunter – geschieht komplett auf Ihrem Gerät, es wird nichts hochgeladen.',
+      presentersRenameBtn: 'Datei auswählen & umbenennen',
+      presentersRenamed: 'Heruntergeladen als "{name}" – diese Datei jetzt bei Nimbus hochladen.',
       planViewList: 'Liste',
       planViewTimeline: 'Zeitplan'
     },
@@ -154,6 +157,9 @@
       presentersFilename: 'Your file name:',
       presentersCopy: 'Copy',
       presentersCopied: 'File name copied!',
+      presentersRenameInfo: 'Alternatively: choose your file and we\'ll download a renamed copy — this happens entirely on your device, nothing is uploaded.',
+      presentersRenameBtn: 'Choose file & rename',
+      presentersRenamed: 'Downloaded as "{name}" — now upload this file to Nimbus.',
       planViewList: 'List',
       planViewTimeline: 'Timeline'
     }
@@ -1654,6 +1660,9 @@
               '<code id="presenterFilenameOutput" style="flex:1;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;word-break:break-all;"></code>' +
               '<button class="btn-secondary" id="presenterCopyBtn" style="white-space:nowrap;">' + t('presentersCopy') + '</button>' +
             '</div>' +
+            '<div class="lunch-meta" style="margin-top:10px;">' + t('presentersRenameInfo') + '</div>' +
+            '<input type="file" id="presenterFileInput" accept=".pptx,.pdf,.ppt" style="display:none;">' +
+            '<button class="btn-secondary" id="presenterRenameBtn" style="width:100%;margin-top:6px;">' + t('presentersRenameBtn') + '</button>' +
           '</div>' +
         '</div>' +
         (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
@@ -1766,6 +1775,31 @@
             showToast(t('presentersCopied'));
           }).catch(function(){});
         }
+      });
+    }
+
+    var renameBtn = document.getElementById('presenterRenameBtn');
+    var fileInput = document.getElementById('presenterFileInput');
+    if(renameBtn && fileInput){
+      renameBtn.addEventListener('click', function(){
+        fileInput.click();
+      });
+      fileInput.addEventListener('change', function(){
+        var file = fileInput.files && fileInput.files[0];
+        if(!file) return;
+        var baseName = document.getElementById('presenterFilenameOutput').textContent.replace(/\.pptx$/i, '');
+        var origExt = (file.name.match(/\.[^.]+$/) || ['.pptx'])[0];
+        var finalName = baseName + origExt;
+        var url = URL.createObjectURL(file);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = finalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+        showToast(t('presentersRenamed').replace('{name}', finalName));
+        fileInput.value = '';
       });
     }
   }
