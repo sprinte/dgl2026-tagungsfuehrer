@@ -1652,7 +1652,7 @@
         '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
         '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
         '<div style="margin-top:14px;">' +
-          '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + '</div>' +
+          '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + ' ' + t('presentersRenameInfo') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
           '<input type="text" id="presenterLastName" class="search-input" autocomplete="off" style="margin-top:4px;margin-bottom:6px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
           '<div id="presenterResultsList"></div>' +
@@ -1663,7 +1663,6 @@
               '<code id="presenterFilenameOutput" style="flex:1;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;word-break:break-all;"></code>' +
               '<button class="btn-secondary" id="presenterCopyBtn" style="white-space:nowrap;">' + t('presentersCopy') + '</button>' +
             '</div>' +
-            '<div class="lunch-meta" style="margin-top:10px;">' + t('presentersRenameInfo') + '</div>' +
             '<input type="file" id="presenterFileInput" accept=".pptx,.pdf,.ppt" style="display:none;">' +
             '<button class="btn-secondary" id="presenterRenameBtn" style="width:100%;margin-top:6px;">' + t('presentersRenameBtn') + '</button>' +
           '</div>' +
