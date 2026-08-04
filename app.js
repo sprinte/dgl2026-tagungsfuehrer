@@ -693,6 +693,7 @@
 
   function computeInfoBlockDisplayTime(day, block){
     if(block.time.indexOf('–') !== -1) return block.time;
+    if(block.noDurationCompute) return block.time;
     var idx = day.blocks.indexOf(block);
     var ownStart = parseTimeRangeMinutes(block.time);
     if(idx !== -1 && ownStart){
