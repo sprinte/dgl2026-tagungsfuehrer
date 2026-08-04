@@ -41,18 +41,20 @@
       officeContact: 'Ansprechpartnerin:',
       officeHours: 'Öffnungszeiten:',
       officeHoursMo: 'Montag: 9:00–18:00 Uhr',
-      officeHoursDiMi: 'Dienstag und Mittwoch: 8:00–18:00 Uhr',
+      officeHoursDi: 'Dienstag: 8:00–18:00 Uhr',
+      officeHoursMi: 'Mittwoch: 8:00–18:00 Uhr',
       officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
       presentersCardTitle: 'Für Vortragende',
       presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
-      presentersExample: 'Beispiel: „A01_Montag_Oprei_13-45.pptx"',
+      presentersExample: 'Beispiel: „S12_Dienstag_Oprei_11-30.pptx"',
+      presentersWarning: 'Achtung: Es muss sich hier um den Nachnamen des gemeldeten Erstautors/der gemeldeten Erstautorin handeln, nicht um den Nachnamen des/der Vortragenden (falls abweichend)!',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Oprei',
-      presentersAutoInfo: 'Wenn Sie unten den Namen des gemeldeten Erstautors/der gemeldeten Erstautorin eingeben, werden Session, Tag und Uhrzeit automatisch erkannt. Der generierte Dateiname kann dann direkt kopiert und für Ihre Datei genutzt werden.',
+      presentersAutoInfo: 'Wenn Sie unten den Nachnamen eingeben, werden Session, Tag und Uhrzeit des Vortrags automatisch erkannt. Sie können den generierten Dateinamen dann direkt kopieren und für Ihre Datei nutzen.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
       presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte prüfen Sie die Schreibweise oder wenden Sie sich ans Tagungsbüro.',
@@ -106,18 +108,20 @@
       officeContact: 'Contact:',
       officeHours: 'Opening hours:',
       officeHoursMo: 'Monday: 9:00 am–6:00 pm',
-      officeHoursDiMi: 'Tuesday and Wednesday: 8:00 am–6:00 pm',
+      officeHoursDi: 'Tuesday: 8:00 am–6:00 pm',
+      officeHoursMi: 'Wednesday: 8:00 am–6:00 pm',
       officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
       officeHoursFr: 'Friday: closed',
       presentersCardTitle: 'For Presenters',
       presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
-      presentersExample: 'Example: "A01_Monday_Oprei_13-45.pptx"',
+      presentersExample: 'Example: "S12_Tuesday_Oprei_11-30.pptx"',
+      presentersWarning: 'Note: This must be the surname of the registered first author, not the surname of the presenter (if different)!',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Oprei',
-      presentersAutoInfo: 'If you enter the last name of the registered first author below, the session, day and time will be detected automatically. The generated file name can then be copied directly for your file.',
+      presentersAutoInfo: 'If you enter the surname below, the session, day and time of the talk will be detected automatically. You can then copy the generated file name directly and use it for your file.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
       presentersNotFound: 'No contribution found under this name. Please check the spelling or contact the conference office.',
@@ -1592,7 +1596,8 @@
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('officeContact') + '</strong> Dr. Hildegard Feldmann (F&U confirm)</div>' +
         '<div class="lunch-meta" style="margin-top:6px;"><strong style="color:var(--text)">' + t('officeHours') + '</strong></div>' +
         '<div class="lunch-meta">' + t('officeHoursMo') + '</div>' +
-        '<div class="lunch-meta">' + t('officeHoursDiMi') + '</div>' +
+        '<div class="lunch-meta">' + t('officeHoursDi') + '</div>' +
+        '<div class="lunch-meta">' + t('officeHoursMi') + '</div>' +
         '<div class="lunch-meta">' + t('officeHoursDo') + '</div>' +
         '<div class="lunch-meta">' + t('officeHoursFr') + '</div>' +
       '</div>' +
@@ -1600,8 +1605,9 @@
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
         '<div class="lunch-meta">' + t('presentersDuration') + '</div>' +
         '<div class="lunch-meta" style="margin-top:10px;">' + t('presentersNamingInfo') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:6px;"><code>Session_Tag_Name_Uhrzeit.pptx</code></div>' +
+        '<div class="lunch-meta" style="margin-top:6px;"><code>Session_Tag_Nachname_Uhrzeit.pptx</code></div>' +
         '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
         '<div style="margin-top:14px;">' +
           '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
