@@ -2507,8 +2507,8 @@
     },
     {
       selector: '#topicJump',
-      text: 'Über "Jump to..." springst du direkt zu einer bestimmten Session oder einem Plenarvortrag.',
-      text_en: 'Use "Jump to..." to go straight to a specific session or plenary talk.'
+      text: 'Über "Zu Thema/Session springen..." kommst du direkt zu einer bestimmten Session oder einem Plenarvortrag.',
+      text_en: 'Use "Jump to topic/session..." to go straight to a specific session or plenary talk.'
     },
     {
       selector: '#langSwitch',
