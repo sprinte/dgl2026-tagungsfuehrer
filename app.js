@@ -2549,6 +2549,8 @@
     if(!target){ tourNext(); return; }
 
     if(tourCurrentTarget) tourCurrentTarget.classList.remove('tour-target-active', 'tour-needs-relative');
+    var prevNav = document.querySelector('nav.bottom-nav.tour-parent-active');
+    if(prevNav) prevNav.classList.remove('tour-parent-active');
     tourCurrentTarget = target;
     target.classList.add('tour-target-active');
     // Only force position:relative on elements that are normally static —
@@ -2559,6 +2561,13 @@
     if(currentPosition === 'static' || currentPosition === ''){
       target.classList.add('tour-needs-relative');
     }
+    // The bottom nav itself has a low z-index (10) and establishes its own
+    // stacking context (position:fixed). A high z-index on a button *inside*
+    // it only competes with its siblings there — the whole bar (and thus the
+    // button) would still render below the backdrop (z-index 299) unless the
+    // bar itself is also lifted.
+    var navAncestor = target.closest('nav.bottom-nav');
+    if(navAncestor) navAncestor.classList.add('tour-parent-active');
     if(target.scrollIntoView){
       target.scrollIntoView({ block: 'center', behavior: 'instant' });
     }
@@ -2586,6 +2595,8 @@
       tourCurrentTarget.classList.remove('tour-target-active', 'tour-needs-relative');
       tourCurrentTarget = null;
     }
+    var activeNav = document.querySelector('nav.bottom-nav.tour-parent-active');
+    if(activeNav) activeNav.classList.remove('tour-parent-active');
     document.getElementById('tourBackdrop').style.display = 'none';
     document.getElementById('tourTooltip').style.display = 'none';
   }
