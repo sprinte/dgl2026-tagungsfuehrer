@@ -53,6 +53,7 @@
       tourNext: 'Weiter',
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
+      tourBack: 'Zurück',
       tourIntroText: '👋 Neu hier? Kurze Einführung in die wichtigsten Funktionen gefällig?',
       tourStart: 'Tour starten',
       tourHelpBtn: '👋 Neu hier?',
@@ -134,6 +135,7 @@
       tourNext: 'Next',
       tourDone: 'Done',
       tourSkip: 'Skip',
+      tourBack: 'Back',
       tourIntroText: '👋 New here? Want a quick tour of the main features?',
       tourStart: 'Start tour',
       tourHelpBtn: '👋 New here?',
@@ -2496,8 +2498,8 @@
 
   var TOUR_STEPS = [
     {
-      text: 'Wir zeigen dir jetzt kurz die wichtigsten Funktionen der App.',
-      text_en: 'We\'ll now quickly show you the app\'s main features.'
+      text: 'Herzlich willkommen bei der 41. DGL-Jahrestagung & 16. WRHC! Lass mich dir kurz zeigen, wie du diese App nutzt.',
+      text_en: 'Welcome to the 41st DGL Annual Conference & 16th WRHC! Let us quickly show you how to use this app.'
     },
     {
       selector: '#langSwitch',
@@ -2556,11 +2558,6 @@
       text_en: 'Click a room to see it highlighted on the floor plan.'
     },
     {
-      selector: '.add-btn.small[data-id]',
-      text: 'Mit "+" fügst du einen Vortrag zu deinem persönlichen Plan hinzu.',
-      text_en: 'Tap "+" to add a talk to your personal plan.'
-    },
-    {
       selector: '.session-header .chevron',
       text: 'Klicke hier, um die einzelnen Vorträge dieser Session zu sehen.',
       text_en: 'Click here to see the individual talks in this session.'
@@ -2570,6 +2567,11 @@
       beforeStep: tourSetupExpandedSession,
       text: 'Klicke auf einen Namen, um alle Beiträge dieser Person auf der Tagung zu sehen.',
       text_en: 'Click a name to see all of that person\'s contributions to the conference.'
+    },
+    {
+      selector: '.add-btn.small[data-id]',
+      text: 'Mit "+" fügst du einen Vortrag zu deinem persönlichen Plan hinzu.',
+      text_en: 'Tap "+" to add a talk to your personal plan.'
     },
     {
       text: 'Viel Spaß bei der DGL-Tagung und der WRHC! 🎉',
@@ -2620,6 +2622,8 @@
 
     document.getElementById('tourTooltipText').textContent = tourText(step);
     document.getElementById('tourSkipBtn').textContent = t('tourSkip');
+    document.getElementById('tourBackBtn').textContent = t('tourBack');
+    document.getElementById('tourBackBtn').disabled = (tourStepIndex === 0);
     document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
     document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
 
@@ -2633,6 +2637,12 @@
       tourEnd();
       return;
     }
+    positionTourStep();
+  }
+
+  function tourPrev(){
+    if(tourStepIndex === 0) return;
+    tourStepIndex--;
     positionTourStep();
   }
 
@@ -2654,6 +2664,7 @@
   }
 
   document.getElementById('tourNextBtn').addEventListener('click', tourNext);
+  document.getElementById('tourBackBtn').addEventListener('click', tourPrev);
   document.getElementById('tourSkipBtn').addEventListener('click', tourEnd);
 
   function markTourIntroSeen(){
