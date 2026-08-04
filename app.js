@@ -12,6 +12,7 @@
       route: 'Route', website: 'Website',
       openMaps: 'In Google Maps öffnen',
       oepnvLabel: 'ÖPNV:',
+      sbahnMapLink: 'Interaktiver S-Bahn-Liniennetzplan',
       min: 'Min',
       headerTitle: '41. DGL-Jahrestagung & WRHC',
       headerDates: '14.–18. September 2026',
@@ -76,6 +77,7 @@
       route: 'Directions', website: 'Website',
       openMaps: 'Open in Google Maps',
       oepnvLabel: 'Public transport:',
+      sbahnMapLink: 'Interactive S-Bahn network map',
       min: 'min',
       headerTitle: '41st DGL Annual Conference & WRHC',
       headerDates: '14–18 September 2026',
@@ -1577,6 +1579,10 @@
         '<div class="lunch-meta" style="margin-top:6px;">' + esc(v.address) + '</div>' +
         '<a class="venue-map-link" href="' + esc(v.maps) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('oepnvLabel') + '</strong> ' + esc(oepnv) + '</div>' +
+        '<a href="https://sbahn.berlin/liniennetz/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;margin-top:10px;text-decoration:none;color:var(--text);">' +
+          '<img src="logo_sbahn.svg" alt="S-Bahn Berlin" style="width:24px;height:24px;flex-shrink:0;">' +
+          '<span style="font-size:13px;font-weight:600;">' + t('sbahnMapLink') + '</span>' +
+        '</a>' +
       '</div>' +
       '<div class="card" id="officeCardLink" style="cursor:pointer;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">' +
