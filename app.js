@@ -9,6 +9,9 @@
       planNote: 'Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar. Tipp: Nutze "Teilen" oder den Kalender-Export, um deinen Plan zu sichern oder auf einem anderen Gerät zu öffnen.',
       exportBtn: 'Als Kalender exportieren (.ics)',
       exportEmptyAlert: 'Dein Plan ist noch leer.',
+      clearPlanBtnText: 'Plan komplett löschen',
+      clearPlanEmptyAlert: 'Dein Plan ist bereits leer.',
+      clearPlanConfirm: 'Möchtest du wirklich deinen gesamten Plan löschen? Alle gemerkten Vorträge, Poster und Termine werden entfernt. Das kann nicht rückgängig gemacht werden.',
       route: 'Route', website: 'Website',
       openMaps: 'In Google Maps öffnen',
       oepnvLabel: 'ÖPNV:',
@@ -84,6 +87,9 @@
       planNote: 'Your plan is stored locally in this browser. It is not visible on another device or in another browser. Tip: use "Share" or the calendar export to back up your plan or open it on another device.',
       exportBtn: 'Export to calendar (.ics)',
       exportEmptyAlert: 'Your plan is still empty.',
+      clearPlanBtnText: 'Clear entire plan',
+      clearPlanEmptyAlert: 'Your plan is already empty.',
+      clearPlanConfirm: 'Are you sure you want to clear your entire plan? All saved talks, posters and events will be removed. This cannot be undone.',
       route: 'Directions', website: 'Website',
       openMaps: 'Open in Google Maps',
       oepnvLabel: 'Public transport:',
@@ -160,6 +166,7 @@
     document.getElementById('headerTitle').textContent = t('headerTitle');
     document.getElementById('headerDates').textContent = t('headerDates');
     document.getElementById('tourHelpBtn').textContent = t('tourHelpBtn');
+    document.getElementById('clearPlanBtnText').textContent = t('clearPlanBtnText');
     document.getElementById('navProgramm').textContent = t('navProgramm');
     document.getElementById('navLunch').textContent = t('navLunch');
     document.getElementById('navExk').textContent = t('navExk');
@@ -614,6 +621,9 @@
   function planIdForBlock(dayId, block){
     return 'b_' + dayId + '_' + block.time;
   }
+  function planIdForPoster(dayId, poster){
+    return 'poster_' + dayId + '_' + slug(poster.code) + '_' + slug(poster.board);
+  }
   function slug(str){
     return (str || '').replace(/[^a-zA-Z0-9]+/g, '').slice(0, 24);
   }
@@ -933,7 +943,7 @@
           posterHeading.textContent = t('posterListLabel') + ' (' + block.posters.length + ')';
           posterList.appendChild(posterHeading);
           block.posters.forEach(function(p, pidx){
-            var posterId = 'poster_' + id + '_' + pidx;
+            var posterId = planIdForPoster(day.id, p);
             var padded = isInPlan(posterId);
             var prow = document.createElement('div');
             prow.className = 'talk-row';
@@ -1136,7 +1146,7 @@
           if(block.title !== 'Poster Speed Talks'){
             (block.posters || []).forEach(function(p, pidx){
               searchIndex.push({
-                kind: 'poster', dayId: day.id, jumpId: 'poster_' + id + '_' + pidx, blockId: id, timeLabel: block.time,
+                kind: 'poster', dayId: day.id, jumpId: planIdForPoster(day.id, p), blockId: id, timeLabel: block.time,
                 text: [p.title, p.authorsDisplay, p.code].filter(Boolean).join(' '),
                 title: p.title, authors: p.authorsDisplay, board: p.board, code: p.code,
                 dayLabel: day.label, date: day.date
@@ -2316,6 +2326,16 @@
     URL.revokeObjectURL(url);
   });
 
+  document.getElementById('clearPlanBtn').addEventListener('click', function(){
+    if(plan.length === 0){ alert(t('clearPlanEmptyAlert')); return; }
+    if(confirm(t('clearPlanConfirm'))){
+      plan = [];
+      savePlan(plan);
+      render();
+      renderPlan();
+    }
+  });
+
   function render(){
     renderProgrammList();
     renderLunchList();
@@ -2438,75 +2458,27 @@
     return (lang === 'en' && step.text_en) ? step.text_en : step.text;
   }
 
-  function isFixedPositioned(el){
-    try{
-      return window.getComputedStyle(el).position === 'fixed';
-    }catch(e){ return false; }
-  }
-
-  function applyTourStepVisuals(){
-    var step = TOUR_STEPS[tourStepIndex];
-    var target = document.querySelector(step.selector);
-    var overlay = document.getElementById('tourOverlay');
-    var highlight = document.getElementById('tourHighlight');
-    var tooltip = document.getElementById('tourTooltip');
-    if(!target) return;
-
-    var r = target.getBoundingClientRect();
-    var pad = 8;
-    highlight.style.top = (r.top - pad) + 'px';
-    highlight.style.left = (r.left - pad) + 'px';
-    highlight.style.width = (r.width + pad*2) + 'px';
-    highlight.style.height = (r.height + pad*2) + 'px';
-
-    document.getElementById('tourTooltipText').textContent = tourText(step);
-    document.getElementById('tourSkipBtn').textContent = t('tourSkip');
-    document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
-    document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
-
-    var tooltipWidth = 280;
-    var viewportH = window.innerHeight;
-    var viewportW = window.innerWidth;
-    var spaceBelow = viewportH - r.bottom;
-    var top;
-    if(spaceBelow > 180){
-      top = r.bottom + 16;
-    } else {
-      top = null;
-    }
-    var left = Math.min(Math.max(r.left, 12), viewportW - tooltipWidth - 12);
-    tooltip.style.left = left + 'px';
-    if(top !== null){
-      tooltip.style.top = top + 'px';
-      tooltip.style.bottom = 'auto';
-    } else {
-      tooltip.style.top = 'auto';
-      tooltip.style.bottom = (viewportH - r.top + 16) + 'px';
-    }
-    overlay.style.display = 'block';
-  }
+  var tourCurrentTarget = null;
 
   function positionTourStep(){
     var step = TOUR_STEPS[tourStepIndex];
     var target = document.querySelector(step.selector);
     if(!target){ tourNext(); return; }
 
-    // Fixed-position elements (like the bottom nav) are always in place and
-    // don't need scrolling; scrolling them "into view" can trigger mobile
-    // browser toolbar animations that shift the viewport and cause the
-    // highlight to be measured before layout has settled.
-    if(!isFixedPositioned(target) && target.scrollIntoView){
+    if(tourCurrentTarget) tourCurrentTarget.classList.remove('tour-target-active');
+    tourCurrentTarget = target;
+    target.classList.add('tour-target-active');
+    if(target.scrollIntoView){
       target.scrollIntoView({ block: 'center', behavior: 'instant' });
     }
-    // Apply multiple times over the following moment: layout/scroll and, on
-    // mobile, the browser's own chrome (address bar) can keep settling for a
-    // little while after scrollIntoView returns, so a single measurement can
-    // be stale. Re-measuring a few times catches that without looping forever.
-    requestAnimationFrame(function(){
-      requestAnimationFrame(applyTourStepVisuals);
-    });
-    setTimeout(applyTourStepVisuals, 150);
-    setTimeout(applyTourStepVisuals, 400);
+
+    document.getElementById('tourTooltipText').textContent = tourText(step);
+    document.getElementById('tourSkipBtn').textContent = t('tourSkip');
+    document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
+    document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
+
+    document.getElementById('tourBackdrop').style.display = 'block';
+    document.getElementById('tourTooltip').style.display = 'block';
   }
 
   function tourNext(){
@@ -2519,7 +2491,12 @@
   }
 
   function tourEnd(){
-    document.getElementById('tourOverlay').style.display = 'none';
+    if(tourCurrentTarget){
+      tourCurrentTarget.classList.remove('tour-target-active');
+      tourCurrentTarget = null;
+    }
+    document.getElementById('tourBackdrop').style.display = 'none';
+    document.getElementById('tourTooltip').style.display = 'none';
   }
 
   function startTour(){
@@ -2530,12 +2507,6 @@
 
   document.getElementById('tourNextBtn').addEventListener('click', tourNext);
   document.getElementById('tourSkipBtn').addEventListener('click', tourEnd);
-  window.addEventListener('resize', function(){
-    if(document.getElementById('tourOverlay').style.display === 'block') applyTourStepVisuals();
-  });
-  window.addEventListener('scroll', function(){
-    if(document.getElementById('tourOverlay').style.display === 'block') applyTourStepVisuals();
-  }, true);
 
   function markTourIntroSeen(){
     try{ localStorage.setItem(TOUR_DISMISS_KEY, '1'); }catch(e){}

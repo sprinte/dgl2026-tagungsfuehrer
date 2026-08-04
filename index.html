@@ -529,6 +529,20 @@
     font-weight:600;
     cursor:pointer;
   }
+  .btn-danger{
+    flex:1;
+    padding:10px;
+    border-radius:var(--radius);
+    border:1px solid #d33;
+    background:#fff;
+    color:#c0392b;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  body.dark .btn-danger{
+    background:var(--card);
+  }
   .filter-label{
     display:block;
     font-size:12.5px;
@@ -867,30 +881,33 @@
     gap:8px;
     margin-bottom:12px;
   }
-  .tour-overlay{
+  .tour-backdrop{
     position:fixed;
     inset:0;
-    z-index:300;
+    background:rgba(0,0,0,.6);
+    z-index:299;
     pointer-events:none;
   }
-  .tour-highlight{
-    position:fixed;
-    border-radius:12px;
-    box-shadow:0 0 0 9999px rgba(0,0,0,.55);
-    transition:top .25s ease, left .25s ease, width .25s ease, height .25s ease;
-    pointer-events:none;
+  .tour-target-active{
+    position:relative !important;
+    z-index:301 !important;
+    outline:3px solid #fff;
+    outline-offset:3px;
+    border-radius:10px;
+    box-shadow:0 0 22px rgba(255,255,255,.5);
   }
   .tour-tooltip{
     position:fixed;
+    left:12px;
+    right:12px;
+    bottom:74px;
     background:var(--card);
     color:var(--text);
     border-radius:14px;
     padding:16px;
-    max-width:280px;
     box-shadow:0 12px 32px rgba(0,0,0,.35);
     pointer-events:auto;
-    transition:top .25s ease, left .25s ease;
-    z-index:301;
+    z-index:302;
   }
   .tour-tooltip-text{
     font-size:13.5px;
@@ -1313,6 +1330,9 @@
         <span id="sharePlanBtnText">Teilen</span>
       </button>
     </div>
+    <div class="plan-actions" style="margin-top:8px;">
+      <button class="btn-danger" id="clearPlanBtn"><span id="clearPlanBtnText">Plan komplett löschen</span></button>
+    </div>
     <div class="lunch-view-toggle" id="planViewToggle">
       <button id="planViewListBtn" class="active" data-view="list"><span id="planViewListText">Liste</span></button>
       <button id="planViewTimelineBtn" data-view="timeline"><span id="planViewTimelineText">Zeitplan</span></button>
@@ -1370,16 +1390,14 @@
 
 <button id="tourHelpBtn" class="tour-help-btn" aria-label="Hilfe / Einführung">👋 Neu hier?</button>
 
-<div id="tourOverlay" class="tour-overlay" style="display:none;">
-  <div id="tourHighlight" class="tour-highlight"></div>
-  <div id="tourTooltip" class="tour-tooltip">
-    <div class="tour-tooltip-text" id="tourTooltipText"></div>
-    <div class="tour-tooltip-footer">
-      <button class="tour-skip" id="tourSkipBtn"></button>
-      <button class="tour-next" id="tourNextBtn"></button>
-    </div>
-    <div class="tour-progress" id="tourProgress"></div>
+<div id="tourBackdrop" class="tour-backdrop" style="display:none;"></div>
+<div id="tourTooltip" class="tour-tooltip" style="display:none;">
+  <div class="tour-tooltip-text" id="tourTooltipText"></div>
+  <div class="tour-tooltip-footer">
+    <button class="tour-skip" id="tourSkipBtn"></button>
+    <button class="tour-next" id="tourNextBtn"></button>
   </div>
+  <div class="tour-progress" id="tourProgress"></div>
 </div>
 
 <script src="app-data.js"></script>
