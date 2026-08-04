@@ -867,6 +867,76 @@
     gap:8px;
     margin-bottom:12px;
   }
+  .tour-overlay{
+    position:fixed;
+    inset:0;
+    z-index:300;
+    pointer-events:none;
+  }
+  .tour-highlight{
+    position:fixed;
+    border-radius:12px;
+    box-shadow:0 0 0 9999px rgba(0,0,0,.55);
+    transition:top .25s ease, left .25s ease, width .25s ease, height .25s ease;
+    pointer-events:none;
+  }
+  .tour-tooltip{
+    position:fixed;
+    background:var(--card);
+    color:var(--text);
+    border-radius:14px;
+    padding:16px;
+    max-width:280px;
+    box-shadow:0 12px 32px rgba(0,0,0,.35);
+    pointer-events:auto;
+    transition:top .25s ease, left .25s ease;
+    z-index:301;
+  }
+  .tour-tooltip-text{
+    font-size:13.5px;
+    line-height:1.5;
+    margin-bottom:12px;
+  }
+  .tour-tooltip-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .tour-skip{
+    background:none;
+    border:none;
+    color:var(--text-muted);
+    font-size:12.5px;
+    cursor:pointer;
+    padding:4px 0;
+  }
+  .tour-next{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    border-radius:20px;
+    padding:8px 18px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .tour-progress{
+    font-size:11px;
+    color:var(--text-muted);
+    text-align:center;
+    margin-top:10px;
+  }
+  .tour-replay-link{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+    margin-top:4px;
+  }
   .lunch-view-toggle button{
     flex:1;
     padding:8px;
@@ -1230,6 +1300,18 @@
   <button id="floorplanOverlayCloseBtn" class="floorplan-overlay-close" aria-label="Schließen">&times;</button>
   <div id="floorplanZoomContainer" class="floorplan-zoom-container">
     <div id="floorplanZoomContent" class="floorplan-zoom-content"></div>
+  </div>
+</div>
+
+<div id="tourOverlay" class="tour-overlay" style="display:none;">
+  <div id="tourHighlight" class="tour-highlight"></div>
+  <div id="tourTooltip" class="tour-tooltip">
+    <div class="tour-tooltip-text" id="tourTooltipText"></div>
+    <div class="tour-tooltip-footer">
+      <button class="tour-skip" id="tourSkipBtn"></button>
+      <button class="tour-next" id="tourNextBtn"></button>
+    </div>
+    <div class="tour-progress" id="tourProgress"></div>
   </div>
 </div>
 

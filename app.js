@@ -47,6 +47,10 @@
       officeHoursFr: 'Freitag: geschlossen',
       wlanCardTitle: 'WLAN',
       wlanComingSoon: 'Infos folgen.',
+      tourNext: 'Weiter',
+      tourDone: 'Fertig',
+      tourSkip: 'Überspringen',
+      tourReplay: 'Kurze Einführung erneut anzeigen',
       presentersCardTitle: 'Für Vortragende',
       presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
@@ -116,6 +120,10 @@
       officeHoursFr: 'Friday: closed',
       wlanCardTitle: 'Wi-Fi',
       wlanComingSoon: 'Details to follow.',
+      tourNext: 'Next',
+      tourDone: 'Done',
+      tourSkip: 'Skip',
+      tourReplay: 'Show quick tour again',
       presentersCardTitle: 'For Presenters',
       presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
@@ -1666,11 +1674,19 @@
             '<img src="logo_hu_berlin.png" alt="HU Berlin">' +
           '</a>' +
         '</div>' +
+      '</div>' +
+      '<div style="text-align:center;margin-top:4px;">' +
+        '<button class="tour-replay-link" id="tourReplayBtn">' + t('tourReplay') + '</button>' +
       '</div>';
     document.getElementById('officeCardLink').addEventListener('click', function(){
       openFloorplanLightbox(['tagungsbuero']);
     });
     setupPresenterForm();
+    var replayBtn = document.getElementById('tourReplayBtn');
+    if(replayBtn) replayBtn.addEventListener('click', function(){
+      switchToView('programm');
+      startTour();
+    });
   }
 
   function setupPresenterForm(){
@@ -2392,6 +2408,113 @@
     }).catch(function(){ /* no announcement file or not reachable — silently ignore */ });
   }
   loadAnnouncement();
+
+  // ---------- Guided tour ----------
+  var TOUR_DISMISS_KEY = 'dgl2026_tour_done';
+  var TOUR_STEPS = [
+    {
+      selector: 'nav.bottom-nav',
+      text: 'Über diese Leiste wechselst du zwischen Programm, Mittagessen, Exkursionen, Infos und deinem persönlichen Plan.',
+      text_en: 'Use this bar to switch between Programme, Lunch, Excursions, Info and your personal Plan.'
+    },
+    {
+      selector: '#programmSearch',
+      text: 'Hier kannst du nach Namen, Themen oder Vortragstiteln suchen.',
+      text_en: 'Search here by name, topic or talk title.'
+    },
+    {
+      selector: '#topicJump',
+      text: 'Über "Jump to..." springst du direkt zu einer bestimmten Session oder einem Plenarvortrag.',
+      text_en: 'Use "Jump to..." to go straight to a specific session or plenary talk.'
+    },
+    {
+      selector: '#langSwitch',
+      text: 'Hier wechselst du die Sprache (DE/EN) und schaltest den Dunkelmodus um.',
+      text_en: 'Switch the language (DE/EN) and toggle dark mode here.'
+    }
+  ];
+  var tourStepIndex = 0;
+
+  function tourText(step){
+    return (lang === 'en' && step.text_en) ? step.text_en : step.text;
+  }
+
+  function positionTourStep(){
+    var step = TOUR_STEPS[tourStepIndex];
+    var target = document.querySelector(step.selector);
+    var overlay = document.getElementById('tourOverlay');
+    var highlight = document.getElementById('tourHighlight');
+    var tooltip = document.getElementById('tourTooltip');
+    if(!target){ tourNext(); return; }
+    if(target.scrollIntoView) target.scrollIntoView({ block: 'center', behavior: 'instant' });
+    setTimeout(function(){
+      var r = target.getBoundingClientRect();
+      var pad = 8;
+      highlight.style.top = (r.top - pad) + 'px';
+      highlight.style.left = (r.left - pad) + 'px';
+      highlight.style.width = (r.width + pad*2) + 'px';
+      highlight.style.height = (r.height + pad*2) + 'px';
+
+      document.getElementById('tourTooltipText').textContent = tourText(step);
+      document.getElementById('tourSkipBtn').textContent = t('tourSkip');
+      document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
+      document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
+
+      var tooltipWidth = 280;
+      var viewportH = window.innerHeight;
+      var viewportW = window.innerWidth;
+      var spaceBelow = viewportH - r.bottom;
+      var top;
+      if(spaceBelow > 180){
+        top = r.bottom + 16;
+      } else {
+        top = null; // will position from bottom instead
+      }
+      var left = Math.min(Math.max(r.left, 12), viewportW - tooltipWidth - 12);
+      tooltip.style.left = left + 'px';
+      if(top !== null){
+        tooltip.style.top = top + 'px';
+        tooltip.style.bottom = 'auto';
+      } else {
+        tooltip.style.top = 'auto';
+        tooltip.style.bottom = (viewportH - r.top + 16) + 'px';
+      }
+      overlay.style.display = 'block';
+    }, 50);
+  }
+
+  function tourNext(){
+    tourStepIndex++;
+    if(tourStepIndex >= TOUR_STEPS.length){
+      tourEnd();
+      return;
+    }
+    positionTourStep();
+  }
+
+  function tourEnd(){
+    document.getElementById('tourOverlay').style.display = 'none';
+    try{ localStorage.setItem(TOUR_DISMISS_KEY, '1'); }catch(e){}
+  }
+
+  function startTour(){
+    tourStepIndex = 0;
+    switchToView('programm');
+    positionTourStep();
+  }
+
+  document.getElementById('tourNextBtn').addEventListener('click', tourNext);
+  document.getElementById('tourSkipBtn').addEventListener('click', tourEnd);
+  window.addEventListener('resize', function(){
+    if(document.getElementById('tourOverlay').style.display === 'block') positionTourStep();
+  });
+
+  (function maybeStartTour(){
+    var done = null;
+    try{ done = localStorage.getItem(TOUR_DISMISS_KEY); }catch(e){}
+    if(done) return;
+    setTimeout(startTour, 600);
+  })();
 
   // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
   window.dglDebug = {
