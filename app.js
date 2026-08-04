@@ -525,7 +525,7 @@
   var currentCategoryFilter = 'alle';
 
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together', 'Early Career Meetup', 'Vorabendtreff'];
-  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Award Ceremony / WSA General Assembly'];
+  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
   var WORKSHOP_TITLES = ['Arbeitskreise'];
   var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'Preisvortrag': 'plenary' };
 
@@ -1623,8 +1623,7 @@
             '</div>' +
           '</div>' +
         '</div>' +
-        (presenterUploadUrl ? ('<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' +
-          '<div class="lunch-meta" style="margin-top:8px;text-align:center;">' + t('presentersPassword') + ' <code>dgl2026-zukunft-wasser-gestalten</code></div>') : '') +
+        (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
@@ -2095,7 +2094,7 @@
           var breakIcon = '';
           if(block.title === 'Kaffeepause') breakIcon = '☕ ';
           else if(block.title === 'Mittagspause') breakIcon = '🍽 ';
-          else if(block.title === 'Registrierung') breakIcon = '📋 ';
+          else if(block.title === 'Anmeldung') breakIcon = '📋 ';
           dayItems.push({
             id: 'fixed_' + block.time + '_' + block.title,
             time: displayTime, title: breakIcon + fixedTitle, subtitle: '', room: '',
