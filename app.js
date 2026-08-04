@@ -14,7 +14,7 @@
       oepnvLabel: 'ÖPNV:',
       sbahnMapLink: 'Interaktiver S-Bahn-Liniennetzplan',
       min: 'Min',
-      headerTitle: '41. DGL-Jahrestagung & WRHC',
+      headerTitle: '41. DGL-Jahrestagung & 16. WRHC',
       headerDates: '14.–18. September 2026',
       searchPlaceholder: 'Suche nach Titel, Autor:in, Stichwort...',
       noResults: 'Keine Treffer.',
@@ -45,6 +45,8 @@
       officeHoursMi: 'Mittwoch: 8:00–18:00 Uhr',
       officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
+      wlanCardTitle: 'WLAN',
+      wlanComingSoon: 'Infos folgen.',
       presentersCardTitle: 'Für Vortragende',
       presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
@@ -81,7 +83,7 @@
       oepnvLabel: 'Public transport:',
       sbahnMapLink: 'Interactive S-Bahn network map',
       min: 'min',
-      headerTitle: '41st DGL Annual Conference & WRHC',
+      headerTitle: '41st DGL Annual Conference & 16th WRHC',
       headerDates: '14–18 September 2026',
       searchPlaceholder: 'Search by title, author, keyword...',
       noResults: 'No results.',
@@ -112,6 +114,8 @@
       officeHoursMi: 'Wednesday: 8:00 am–6:00 pm',
       officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
       officeHoursFr: 'Friday: closed',
+      wlanCardTitle: 'Wi-Fi',
+      wlanComingSoon: 'Details to follow.',
       presentersCardTitle: 'For Presenters',
       presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
@@ -1601,6 +1605,10 @@
         '<div class="lunch-meta">' + t('officeHoursMi') + '</div>' +
         '<div class="lunch-meta">' + t('officeHoursDo') + '</div>' +
         '<div class="lunch-meta">' + t('officeHoursFr') + '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-section-heading">' + t('wlanCardTitle') + '</div>' +
+        '<div class="lunch-meta">' + t('wlanComingSoon') + '</div>' +
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
