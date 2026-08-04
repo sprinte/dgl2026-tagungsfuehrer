@@ -2497,8 +2497,8 @@
 
   var TOUR_STEPS = [
     {
-      text: 'Herzlich willkommen bei der 41. DGL-Jahrestagung & 16. WRHC! Lass mich dir kurz zeigen, wie du diese App nutzt.',
-      text_en: 'Welcome to the 41st DGL Annual Conference & 16th WRHC! Let us quickly show you how to use this app.'
+      text: '👋 Herzlich willkommen bei der 41. DGL-Jahrestagung & 16. WRHC! Lass mich dir kurz zeigen, wie du diese App nutzt.',
+      text_en: '👋 Welcome to the 41st DGL Annual Conference & 16th WRHC! Let us quickly show you how to use this app.'
     },
     {
       selector: '#langSwitch',
@@ -2571,6 +2571,11 @@
       selector: '.add-btn.small[data-id]',
       text: 'Mit "+" fügst du einen Vortrag zu deinem persönlichen Plan hinzu.',
       text_en: 'Tap "+" to add a talk to your personal plan.'
+    },
+    {
+      selector: '[data-role="session-add"]',
+      text: 'Du kannst auch alle Vorträge einer Session auf einmal hinzufügen, indem du hier auf das "+" klickst.',
+      text_en: 'You can also add all talks of a session at once by clicking the "+" here.'
     },
     {
       text: 'Das war\'s schon! Viel Spaß bei der DGL-Tagung und der WRHC! 🎉',
