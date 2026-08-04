@@ -44,13 +44,14 @@
       officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
       presentersCardTitle: 'Für Vortragende',
+      presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
       presentersExample: 'Beispiel: „A01_Montag_Oprei_13-45.pptx"',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Oprei',
-      presentersAutoInfo: 'Session, Tag und Uhrzeit werden automatisch anhand des Namens des gemeldeten Erstautors/der gemeldeten Erstautorin erkannt. Der generierte Dateiname kann unten direkt kopiert werden.',
+      presentersAutoInfo: 'Wenn Sie unten den Namen des gemeldeten Erstautors/der gemeldeten Erstautorin eingeben, werden Session, Tag und Uhrzeit automatisch erkannt. Der generierte Dateiname kann dann direkt kopiert und für Ihre Datei genutzt werden.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
       presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte prüfen Sie die Schreibweise oder wenden Sie sich ans Tagungsbüro.',
@@ -107,13 +108,14 @@
       officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
       officeHoursFr: 'Friday: closed',
       presentersCardTitle: 'For Presenters',
+      presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
       presentersExample: 'Example: "A01_Monday_Oprei_13-45.pptx"',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Oprei',
-      presentersAutoInfo: 'Session, day and time are detected automatically from your name. You can copy the generated file name below.',
+      presentersAutoInfo: 'If you enter the last name of the registered first author below, the session, day and time will be detected automatically. The generated file name can then be copied directly for your file.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
       presentersNotFound: 'No contribution found under this name. Please check the spelling or contact the conference office.',
@@ -1590,7 +1592,8 @@
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
-        '<div class="lunch-meta">' + t('presentersNamingInfo') + '</div>' +
+        '<div class="lunch-meta">' + t('presentersDuration') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:10px;">' + t('presentersNamingInfo') + '</div>' +
         '<div class="lunch-meta" style="margin-top:6px;"><code>Session_Tag_Name_Uhrzeit.pptx</code></div>' +
         '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
         '<div style="margin-top:14px;">' +
