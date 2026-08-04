@@ -1831,6 +1831,8 @@
   }
 
   function renderPlan(){
+    var clearBtn = document.getElementById('clearPlanBtn');
+    if(clearBtn) clearBtn.disabled = plan.length === 0;
     renderNextUp();
     renderPlanListDayTabs();
     var box = document.getElementById('planList');

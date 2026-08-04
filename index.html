@@ -540,6 +540,15 @@
     font-weight:600;
     cursor:pointer;
   }
+  .btn-danger:disabled{
+    border-color:var(--border);
+    color:var(--text-muted);
+    background:#f4f4f4;
+    cursor:not-allowed;
+  }
+  body.dark .btn-danger:disabled{
+    background:#1c232b;
+  }
   body.dark .btn-danger{
     background:var(--card);
   }
