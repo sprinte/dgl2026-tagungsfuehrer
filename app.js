@@ -52,6 +52,7 @@
       tourSkip: 'Überspringen',
       tourIntroText: '👋 Neu hier? Kurze Einführung in die wichtigsten Funktionen gefällig?',
       tourStart: 'Tour starten',
+      tourHelpBtn: '👋 Neu hier?',
       presentersCardTitle: 'Für Vortragende',
       presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
       presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
@@ -126,6 +127,7 @@
       tourSkip: 'Skip',
       tourIntroText: '👋 New here? Want a quick tour of the main features?',
       tourStart: 'Start tour',
+      tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'For Presenters',
       presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
@@ -157,6 +159,7 @@
   function applyStaticI18n(){
     document.getElementById('headerTitle').textContent = t('headerTitle');
     document.getElementById('headerDates').textContent = t('headerDates');
+    document.getElementById('tourHelpBtn').textContent = t('tourHelpBtn');
     document.getElementById('navProgramm').textContent = t('navProgramm');
     document.getElementById('navLunch').textContent = t('navLunch');
     document.getElementById('navExk').textContent = t('navExk');
@@ -2441,48 +2444,52 @@
     }catch(e){ return false; }
   }
 
-  function positionTourStep(){
+  function applyTourStepVisuals(){
     var step = TOUR_STEPS[tourStepIndex];
     var target = document.querySelector(step.selector);
     var overlay = document.getElementById('tourOverlay');
     var highlight = document.getElementById('tourHighlight');
     var tooltip = document.getElementById('tourTooltip');
-    if(!target){ tourNext(); return; }
+    if(!target) return;
 
-    function applyPosition(){
-      var r = target.getBoundingClientRect();
-      var pad = 8;
-      highlight.style.top = (r.top - pad) + 'px';
-      highlight.style.left = (r.left - pad) + 'px';
-      highlight.style.width = (r.width + pad*2) + 'px';
-      highlight.style.height = (r.height + pad*2) + 'px';
+    var r = target.getBoundingClientRect();
+    var pad = 8;
+    highlight.style.top = (r.top - pad) + 'px';
+    highlight.style.left = (r.left - pad) + 'px';
+    highlight.style.width = (r.width + pad*2) + 'px';
+    highlight.style.height = (r.height + pad*2) + 'px';
 
-      document.getElementById('tourTooltipText').textContent = tourText(step);
-      document.getElementById('tourSkipBtn').textContent = t('tourSkip');
-      document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
-      document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
+    document.getElementById('tourTooltipText').textContent = tourText(step);
+    document.getElementById('tourSkipBtn').textContent = t('tourSkip');
+    document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
+    document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
 
-      var tooltipWidth = 280;
-      var viewportH = window.innerHeight;
-      var viewportW = window.innerWidth;
-      var spaceBelow = viewportH - r.bottom;
-      var top;
-      if(spaceBelow > 180){
-        top = r.bottom + 16;
-      } else {
-        top = null;
-      }
-      var left = Math.min(Math.max(r.left, 12), viewportW - tooltipWidth - 12);
-      tooltip.style.left = left + 'px';
-      if(top !== null){
-        tooltip.style.top = top + 'px';
-        tooltip.style.bottom = 'auto';
-      } else {
-        tooltip.style.top = 'auto';
-        tooltip.style.bottom = (viewportH - r.top + 16) + 'px';
-      }
-      overlay.style.display = 'block';
+    var tooltipWidth = 280;
+    var viewportH = window.innerHeight;
+    var viewportW = window.innerWidth;
+    var spaceBelow = viewportH - r.bottom;
+    var top;
+    if(spaceBelow > 180){
+      top = r.bottom + 16;
+    } else {
+      top = null;
     }
+    var left = Math.min(Math.max(r.left, 12), viewportW - tooltipWidth - 12);
+    tooltip.style.left = left + 'px';
+    if(top !== null){
+      tooltip.style.top = top + 'px';
+      tooltip.style.bottom = 'auto';
+    } else {
+      tooltip.style.top = 'auto';
+      tooltip.style.bottom = (viewportH - r.top + 16) + 'px';
+    }
+    overlay.style.display = 'block';
+  }
+
+  function positionTourStep(){
+    var step = TOUR_STEPS[tourStepIndex];
+    var target = document.querySelector(step.selector);
+    if(!target){ tourNext(); return; }
 
     // Fixed-position elements (like the bottom nav) are always in place and
     // don't need scrolling; scrolling them "into view" can trigger mobile
@@ -2491,10 +2498,15 @@
     if(!isFixedPositioned(target) && target.scrollIntoView){
       target.scrollIntoView({ block: 'center', behavior: 'instant' });
     }
-    // Wait two animation frames so scroll/layout has fully settled before measuring.
+    // Apply multiple times over the following moment: layout/scroll and, on
+    // mobile, the browser's own chrome (address bar) can keep settling for a
+    // little while after scrollIntoView returns, so a single measurement can
+    // be stale. Re-measuring a few times catches that without looping forever.
     requestAnimationFrame(function(){
-      requestAnimationFrame(applyPosition);
+      requestAnimationFrame(applyTourStepVisuals);
     });
+    setTimeout(applyTourStepVisuals, 150);
+    setTimeout(applyTourStepVisuals, 400);
   }
 
   function tourNext(){
@@ -2519,10 +2531,10 @@
   document.getElementById('tourNextBtn').addEventListener('click', tourNext);
   document.getElementById('tourSkipBtn').addEventListener('click', tourEnd);
   window.addEventListener('resize', function(){
-    if(document.getElementById('tourOverlay').style.display === 'block') positionTourStep();
+    if(document.getElementById('tourOverlay').style.display === 'block') applyTourStepVisuals();
   });
   window.addEventListener('scroll', function(){
-    if(document.getElementById('tourOverlay').style.display === 'block') positionTourStep();
+    if(document.getElementById('tourOverlay').style.display === 'block') applyTourStepVisuals();
   }, true);
 
   function markTourIntroSeen(){
