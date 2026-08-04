@@ -857,10 +857,11 @@
           headerDiv.querySelector('[data-role="info-add"]').addEventListener('click', function(ev){
             ev.stopPropagation();
             var bioText = lang === 'en' ? block.bio_en : block.bio_de;
+            var planAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
             togglePlan({
               id: id, dayId: day.id, dayLabel: day.label, date: day.date,
               time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || '',
-              abstract: block.abstract || '', bio: bioText || ''
+              abstract: planAbstractText || '', bio: bioText || ''
             });
           });
         }
@@ -899,10 +900,11 @@
         }
         if(hasInfoDetails && infoOpen){
           var infoBox = document.createElement('div');
-          if(block.abstract){
+          var infoAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
+          if(infoAbstractText){
             var abP = document.createElement('div');
             abP.className = 'abstract-box';
-            abP.textContent = block.abstract;
+            abP.textContent = infoAbstractText;
             infoBox.appendChild(abP);
           }
           var bioText = lang === 'en' ? block.bio_en : block.bio_de;
