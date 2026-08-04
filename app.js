@@ -274,7 +274,7 @@
     return debugNowOverride ? new Date(debugNowOverride) : new Date();
   }
   function dateForDay(dayId){
-    var map = { mo:'20260914', di:'20260915', mi:'20260916', do:'20260917', fr:'20260918' };
+    var map = { so:'20260913', mo:'20260914', di:'20260915', mi:'20260916', do:'20260917', fr:'20260918' };
     return map[dayId] || '20260914';
   }
   function parseStartTime(timeStr){
@@ -518,7 +518,7 @@
   var currentDay = DATA.programm[0].id;
   var currentCategoryFilter = 'alle';
 
-  var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together'];
+  var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together', 'Early Career Meetup', 'Vorabendtreff'];
   var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Award Ceremony / WSA General Assembly'];
   var WORKSHOP_TITLES = ['Arbeitskreise'];
   var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'Preisvortrag': 'plenary' };
