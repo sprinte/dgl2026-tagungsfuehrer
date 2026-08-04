@@ -2630,6 +2630,7 @@
     document.getElementById('tourBackBtn').disabled = (tourStepIndex === 0);
     document.getElementById('tourNextBtn').textContent = (tourStepIndex === TOUR_STEPS.length - 1) ? t('tourDone') : t('tourNext');
     document.getElementById('tourProgress').textContent = (tourStepIndex + 1) + ' / ' + TOUR_STEPS.length;
+    document.getElementById('tourTooltip').classList.toggle('tour-tooltip-centered', !step.selector);
 
     document.getElementById('tourBackdrop').style.display = 'block';
     document.getElementById('tourTooltip').style.display = 'block';
@@ -2651,6 +2652,7 @@
   }
 
   function tourEnd(){
+    markTourIntroSeen();
     if(tourCurrentTarget){
       tourCurrentTarget.classList.remove('tour-target-active', 'tour-needs-relative');
       tourCurrentTarget = null;
@@ -2684,38 +2686,19 @@
     try{ localStorage.setItem(TOUR_DISMISS_KEY, '1'); }catch(e){}
   }
 
-  function showTourIntro(){
-    document.getElementById('tourIntroText').textContent = t('tourIntroText');
-    document.getElementById('tourIntroSkipBtn').textContent = t('tourSkip');
-    document.getElementById('tourIntroStartBtn').textContent = t('tourStart');
-    document.getElementById('tourIntroBackdrop').style.display = 'block';
-    document.getElementById('tourIntroCard').style.display = 'block';
-  }
-  function hideTourIntro(){
-    document.getElementById('tourIntroBackdrop').style.display = 'none';
-    document.getElementById('tourIntroCard').style.display = 'none';
-  }
-
-  document.getElementById('tourIntroStartBtn').addEventListener('click', function(){
-    hideTourIntro();
-    markTourIntroSeen();
-    startTour();
-  });
-  document.getElementById('tourIntroSkipBtn').addEventListener('click', function(){
-    hideTourIntro();
-    markTourIntroSeen();
-  });
   document.getElementById('tourHelpBtn').addEventListener('click', function(){
-    hideTourIntro();
     switchToView('programm');
     startTour();
   });
 
-  (function maybeShowTourIntro(){
+  (function maybeStartTourAutomatically(){
     var done = null;
     try{ done = localStorage.getItem(TOUR_DISMISS_KEY); }catch(e){}
     if(done) return;
-    setTimeout(showTourIntro, 600);
+    setTimeout(function(){
+      switchToView('programm');
+      startTour();
+    }, 600);
   })();
 
   // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
