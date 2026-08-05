@@ -908,6 +908,7 @@
               '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
               '<div class="block-title">' + (block.tag ? '<span class="session-tag' + (block.isWSA ? ' session-tag-wsa' : '') + '">' + esc(lang === 'en' ? (block.tag_en || block.tag) : block.tag) + '</span> ' : '') + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
+              (block.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(block.mod) + '</div>' : '') +
               (block.room ? '<span class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</span>' : '') +
             '</div>' +
             '<div class="session-btns">' +
@@ -943,9 +944,11 @@
             ev.stopPropagation();
             var bioText = lang === 'en' ? block.bio_en : block.bio_de;
             var planAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
+            var modSuffix = block.mod ? (t('mod') + ' ' + block.mod) : '';
+            var planSubtitle = [blockSubtitle, modSuffix].filter(Boolean).join(' · ');
             togglePlan({
               id: id, dayId: day.id, dayLabel: day.label, date: day.date,
-              time: block.time, title: blockTitle, subtitle: blockSubtitle || '', room: block.room || '',
+              time: block.time, title: blockTitle, subtitle: planSubtitle, room: block.room || '',
               abstract: planAbstractText || '', bio: bioText || ''
             });
           });
