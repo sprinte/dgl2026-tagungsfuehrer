@@ -679,17 +679,36 @@
     if(extra){ for(var k in extra){ searchBackState[k] = extra[k]; } }
     document.getElementById('searchBackBtn').style.display = 'block';
   }
+  function personKeyFromName(name){
+    var words = (name || '').trim().split(/\s+/).filter(Boolean);
+    if(!words.length) return null;
+    var surname = words[words.length - 1].toLowerCase();
+    var initial = words[0].replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g, '').charAt(0).toLowerCase();
+    return { surname: surname, initial: initial };
+  }
+  function authorsMatchPerson(authorsStr, personKey){
+    if(!authorsStr || !personKey) return false;
+    var namesPart = authorsStr.split(' — ')[0];
+    var names = namesPart.split(',');
+    return names.some(function(n){
+      var k = personKeyFromName(n);
+      return k && k.surname === personKey.surname && k.initial === personKey.initial;
+    });
+  }
+
   function searchForAuthor(name, originView){
     saveNavBackState(originView);
     // Different data sources format the same person differently (e.g. "Michael Hupfer"
-    // on a poster vs "M. Hupfer" as a talk author) — searching by the full name would
-    // miss entries using the other format. The surname alone matches both.
+    // on a poster vs "M. Hupfer" as a talk author) — matching on surname + first initial
+    // bridges that gap, while still telling apart two different people who happen to
+    // share a surname (e.g. "Alexandra Heinrich" vs "Lena Heinrich").
+    var personKey = personKeyFromName(name);
     var words = (name || '').trim().split(/\s+/).filter(Boolean);
     var lastName = words.length ? words[words.length - 1] : name;
     var input = document.getElementById('programmSearch');
     input.value = lastName;
     document.getElementById('searchClearBtn').style.display = 'block';
-    renderSearchResults(lastName);
+    renderSearchResults(lastName, personKey);
     switchToView('programm');
   }
   document.getElementById('searchBackBtn').addEventListener('click', function(){
@@ -1256,7 +1275,7 @@
     }, 50);
   }
 
-  function renderSearchResults(query){
+  function renderSearchResults(query, personKey){
     var wrap = document.getElementById('searchResults');
     var q = query.trim().toLowerCase();
     if(!q){
@@ -1272,9 +1291,19 @@
     wrap.style.display = 'block';
     wrap.innerHTML = '';
 
-    var matches = searchIndex.filter(function(entry){
-      return entry.text.toLowerCase().indexOf(q) !== -1;
-    }).slice(0, 25);
+    var matches;
+    if(personKey){
+      // Precise mode (triggered by clicking a name): only entries whose author list
+      // contains this exact person (surname + first initial), not just anyone sharing
+      // the surname, and not entries that merely mention the name in an abstract.
+      matches = searchIndex.filter(function(entry){
+        return authorsMatchPerson(entry.authors, personKey);
+      }).slice(0, 25);
+    } else {
+      matches = searchIndex.filter(function(entry){
+        return entry.text.toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 25);
+    }
 
     if(matches.length === 0){
       wrap.innerHTML = '<div class="search-no-results">' + t('noResults') + '</div>';
