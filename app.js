@@ -1242,7 +1242,7 @@
             (block.posters || []).forEach(function(p, pidx){
               searchIndex.push({
                 kind: 'poster', dayId: day.id, jumpId: planIdForPoster(day.id, p), blockId: id, timeLabel: block.time,
-                text: [p.title, p.authorsDisplay, p.code].filter(Boolean).join(' '),
+                text: [p.title, p.authorsDisplay, p.authors, p.code].filter(Boolean).join(' '),
                 title: p.title, authors: p.authorsDisplay, board: p.board, code: p.code,
                 dayLabel: day.label, date: day.date
               });
