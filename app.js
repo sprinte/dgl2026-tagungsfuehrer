@@ -681,10 +681,15 @@
   }
   function searchForAuthor(name, originView){
     saveNavBackState(originView);
+    // Different data sources format the same person differently (e.g. "Michael Hupfer"
+    // on a poster vs "M. Hupfer" as a talk author) — searching by the full name would
+    // miss entries using the other format. The surname alone matches both.
+    var words = (name || '').trim().split(/\s+/).filter(Boolean);
+    var lastName = words.length ? words[words.length - 1] : name;
     var input = document.getElementById('programmSearch');
-    input.value = name;
+    input.value = lastName;
     document.getElementById('searchClearBtn').style.display = 'block';
-    renderSearchResults(name);
+    renderSearchResults(lastName);
     switchToView('programm');
   }
   document.getElementById('searchBackBtn').addEventListener('click', function(){
