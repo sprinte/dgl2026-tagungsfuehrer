@@ -1746,7 +1746,8 @@
 
     function buildFilename(entry){
       var timeSlug = entry.time.replace(':', '-');
-      return entry.code + '_' + entry.dayLabel + '_' + entry.lastName + '_' + timeSlug + '.pptx';
+      var codeSlug = entry.code.replace(/\//g, '_');
+      return codeSlug + '_' + entry.dayLabel + '_' + entry.lastName + '_' + timeSlug + '.pptx';
     }
 
     function selectEntry(entry){
