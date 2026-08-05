@@ -9,6 +9,10 @@
       planNote: 'Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar. Tipp: Nutze "Teilen" oder den Kalender-Export, um deinen Plan zu sichern oder auf einem anderen Gerät zu öffnen.',
       exportBtn: 'Als Kalender exportieren (.ics)',
       exportEmptyAlert: 'Dein Plan ist noch leer.',
+      exportPlanPdfBtnText: 'Als PDF exportieren',
+      pdfPlanTitle: 'Mein Plan — DGL 2026',
+      pdfGeneratedOn: 'Erstellt am',
+      pdfLibError: 'PDF-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
       clearPlanBtnText: 'Plan komplett löschen',
       clearPlanEmptyAlert: 'Dein Plan ist bereits leer.',
       clearPlanConfirm: 'Möchtest du wirklich deinen gesamten Plan löschen? Alle gemerkten Vorträge, Poster und Termine werden entfernt. Das kann nicht rückgängig gemacht werden.',
@@ -93,6 +97,10 @@
       planNote: 'Your plan is stored locally in this browser. It is not visible on another device or in another browser. Tip: use "Share" or the calendar export to back up your plan or open it on another device.',
       exportBtn: 'Export to calendar (.ics)',
       exportEmptyAlert: 'Your plan is still empty.',
+      exportPlanPdfBtnText: 'Export as PDF',
+      pdfPlanTitle: 'My Plan — DGL 2026',
+      pdfGeneratedOn: 'Generated on',
+      pdfLibError: 'The PDF feature could not be loaded. Please check your internet connection and try again.',
       clearPlanBtnText: 'Clear entire plan',
       clearPlanEmptyAlert: 'Your plan is already empty.',
       clearPlanConfirm: 'Are you sure you want to clear your entire plan? All saved talks, posters and events will be removed. This cannot be undone.',
@@ -179,6 +187,7 @@
     document.getElementById('headerDates').textContent = t('headerDates');
     document.getElementById('tourHelpBtn').textContent = t('tourHelpBtn');
     document.getElementById('clearPlanBtnText').textContent = t('clearPlanBtnText');
+    document.getElementById('exportPlanPdfBtnText').textContent = t('exportPlanPdfBtnText');
     document.getElementById('navProgramm').textContent = t('navProgramm');
     document.getElementById('navLunch').textContent = t('navLunch');
     document.getElementById('navExk').textContent = t('navExk');
@@ -2507,6 +2516,93 @@
       render();
       renderPlan();
     }
+  });
+
+  document.getElementById('exportPlanPdfBtn').addEventListener('click', function(){
+    if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    if(typeof window.jspdf === 'undefined'){ alert(t('pdfLibError')); return; }
+
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var pageHeight = doc.internal.pageSize.getHeight();
+    var margin = 16;
+    var y = margin;
+    var maxWidth = pageWidth - margin * 2;
+
+    function ensureSpace(neededMm){
+      if(y + neededMm > pageHeight - margin){
+        doc.addPage();
+        y = margin;
+      }
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(t('pdfPlanTitle'), margin, y);
+    y += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(t('pdfGeneratedOn') + ' ' + new Date().toLocaleDateString(lang === 'en' ? 'en-GB' : 'de-DE'), margin, y);
+    doc.setTextColor(0);
+    y += 10;
+
+    var dayOrder = {};
+    DATA.programm.forEach(function(d, idx){ dayOrder[d.id] = idx; });
+    var sorted = plan.slice().sort(function(a, b){
+      var da = dayOrder[a.dayId] !== undefined ? dayOrder[a.dayId] : 999;
+      var db = dayOrder[b.dayId] !== undefined ? dayOrder[b.dayId] : 999;
+      if(da !== db) return da - db;
+      return (a.time || '').localeCompare(b.time || '');
+    });
+
+    var lastDayId = null;
+    sorted.forEach(function(item){
+      if(item.dayId !== lastDayId){
+        lastDayId = item.dayId;
+        ensureSpace(14);
+        y += 4;
+        doc.setDrawColor(210);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 6;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(0, 61, 115);
+        var dayHeading = (item.dayLabel || item.dayId) + (item.date ? ', ' + item.date : '');
+        doc.text(dayHeading, margin, y);
+        doc.setTextColor(0);
+        y += 7;
+      }
+      ensureSpace(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      var timeRoom = (item.time || '') + (item.room ? '  ·  ' + item.room : '');
+      doc.text(timeRoom, margin, y);
+      y += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      var titleLines = doc.splitTextToSize(item.title || '', maxWidth);
+      titleLines.forEach(function(line){
+        ensureSpace(5.5);
+        doc.text(line, margin, y);
+        y += 5.5;
+      });
+      if(item.subtitle){
+        doc.setFontSize(9);
+        doc.setTextColor(90);
+        var subLines = doc.splitTextToSize(item.subtitle, maxWidth);
+        subLines.forEach(function(line){
+          ensureSpace(5);
+          doc.text(line, margin, y);
+          y += 5;
+        });
+        doc.setTextColor(0);
+      }
+      y += 4;
+    });
+
+    doc.save('mein-dgl-2026-plan.pdf');
   });
 
   function render(){
