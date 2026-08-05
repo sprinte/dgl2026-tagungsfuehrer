@@ -643,6 +643,7 @@
   }
 
   var expandedSessions = {};
+  var expandedSessionAbstract = {};
   var expandedTalks = {};
   var expandedPlanItems = {};
 
@@ -997,12 +998,12 @@
           var sid = planIdForSession(day.id, block, s);
           var hasTalks = s.talks && s.talks.length > 0;
           var sessionAbstractText = lang === 'en' ? s.abstract_en : s.abstract_de;
-          var hasExpandableContent = hasTalks || !!sessionAbstractText;
+          var hasAbstract = !!sessionAbstractText;
           var sadded = hasTalks
             ? s.talks.every(function(talk, idx){ return isInPlan(planIdForTalk(day.id, block, s, talk, idx)); })
             : isInPlan(sid);
-          var expandKey = sid;
-          var isOpen = !!expandedSessions[expandKey];
+          var talksOpen = !!expandedSessions[sid];
+          var abstractOpen = !!expandedSessionAbstract[sid];
 
           var row = document.createElement('div');
           row.className = 'session-row';
@@ -1015,12 +1016,12 @@
           header.innerHTML =
             '<div class="session-main">' +
               '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
-              '<div class="session-title">' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
+              '<div class="session-title"' + (hasAbstract ? ' style="cursor:pointer;"' : '') + '>' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
               '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add">' + (sadded ? '&#10003;' : '+') + '</button>' +
-              (hasExpandableContent ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+              (hasTalks ? '<div class="chevron' + (talksOpen ? ' open' : '') + '">&#9656;</div>' : '') +
             '</div>';
           row.appendChild(header);
 
@@ -1060,26 +1061,36 @@
             });
           }
 
-          if(hasExpandableContent){
-            header.style.cursor = 'pointer';
-            header.addEventListener('click', function(ev){
-              if(ev.target.closest('[data-role="session-add"]') || ev.target.closest('.room-link')) return;
-              var wasOpen = !!expandedSessions[expandKey];
-              expandedSessions = {};
-              if(!wasOpen){ expandedSessions[expandKey] = true; }
+          if(hasAbstract){
+            header.querySelector('.session-title').addEventListener('click', function(ev){
+              ev.stopPropagation();
+              var wasOpen = !!expandedSessionAbstract[sid];
+              expandedSessionAbstract = {};
+              if(!wasOpen){ expandedSessionAbstract[sid] = true; }
               rerenderPreservingScroll('row-' + sid);
             });
           }
 
-          if(hasExpandableContent && isOpen){
+          if(hasTalks){
+            header.querySelector('.chevron').addEventListener('click', function(ev){
+              ev.stopPropagation();
+              var wasOpen = !!expandedSessions[sid];
+              expandedSessions = {};
+              if(!wasOpen){ expandedSessions[sid] = true; }
+              rerenderPreservingScroll('row-' + sid);
+            });
+          }
+
+          if(hasAbstract && abstractOpen){
+            var abstractWrap = document.createElement('div');
+            abstractWrap.className = 'talk-list';
+            appendAbstractWithKeynote(abstractWrap, sessionAbstractText);
+            row.appendChild(abstractWrap);
+          }
+
+          if(hasTalks && talksOpen){
             var talkList = document.createElement('div');
             talkList.className = 'talk-list';
-
-            if(sessionAbstractText){
-              appendAbstractWithKeynote(talkList, sessionAbstractText);
-            }
-
-            if(hasTalks){
             s.talks.forEach(function(talk, idx){
               var tid = planIdForTalk(day.id, block, s, talk, idx);
               var tadded = isInPlan(tid);
@@ -1128,7 +1139,6 @@
                 talkList.appendChild(abBox);
               }
             });
-            }
             row.appendChild(talkList);
           }
 
@@ -1196,8 +1206,9 @@
     currentDay = m.dayId;
     currentCategoryFilter = 'alle';
     expandedSessions = {};
+    expandedSessionAbstract = {};
     expandedTalks = {};
-    if(m.kind === 'session'){ expandedSessions[m.sid] = true; }
+    if(m.kind === 'session'){ expandedSessions[m.sid] = true; expandedSessionAbstract[m.sid] = true; }
     if(m.kind === 'talk'){ expandedSessions[m.sid] = true; expandedTalks[m.jumpId] = true; }
     if(m.kind === 'info'){ expandedSessions[m.jumpId] = true; }
     document.getElementById('programmSearch').value = '';
@@ -2507,13 +2518,13 @@
     },
     {
       selector: 'nav.bottom-nav button[data-view="programm"]',
-      text: 'Hier findest du das gesamte Vortragsprogramm aller Tage.',
-      text_en: 'Here you\'ll find the full talk programme for all days.'
+      text: 'Hier findest du das gesamte Vortragsprogramm.',
+      text_en: 'Here you\'ll find the full talk programme.'
     },
     {
       selector: 'nav.bottom-nav button[data-view="lunch"]',
-      text: 'Hier gibt es Vorschläge für Mittagsoptionen in der Nähe, mit Karte.',
-      text_en: 'Here you\'ll find nearby lunch suggestions, with a map.'
+      text: 'Hier gibt es Vorschläge für Mittagsoptionen in der Nähe (inklusive Karte).',
+      text_en: 'Here you\'ll find nearby lunch suggestions (including a map).'
     },
     {
       selector: 'nav.bottom-nav button[data-view="exkursionen"]',
@@ -2527,8 +2538,8 @@
     },
     {
       selector: 'nav.bottom-nav button[data-view="plan"]',
-      text: 'Hier siehst du deinen persönlichen Plan mit allem, was du dir gemerkt hast.',
-      text_en: 'Here you\'ll see your personal plan with everything you\'ve saved.'
+      text: 'Hier siehst du deinen persönlichen Plan mit allen Vorträgen und Sessions, die du dir gemerkt hast.',
+      text_en: 'Here you\'ll see your personal plan with all the talks and sessions you\'ve saved.'
     },
     {
       selector: '#programmSearch',
@@ -2576,6 +2587,11 @@
       selector: '[data-role="session-add"]',
       text: 'Du kannst auch alle Vorträge einer Session auf einmal hinzufügen, indem du hier auf das "+" klickst.',
       text_en: 'You can also add all talks of a session at once by clicking the "+" here.'
+    },
+    {
+      selector: '[data-role="session-add"]',
+      text: 'Ist etwas schon gemerkt, steht hier statt "+" ein Häkchen (✓). Tippe erneut darauf, um es wieder aus deinem Plan zu entfernen.',
+      text_en: 'Once something is saved, a checkmark (✓) appears here instead of "+". Tap it again to remove it from your plan.'
     },
     {
       text: 'Das war\'s schon! Viel Spaß bei der DGL-Tagung und der WRHC! 🎉',
