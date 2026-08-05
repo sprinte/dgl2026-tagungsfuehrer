@@ -627,7 +627,7 @@
   }
 
   function planIdForBlock(dayId, block){
-    return 'b_' + dayId + '_' + block.time;
+    return 'b_' + dayId + '_' + block.time + '_' + slug(block.title);
   }
   function planIdForPoster(dayId, poster){
     return 'poster_' + dayId + '_' + slug(poster.code) + '_' + slug(poster.board);
