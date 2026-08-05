@@ -421,6 +421,18 @@
           renderSearchResults('');
         }
         renderAll();
+      } else if(target === 'lunch'){
+        currentLunchFilter = 'Alle';
+        setLunchView('list');
+        renderLunchList();
+      } else if(target === 'exkursionen'){
+        expandedExk = {};
+        renderExkursionen();
+      } else if(target === 'venue'){
+        renderVenue();
+      } else if(target === 'plan'){
+        currentPlanDay = getDefaultProgrammDay();
+        setPlanView('list');
       }
       switchToView(target);
     });
