@@ -398,12 +398,31 @@
     if(target === 'plan') renderPlan();
     window.scrollTo(0,0);
   }
+  function getDefaultProgrammDay(){
+    var todayMatch = DATA.programm.find(function(d){ return isToday(d.id); });
+    return todayMatch ? todayMatch.id : DATA.programm[0].id;
+  }
   document.querySelectorAll('nav.bottom-nav button').forEach(function(btn){
     btn.addEventListener('click', function(){
       var backBtn = document.getElementById('searchBackBtn');
       if(backBtn) backBtn.style.display = 'none';
       searchBackState = null;
-      switchToView(btn.getAttribute('data-view'));
+      var target = btn.getAttribute('data-view');
+      if(target === 'programm'){
+        currentDay = getDefaultProgrammDay();
+        currentCategoryFilter = 'alle';
+        expandedSessions = {};
+        expandedSessionAbstract = {};
+        expandedInfoAbstract = {};
+        expandedTalks = {};
+        if(searchInputEl){
+          searchInputEl.value = '';
+          currentPersonSearchKey = null;
+          renderSearchResults('');
+        }
+        renderAll();
+      }
+      switchToView(target);
     });
   });
 
