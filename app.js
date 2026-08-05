@@ -1016,7 +1016,7 @@
           header.innerHTML =
             '<div class="session-main">' +
               '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
-              '<div class="session-title"' + (hasAbstract ? ' style="cursor:pointer;"' : '') + '>' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
+              '<div class="session-title">' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
@@ -1062,8 +1062,9 @@
           }
 
           if(hasAbstract){
-            header.querySelector('.session-title').addEventListener('click', function(ev){
-              ev.stopPropagation();
+            header.style.cursor = 'pointer';
+            header.addEventListener('click', function(ev){
+              if(ev.target.closest('[data-role="session-add"]') || ev.target.closest('.room-link')) return;
               var wasOpen = !!expandedSessionAbstract[sid];
               expandedSessionAbstract = {};
               if(!wasOpen){ expandedSessionAbstract[sid] = true; }
