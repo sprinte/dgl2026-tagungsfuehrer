@@ -644,6 +644,7 @@
 
   var expandedSessions = {};
   var expandedSessionAbstract = {};
+  var expandedInfoAbstract = {};
   var expandedTalks = {};
   var expandedPlanItems = {};
 
@@ -827,9 +828,13 @@
         var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
         var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
         var showAddBtn = !block.noPlan;
-        var hasInfoDetails = !!(block.abstract || block.bio_de || block.bio_en || (block.posters && block.posters.length));
-        var isClickable = hasInfoDetails || !!block.linkView || !!block.linkExk || !!block.linkFloorplan;
-        var infoOpen = !!expandedSessions[id];
+        var infoAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
+        var infoBioText = lang === 'en' ? block.bio_en : block.bio_de;
+        var hasAbstractOrBio = !!(infoAbstractText || infoBioText);
+        var hasPosters = !!(block.posters && block.posters.length);
+        var isClickable = hasAbstractOrBio || hasPosters || !!block.linkView || !!block.linkExk || !!block.linkFloorplan;
+        var infoAbstractOpen = !!expandedInfoAbstract[id];
+        var infoPostersOpen = !!expandedSessions[id];
         if(blockIsNow){
           var liveBadgeInfoEl = document.createElement('div');
           liveBadgeInfoEl.className = 'live-badge';
@@ -850,8 +855,8 @@
               (block.room ? '<div class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
-              (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' : '') +
-              (hasInfoDetails ? '<div class="chevron' + (infoOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+              (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
+              (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '">&#9656;</div>' : '') +
               (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
@@ -889,12 +894,12 @@
             });
           });
         }
-        if(hasInfoDetails){
+        if(hasAbstractOrBio){
           headerDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
-            var wasOpen = !!expandedSessions[id];
-            expandedSessions = {};
-            if(!wasOpen){ expandedSessions[id] = true; }
+            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link') || ev.target.closest('.chevron')) return;
+            var wasOpen = !!expandedInfoAbstract[id];
+            expandedInfoAbstract = {};
+            if(!wasOpen){ expandedInfoAbstract[id] = true; }
             rerenderPreservingScroll('row-' + id);
           });
         } else if(block.linkView){
@@ -922,29 +927,39 @@
             openFloorplanLightbox([block.linkFloorplan]);
           });
         }
-        if(hasInfoDetails && infoOpen){
+        if(hasPosters){
+          headerDiv.querySelector('.chevron:not(.link-arrow)').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            var wasOpen = !!expandedSessions[id];
+            expandedSessions = {};
+            if(!wasOpen){
+              expandedSessions[id] = true;
+              delete expandedInfoAbstract[id];
+            }
+            rerenderPreservingScroll('row-' + id);
+          });
+        }
+        if(hasAbstractOrBio && infoAbstractOpen){
           var infoBox = document.createElement('div');
-          var infoAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
           if(infoAbstractText){
             var abP = document.createElement('div');
             abP.className = 'abstract-box';
             abP.textContent = infoAbstractText;
             infoBox.appendChild(abP);
           }
-          var bioText = lang === 'en' ? block.bio_en : block.bio_de;
-          if(bioText){
+          if(infoBioText){
             var bioHeading = document.createElement('div');
             bioHeading.className = 'bio-heading';
             bioHeading.textContent = t('aboutSpeaker');
             infoBox.appendChild(bioHeading);
             var bioP = document.createElement('div');
             bioP.className = 'abstract-box';
-            bioP.textContent = bioText;
+            bioP.textContent = infoBioText;
             infoBox.appendChild(bioP);
           }
           card.appendChild(infoBox);
         }
-        if(hasInfoDetails && infoOpen && block.posters && block.posters.length){
+        if(hasPosters && infoPostersOpen){
           var posterList = document.createElement('div');
           posterList.className = 'talk-list';
           var posterHeading = document.createElement('div');
@@ -1012,6 +1027,7 @@
           var header = document.createElement('div');
           header.className = 'session-header';
           header.setAttribute('data-sid', sid);
+          if(hasAbstract) header.setAttribute('data-has-abstract', '1');
           var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
           header.innerHTML =
             '<div class="session-main">' +
@@ -1211,10 +1227,11 @@
     currentCategoryFilter = 'alle';
     expandedSessions = {};
     expandedSessionAbstract = {};
+    expandedInfoAbstract = {};
     expandedTalks = {};
     if(m.kind === 'session'){ expandedSessions[m.sid] = true; expandedSessionAbstract[m.sid] = true; }
     if(m.kind === 'talk'){ expandedSessions[m.sid] = true; expandedTalks[m.jumpId] = true; }
-    if(m.kind === 'info'){ expandedSessions[m.jumpId] = true; }
+    if(m.kind === 'info'){ expandedSessions[m.jumpId] = true; expandedInfoAbstract[m.jumpId] = true; }
     document.getElementById('programmSearch').value = '';
     document.getElementById('searchClearBtn').style.display = 'none';
     document.getElementById('searchResults').style.display = 'none';
@@ -2573,9 +2590,20 @@
       text_en: 'Click a room to see it highlighted on the floor plan.'
     },
     {
+      selector: '.session-header[data-has-abstract="1"]',
+      text: 'Klicke hier, um mehr Informationen zur Session (z. B. Abstract) zu sehen.',
+      text_en: 'Click here to see more information about the session (e.g. the abstract).'
+    },
+    {
       selector: '.session-header .chevron',
       text: 'Klicke hier, um die einzelnen Vorträge dieser Session zu sehen.',
       text_en: 'Click here to see the individual talks in this session.'
+    },
+    {
+      selector: '.talk-main',
+      beforeStep: tourSetupExpandedSession,
+      text: 'Klicke auf einen Vortrag, um das Abstract angezeigt zu bekommen.',
+      text_en: 'Click a talk to see its abstract.'
     },
     {
       selector: '.author-link',
@@ -2687,6 +2715,8 @@
     currentDay = DATA.programm[0].id;
     currentCategoryFilter = 'alle';
     expandedSessions = {};
+    expandedSessionAbstract = {};
+    expandedInfoAbstract = {};
     expandedTalks = {};
     switchToView('programm');
     renderAll();
