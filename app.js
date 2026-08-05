@@ -1077,7 +1077,10 @@
               ev.stopPropagation();
               var wasOpen = !!expandedSessions[sid];
               expandedSessions = {};
-              if(!wasOpen){ expandedSessions[sid] = true; }
+              if(!wasOpen){
+                expandedSessions[sid] = true;
+                delete expandedSessionAbstract[sid];
+              }
               rerenderPreservingScroll('row-' + sid);
             });
           }
