@@ -1,0 +1,13 @@
+pages:
+  stage: deploy
+  tags:
+    - dgl2026
+  pages: true
+  script:
+    - New-Item -ItemType Directory -Force -Path public
+    - Copy-Item -Path *.html,*.js,*.json,*.svg,*.png,*.txt -Destination public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
