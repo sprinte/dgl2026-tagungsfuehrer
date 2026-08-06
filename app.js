@@ -68,8 +68,8 @@
       presentersTalkPattern: 'Uhrzeit_Nachname.pptx',
       presentersExample: 'Beispiel: „1100_Oprei.pptx"',
       presentersPosterHeading: 'Poster Speed Talk (optionale Folie zu Ihrem Poster)',
-      presentersPosterNamingInfo: 'Stellwand_Nachname.pptx',
-      presentersPosterExample: 'Beispiel: „22_Heinrich.pptx"',
+      presentersPosterNamingInfo: 'Nummer_Nachname.pptx',
+      presentersPosterExample: 'Beispiel: „03_Heinrich.pptx" (Nummer = Reihenfolge beim Poster Speed Talk)',
       presentersWarning: '⚠️ Wichtig: Verwenden Sie den Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt.',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
@@ -159,8 +159,8 @@
       presentersTalkPattern: 'Time_Surname.pptx',
       presentersExample: 'Example: "1100_Oprei.pptx"',
       presentersPosterHeading: 'Poster speed talk (optional slide for your poster)',
-      presentersPosterNamingInfo: 'Board_Surname.pptx',
-      presentersPosterExample: 'Example: "22_Heinrich.pptx"',
+      presentersPosterNamingInfo: 'Number_Surname.pptx',
+      presentersPosterExample: 'Example: "03_Heinrich.pptx" (number = order in the poster speed talk)',
       presentersWarning: '⚠️ Important: Use the surname of the registered first author, even if someone else is presenting.',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
@@ -1889,15 +1889,15 @@
               allEntries.push({ type: 'talk', lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
             });
           });
-        } else if(block.type === 'info' && (block.title === 'Postersession 1' || block.title === 'Postersession 2')){
-          var psNumber = block.title === 'Postersession 1' ? '1' : '2';
-          (block.posters || []).forEach(function(p){
+        } else if(block.type === 'info' && (block.title === 'Postersession 1 – Speed Talks' || block.title === 'Postersession 2 – Speed Talks')){
+          var psNumber = block.title === 'Postersession 1 – Speed Talks' ? '1' : '2';
+          (block.posters || []).forEach(function(p, pIdx){
             var firstAuthor = (p.authorsDisplay || '').split(' — ')[0].split(',')[0].trim();
             if(!firstAuthor) return;
             var words = firstAuthor.split(/\s+/).filter(Boolean);
             var lastName = words[words.length - 1];
-            var boardNum = (p.board || '').split(' ')[0];
-            allEntries.push({ type: 'poster', lastName: lastName, code: p.code, board: boardNum, psNumber: psNumber, title: p.title, dayLabel: day.label });
+            var orderNum = String(pIdx + 1).padStart(2, '0');
+            allEntries.push({ type: 'poster', lastName: lastName, code: p.code, orderNum: orderNum, psNumber: psNumber, title: p.title, dayLabel: day.label });
           });
         } else if(block.type === 'info' && block.isPlenary && block.tag === 'Plenarvortrag'){
           var words = (block.title || '').trim().split(/\s+/).filter(Boolean);
@@ -1911,7 +1911,7 @@
 
     function buildFilename(entry){
       if(entry.type === 'poster'){
-        return entry.board + '_' + entry.lastName + '.pptx';
+        return entry.orderNum + '_' + entry.lastName + '.pptx';
       }
       if(entry.type === 'plenary'){
         var plenaryTimeSlug = entry.time.replace(':', '');
@@ -1956,7 +1956,7 @@
         var row = document.createElement('div');
         row.className = 'presenter-result-row';
         var label = entry.type === 'poster'
-          ? (entry.lastName + ', Postersession ' + entry.psNumber + ', Poster ' + entry.code + ' (Stellwand ' + entry.board + '), ' + entry.dayLabel + ', ' + entry.title.slice(0, 40) + '…')
+          ? (entry.lastName + ', Postersession ' + entry.psNumber + ', Speed Talk Nr. ' + entry.orderNum + ', Poster ' + entry.code + ', ' + entry.dayLabel + ', ' + entry.title.slice(0, 40) + '…')
           : entry.type === 'plenary'
           ? (entry.lastName + ', Plenarvortrag, ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40))
           : (entry.lastName + ', ' + entry.code + ', ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40) + '…');
