@@ -1,55 +1,62 @@
-# Trage hier für jede Session/jeden Ordner den passenden Nimbus/Nextcloud-Link ein.
+# Trage hier für jede Session/jeden Ordner den passenden Nimbus-Link ein.
 # Format: Schluessel=Link   (kein Leerzeichen um das Gleichheitszeichen, eine Zeile pro Eintrag)
 # Zeilen, die mit # beginnen, werden ignoriert.
-#
-# _unsortiert ist PFLICHT – das ist der Link, der genutzt wird, wenn die App
-# keine passende Session zu einem Namen findet (Sicherheitsnetz).
-#
-# WICHTIG: A01 und A09 laufen über zwei Tage und brauchen deshalb JEWEILS
-# zwei separate Zeilen (Montag_A01 UND Dienstag_A01 usw.) – das ist kein Fehler.
-#
-# Beispiel: _unsortiert=https://nimbus.igb-berlin.de/index.php/s/AbCdEfGhIjKlMnOp
 
-_unsortiert=https://nimbus.igb-berlin.de/index.php/s/tSmJf24WKeMcRQS
+_unsortiert=https://nimbus.igb-berlin.de/index.php/s/qtf9Q3bWo3ExM7Z
 
-# --- Plenarvorträge & Postersessions (nicht tagesgebunden) ---
-Plenar=https://nimbus.igb-berlin.de/index.php/s/MbJWqXiHediX8RM
-Postersession_1=https://nimbus.igb-berlin.de/index.php/s/r3H82eJDHpqHwQo
-Postersession_2=https://nimbus.igb-berlin.de/index.php/s/fnCAZEbpKDZYGZd
+# --- Postersessions (nicht tagesgebunden, gilt für Poster Speed Talks UND die eigentliche Postersession) ---
+Postersession_1=https://nimbus.igb-berlin.de/index.php/s/xoKbdgwN55HAsHM
+Postersession_2=https://nimbus.igb-berlin.de/index.php/s/ZNk7d2B3mC9QZy6
 
 # --- Montag, 14.09. ---
-Montag_A01=https://nimbus.igb-berlin.de/index.php/s/zLeFtDMTmK2HFSn
-Montag_A02=https://nimbus.igb-berlin.de/index.php/s/5BNXqYCXgdsrZXe
-Montag_A03=https://nimbus.igb-berlin.de/index.php/s/YafCC96m94iw2Xj
-Montag_S03=https://nimbus.igb-berlin.de/index.php/s/SGbMQJaWTiLDaNe
-Montag_S04=https://nimbus.igb-berlin.de/index.php/s/KMcyAajKidDrLCq
-Montag_S19=https://nimbus.igb-berlin.de/index.php/s/xJ4mtRLnraKYPTB
+Montag_Plenar=https://nimbus.igb-berlin.de/index.php/s/GqewQcM4mXamzzA
+Montag_A01=https://nimbus.igb-berlin.de/index.php/s/zc5XYFoi5gnEEMw
+Montag_A02=https://nimbus.igb-berlin.de/index.php/s/9zZF7tJBDpAMdSo
+Montag_A03=https://nimbus.igb-berlin.de/index.php/s/5n4xmpLFR9eajoe
+Montag_S03=https://nimbus.igb-berlin.de/index.php/s/gAwsCPNpBxisRdQ
+Montag_S04=https://nimbus.igb-berlin.de/index.php/s/8RqXDQZJ3mPdarF
+Montag_S19=https://nimbus.igb-berlin.de/index.php/s/7PPZGXWHQAEKw7Y
 
 # --- Dienstag, 15.09. ---
-Dienstag_A01=https://nimbus.igb-berlin.de/index.php/s/9MJrWd7Ni7BBLrZ
-Dienstag_A06=https://nimbus.igb-berlin.de/index.php/s/b6jZNN5kNTSz9Xm
-Dienstag_A07=https://nimbus.igb-berlin.de/index.php/s/EYRjEq7YRxAXSAG
-Dienstag_S01=https://nimbus.igb-berlin.de/index.php/s/6tdN7kDifTk8iMm
-Dienstag_S02=https://nimbus.igb-berlin.de/index.php/s/EWPg8znW7Wn9L46
-Dienstag_S09=https://nimbus.igb-berlin.de/index.php/s/z8EpFFLdTyKFR3P
-Dienstag_S12=https://nimbus.igb-berlin.de/index.php/s/MH8nJbE2S4emW2S
-Dienstag_S13=https://nimbus.igb-berlin.de/index.php/s/sZz2GGzFiBTzf3G
-Dienstag_S14_16=https://nimbus.igb-berlin.de/index.php/s/yZW5CK7tPrnDA6C
+Dienstag_Plenar=https://nimbus.igb-berlin.de/index.php/s/QxaSFJcgFgLrr9b
+Dienstag_A01=https://nimbus.igb-berlin.de/index.php/s/8xyXWm5ftztcTja
+Dienstag_A06=https://nimbus.igb-berlin.de/index.php/s/Lk7qQXesm9Swi3S
+Dienstag_A07=https://nimbus.igb-berlin.de/index.php/s/NKYKyLskBk8X2Zq
+Dienstag_S01=https://nimbus.igb-berlin.de/index.php/s/owKiqj7kAJosH5Q
+Dienstag_S02=https://nimbus.igb-berlin.de/index.php/s/32zJotn96cF87bg
+Dienstag_S09=https://nimbus.igb-berlin.de/index.php/s/yD4AWMR7fR9gJtW
+Dienstag_S12=https://nimbus.igb-berlin.de/index.php/s/ijAC9iGQasx52En
+Dienstag_S13=https://nimbus.igb-berlin.de/index.php/s/rBtzHm6N59KnWLN
+Dienstag_S14_16=https://nimbus.igb-berlin.de/index.php/s/amyDoL77kCMBExy
 
 # --- Mittwoch, 16.09. ---
-Mittwoch_A05=https://nimbus.igb-berlin.de/index.php/s/rttXeeeYmtbtY7D
-Mittwoch_A09=https://nimbus.igb-berlin.de/index.php/s/8efmTzbgfGtZ7nR
-Mittwoch_S07=https://nimbus.igb-berlin.de/index.php/s/9bWmCbD5bdJNELQ
-Mittwoch_S08=https://nimbus.igb-berlin.de/index.php/s/trqHaNW9dE6FF2X
-Mittwoch_S11=https://nimbus.igb-berlin.de/index.php/s/JQYrqABrqy5FE5e
-Mittwoch_S15=https://nimbus.igb-berlin.de/index.php/s/JMyo2npfKBa4NGH
-Mittwoch_S17=https://nimbus.igb-berlin.de/index.php/s/8ynRZx7simdJB4g
-Mittwoch_S20=https://nimbus.igb-berlin.de/index.php/s/2p49kmFozrNLPKq
-Mittwoch_S21=https://nimbus.igb-berlin.de/index.php/s/P7Ae4rRzPgsjD3p
+Mittwoch_Plenar=https://nimbus.igb-berlin.de/index.php/s/YBx3Ys4T76FpLZE
+Mittwoch_A05=https://nimbus.igb-berlin.de/index.php/s/JADz5QoB7iGx8sw
+Mittwoch_A09=https://nimbus.igb-berlin.de/index.php/s/2GErkw4FJ6R9CyE
+Mittwoch_S07=https://nimbus.igb-berlin.de/index.php/s/tnckge7H5Cn2JtN
+Mittwoch_S08=https://nimbus.igb-berlin.de/index.php/s/m8gDm5kEr7D2xbH
+Mittwoch_S11=https://nimbus.igb-berlin.de/index.php/s/oeSXJaLnDRmi46s
+Mittwoch_S15=https://nimbus.igb-berlin.de/index.php/s/SrYrTX3gxYL9YYW
+Mittwoch_S17=https://nimbus.igb-berlin.de/index.php/s/BLqqKwNXsFeyLDq
+Mittwoch_S20=https://nimbus.igb-berlin.de/index.php/s/2Y4WDEwrFbZbsoM
+Mittwoch_S21=https://nimbus.igb-berlin.de/index.php/s/3mgwMjr8YKSw95P
 
 # --- Donnerstag, 17.09. ---
-Donnerstag_A04=https://nimbus.igb-berlin.de/index.php/s/EXaSRat42qAZwLj
-Donnerstag_A08=https://nimbus.igb-berlin.de/index.php/s/24LXbdZAz2t5cyX
-Donnerstag_A09=https://nimbus.igb-berlin.de/index.php/s/tRZCTp9x8YtAbSF
-Donnerstag_A10=https://nimbus.igb-berlin.de/index.php/s/83BLopfkRy5E4z8
-Donnerstag_S05=https://nimbus.igb-berlin.de/index.php/s/jHKyp9o5d2mxmr8
+Donnerstag_Plenar=https://nimbus.igb-berlin.de/index.php/s/GNmfkAPrGk5NSaY
+Donnerstag_A04=https://nimbus.igb-berlin.de/index.php/s/7PTG8ZSs4HnSRf9
+Donnerstag_A08=https://nimbus.igb-berlin.de/index.php/s/QBqsiaWEgKGDfNd
+Donnerstag_A09=https://nimbus.igb-berlin.de/index.php/s/d6PKexmiYLXF84k
+Donnerstag_A10=https://nimbus.igb-berlin.de/index.php/s/PYWW2tFJ7riETfS
+Donnerstag_S05=https://nimbus.igb-berlin.de/index.php/s/YQDDsfEx9JcM8Yr
+
+# --- Links, die es bei dir zusätzlich gibt, aber (noch) keiner App-internen
+# Session entsprechen (siehe Hinweis im Chat) — zur Referenz mit aufgeführt,
+# werden von der App aktuell nicht automatisch angesteuert:
+# Eröffnung (Montag) = https://nimbus.igb-berlin.de/index.php/s/9LF4SbtiF7Cn6rt
+# WRHC Sessions (Montag) = https://nimbus.igb-berlin.de/index.php/s/PkcMHpiJzCMSbJB
+# WRHC-Praxispreis (Montag) = https://nimbus.igb-berlin.de/index.php/s/3aFrE7icd739ptJ
+# WRHC Sessions (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/M5FCpASyiAYGmXm
+# DGL-Mitgliederversammlung (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/Mkxq3BnLk8oma2Z
+# Workshop S18: Methoden (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/EBiTAinmFJnDAtm
+# Schwoerbel-Benndorf-Nachwuchspreis (Mittwoch) = https://nimbus.igb-berlin.de/index.php/s/BEoNXLA2TAs8Ha4
+# Abschluss (Donnerstag) = https://nimbus.igb-berlin.de/index.php/s/FYgae66b6TQdJ9Y
