@@ -68,9 +68,8 @@
       presentersTalkPattern: 'Session_Tag_Nachname_Uhrzeit.pptx',
       presentersExample: 'Beispiel: „S12_Dienstag_Oprei_11-30.pptx"',
       presentersPosterHeading: 'Poster Speed Talk (optionale Folie zu Ihrem Poster)',
-      presentersPosterNamingInfo: 'Poster_Session_Tag_Nachname.pptx',
-      presentersPosterExample: 'Beispiel: „Poster_S12_Dienstag_Heinrich.pptx"',
-      presentersPosterMultiExample: 'Bei mehreren zugeordneten Sessions: „Poster_S12_S14_Dienstag_Heinrich.pptx"',
+      presentersPosterNamingInfo: 'Postersession[Nummer]_Tag_Nachname.pptx',
+      presentersPosterExample: 'Beispiel: „Postersession1_Dienstag_Heinrich.pptx"',
       presentersWarning: 'Achtung: Es muss sich hier um den Nachnamen des gemeldeten Erstautors/der gemeldeten Erstautorin handeln, nicht um den Nachnamen des/der Vortragenden (falls abweichend)!',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
@@ -160,9 +159,8 @@
       presentersTalkPattern: 'Session_Day_Surname_Time.pptx',
       presentersExample: 'Example: "S12_Tuesday_Oprei_11-30.pptx"',
       presentersPosterHeading: 'Poster speed talk (optional slide for your poster)',
-      presentersPosterNamingInfo: 'Poster_Session_Day_Surname.pptx',
-      presentersPosterExample: 'Example: "Poster_S12_Tuesday_Heinrich.pptx"',
-      presentersPosterMultiExample: 'With multiple assigned sessions: "Poster_S12_S14_Tuesday_Heinrich.pptx"',
+      presentersPosterNamingInfo: 'Postersession[number]_Day_Surname.pptx',
+      presentersPosterExample: 'Example: "Postersession1_Tuesday_Heinrich.pptx"',
       presentersWarning: 'Note: This must be the surname of the registered first author, not the surname of the presenter (if different)!',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
@@ -613,7 +611,7 @@
   var currentCategoryFilter = 'alle';
 
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together', 'Early Career Meetup', 'Vorabendtreff'];
-  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Poster Speed Talks', 'Postersession', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
+  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Postersession 1 – Speed Talks', 'Postersession 2 – Speed Talks', 'Postersession 1', 'Postersession 2', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
   var WORKSHOP_TITLES = ['Arbeitskreise'];
   var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'Preisvortrag': 'plenary' };
 
@@ -1280,7 +1278,7 @@
             title: block.title, title_en: block.title_en,
             isPlenary: !!block.isPlenary, tag: block.tag, tag_en: block.tag_en
           });
-          if(block.title !== 'Poster Speed Talks'){
+          if(block.title !== 'Postersession 1 – Speed Talks' && block.title !== 'Postersession 2 – Speed Talks'){
             (block.posters || []).forEach(function(p, pidx){
               searchIndex.push({
                 kind: 'poster', dayId: day.id, jumpId: planIdForPoster(day.id, p), blockId: id, timeLabel: block.time,
@@ -1811,7 +1809,6 @@
         '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersPosterHeading') + '</div>' +
         '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersPosterNamingInfo') + '</code></div>' +
         '<div class="lunch-meta">' + t('presentersPosterExample') + '</div>' +
-        '<div class="lunch-meta">' + t('presentersPosterMultiExample') + '</div>' +
         '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
         '<div style="margin-top:14px;">' +
           '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + ' ' + t('presentersRenameInfo') + '</div>' +
@@ -1892,14 +1889,15 @@
               allEntries.push({ type: 'talk', lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
             });
           });
-        } else if(block.type === 'info' && block.title === 'Postersession'){
+        } else if(block.type === 'info' && (block.title === 'Postersession 1' || block.title === 'Postersession 2')){
+          var psNumber = block.title === 'Postersession 1' ? '1' : '2';
           (block.posters || []).forEach(function(p){
             var firstAuthor = (p.authorsDisplay || '').split(' — ')[0].split(',')[0].trim();
             if(!firstAuthor) return;
             var words = firstAuthor.split(/\s+/).filter(Boolean);
             var lastName = words[words.length - 1];
             var boardNum = (p.board || '').split(' ')[0];
-            allEntries.push({ type: 'poster', lastName: lastName, code: p.code, board: boardNum, title: p.title, dayLabel: day.label });
+            allEntries.push({ type: 'poster', lastName: lastName, code: p.code, board: boardNum, psNumber: psNumber, title: p.title, dayLabel: day.label });
           });
         }
       });
@@ -1907,8 +1905,7 @@
 
     function buildFilename(entry){
       if(entry.type === 'poster'){
-        var posterCodeSlug = entry.code.replace(/,\s*/g, '_').replace(/\//g, '_');
-        return 'Poster_' + posterCodeSlug + '_' + entry.dayLabel + '_' + entry.lastName + '.pptx';
+        return 'Postersession' + entry.psNumber + '_' + entry.dayLabel + '_' + entry.lastName + '.pptx';
       }
       var timeSlug = entry.time.replace(':', '-');
       var codeSlug = entry.code.replace(/\//g, '_');
@@ -1938,7 +1935,7 @@
         var row = document.createElement('div');
         row.className = 'presenter-result-row';
         var label = entry.type === 'poster'
-          ? (entry.lastName + ', Poster ' + entry.code + ' (Stellwand ' + entry.board + '), ' + entry.dayLabel + ', ' + entry.title.slice(0, 40) + '…')
+          ? (entry.lastName + ', Postersession ' + entry.psNumber + ', Poster ' + entry.code + ' (Stellwand ' + entry.board + '), ' + entry.dayLabel + ', ' + entry.title.slice(0, 40) + '…')
           : (entry.lastName + ', ' + entry.code + ', ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40) + '…');
         row.textContent = label;
         row.addEventListener('click', function(){
