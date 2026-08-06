@@ -40,7 +40,7 @@
   <text x="657.5" y="278" text-anchor="middle" dominant-baseline="central" font-size="10px" font-weight="700" fill="#003d73" id="text23">0'110</text>
   <text x="657.5" y="291" text-anchor="middle" dominant-baseline="central" font-size="8.5px" fill="#1d6f5c" id="text24">Small hall · 0/110</text>
   </g><g id="fp-tagungsbuero" class="fp-room"><rect x="505.0672" y="156.97632" width="27.865557" height="70.956459" fill="#f3e4ee" stroke="#8a4b8f" stroke-width="2.13445" rx="3.9807935" id="rect24" />
-  <text x="-192.35445" y="519" text-anchor="middle" dominant-baseline="central" font-size="10px" font-weight="700" fill="#003d73" transform="rotate(-90)" id="text25">Conference office</text>
+  <text x="-192.35445" y="519" text-anchor="middle" font-size="9px" font-weight="700" fill="#003d73" transform="rotate(-90)" id="text25"><tspan x="-192.35445" dy="-2">Conference</tspan><tspan x="-192.35445" dy="10">office</tspan></text>
   </g><rect x="545" y="166" width="40" height="56" fill="#eceae2" stroke="#c7cbc4" stroke-width="1" rx="4" id="rect25" />
   <line x1="550" y1="172" x2="580" y2="172" stroke="#5c6570" stroke-width="1" id="line25" />
   <line x1="550" y1="182.75" x2="580" y2="182.75" stroke="#5c6570" stroke-width="1" id="line26" />
@@ -56,7 +56,7 @@
   </g>
   <g id="g2" transform="translate(0,16)">
     <rect x="528.55225" y="18.883717" width="14" height="14" fill="#f3e4ee" stroke="#8a4b8f" stroke-width="2" rx="2" id="rect31" />
-    <text x="548.55225" y="25.627274" dominant-baseline="central" font-size="11px" fill="#1c2530" id="text32">Conference office</text>
+    <text x="548.55225" y="25.627274" font-size="10px" fill="#1c2530" id="text32"><tspan x="548.55225" dy="-2">Conference</tspan><tspan x="548.55225" dy="11">office</tspan></text>
   </g>
   <g id="g3" transform="translate(0,16)">
     <rect x="632.55225" y="18.883717" width="14" height="14" fill="#fdf1e0" stroke="#c9932f" stroke-width="1" rx="2" id="rect32" />

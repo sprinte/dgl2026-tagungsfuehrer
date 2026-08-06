@@ -1661,6 +1661,21 @@
         .bindPopup('<strong>' + esc(sv.name) + '</strong><br>' + esc(sv.address) + '<br>' + (lang === 'en' ? 'Conference Dinner' : 'Gesellschaftsabend'))
         .bindTooltip(sv.name + (lang === 'en' ? ' (Conference Dinner)' : ' (Gesellschaftsabend)'), { direction: 'top', offset: [0, -17], className: 'venue-tooltip social-tooltip' });
     }
+
+    if(venue.preEveningVenue){
+      var pv = venue.preEveningVenue;
+      var preEveningIcon = L.divIcon({
+        className: '', html:
+          '<div style="position:relative;width:34px;height:34px;">' +
+            '<div class="venue-pulse" style="background:rgba(29,111,92,.35);"></div>' +
+            '<div style="position:relative;background:#1d6f5c;color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);">&#127860;</div>' +
+          '</div>',
+        iconSize: [34,34], iconAnchor: [17,17]
+      });
+      L.marker([pv.lat, pv.lng], { icon: preEveningIcon, zIndexOffset: 900 }).addTo(lunchMapInstance)
+        .bindPopup('<strong>' + esc(pv.name) + '</strong><br>' + esc(pv.address) + '<br>' + (lang === 'en' ? 'Pre-conference get-together' : 'Vorabendtreff'))
+        .bindTooltip(pv.name + (lang === 'en' ? ' (Pre-conference get-together)' : ' (Vorabendtreff)'), { direction: 'top', offset: [0, -17], className: 'venue-tooltip social-tooltip' });
+    }
   }
 
   function setLunchView(mode){
