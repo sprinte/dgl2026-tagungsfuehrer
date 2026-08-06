@@ -1,6 +1,55 @@
-# Trage hier in der ersten Zeile den Link zum Cloud-Ordner ein (z.B. Nimbus-Link),
-# in dem Vortragende ihre Präsentation hochladen können.
-# Alles ab der Raute (#) wird ignoriert. Nur die erste Zeile ohne # zählt.
-# Beispiel: https://nimbus.tu-berlin.de/s/AbCdEfGhIjKlMnOp
-https://nimbus.igb-berlin.de/index.php/s/zTFHJwF8tGGcpAJ
+# Trage hier für jede Session/jeden Ordner den passenden Nimbus/Nextcloud-Link ein.
+# Format: Schluessel=Link   (kein Leerzeichen um das Gleichheitszeichen, eine Zeile pro Eintrag)
+# Zeilen, die mit # beginnen, werden ignoriert.
+#
+# _unsortiert ist PFLICHT – das ist der Link, der genutzt wird, wenn die App
+# keine passende Session zu einem Namen findet (Sicherheitsnetz).
+#
+# WICHTIG: A01 und A09 laufen über zwei Tage und brauchen deshalb JEWEILS
+# zwei separate Zeilen (Montag_A01 UND Dienstag_A01 usw.) – das ist kein Fehler.
+#
+# Beispiel: _unsortiert=https://nimbus.igb-berlin.de/index.php/s/AbCdEfGhIjKlMnOp
 
+_unsortiert=https://nimbus.igb-berlin.de/index.php/s/tSmJf24WKeMcRQS
+
+# --- Plenarvorträge & Postersessions (nicht tagesgebunden) ---
+Plenar=https://nimbus.igb-berlin.de/index.php/s/MbJWqXiHediX8RM
+Postersession_1=https://nimbus.igb-berlin.de/index.php/s/r3H82eJDHpqHwQo
+Postersession_2=https://nimbus.igb-berlin.de/index.php/s/fnCAZEbpKDZYGZd
+
+# --- Montag, 14.09. ---
+Montag_A01=https://nimbus.igb-berlin.de/index.php/s/zLeFtDMTmK2HFSn
+Montag_A02=https://nimbus.igb-berlin.de/index.php/s/5BNXqYCXgdsrZXe
+Montag_A03=https://nimbus.igb-berlin.de/index.php/s/YafCC96m94iw2Xj
+Montag_S03=https://nimbus.igb-berlin.de/index.php/s/SGbMQJaWTiLDaNe
+Montag_S04=https://nimbus.igb-berlin.de/index.php/s/KMcyAajKidDrLCq
+Montag_S19=https://nimbus.igb-berlin.de/index.php/s/xJ4mtRLnraKYPTB
+
+# --- Dienstag, 15.09. ---
+Dienstag_A01=https://nimbus.igb-berlin.de/index.php/s/9MJrWd7Ni7BBLrZ
+Dienstag_A06=https://nimbus.igb-berlin.de/index.php/s/b6jZNN5kNTSz9Xm
+Dienstag_A07=https://nimbus.igb-berlin.de/index.php/s/EYRjEq7YRxAXSAG
+Dienstag_S01=https://nimbus.igb-berlin.de/index.php/s/6tdN7kDifTk8iMm
+Dienstag_S02=https://nimbus.igb-berlin.de/index.php/s/EWPg8znW7Wn9L46
+Dienstag_S09=https://nimbus.igb-berlin.de/index.php/s/z8EpFFLdTyKFR3P
+Dienstag_S12=https://nimbus.igb-berlin.de/index.php/s/MH8nJbE2S4emW2S
+Dienstag_S13=https://nimbus.igb-berlin.de/index.php/s/sZz2GGzFiBTzf3G
+Dienstag_S14_16=https://nimbus.igb-berlin.de/index.php/s/yZW5CK7tPrnDA6C
+
+# --- Mittwoch, 16.09. ---
+Mittwoch_A05=https://nimbus.igb-berlin.de/index.php/s/rttXeeeYmtbtY7D
+Mittwoch_A09=https://nimbus.igb-berlin.de/index.php/s/8efmTzbgfGtZ7nR
+Mittwoch_S07=https://nimbus.igb-berlin.de/index.php/s/9bWmCbD5bdJNELQ
+Mittwoch_S08=https://nimbus.igb-berlin.de/index.php/s/trqHaNW9dE6FF2X
+Mittwoch_S11=https://nimbus.igb-berlin.de/index.php/s/JQYrqABrqy5FE5e
+Mittwoch_S15=https://nimbus.igb-berlin.de/index.php/s/JMyo2npfKBa4NGH
+Mittwoch_S17=https://nimbus.igb-berlin.de/index.php/s/8ynRZx7simdJB4g
+Mittwoch_S20=https://nimbus.igb-berlin.de/index.php/s/2p49kmFozrNLPKq
+Mittwoch_S21=https://nimbus.igb-berlin.de/index.php/s/P7Ae4rRzPgsjD3p
+
+# --- Donnerstag, 17.09. ---
+Donnerstag_A04=https://nimbus.igb-berlin.de/index.php/s/EXaSRat42qAZwLj
+Donnerstag_A08=https://nimbus.igb-berlin.de/index.php/s/24LXbdZAz2t5cyX
+Donnerstag_A09=https://nimbus.igb-berlin.de/index.php/s/tRZCTp9x8YtAbSF
+Donnerstag_A10=https://nimbus.igb-berlin.de/index.php/s/83BLopfkRy5E4z8
+Donnerstag_S05=https://nimbus.igb-berlin.de/index.php/s/jHKyp9o5d2mxmr8

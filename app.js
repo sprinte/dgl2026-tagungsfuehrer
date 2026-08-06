@@ -1826,7 +1826,7 @@
             '<button class="btn-secondary" id="presenterRenameBtn" style="width:100%;margin-top:6px;">' + t('presentersRenameBtn') + '</button>' +
           '</div>' +
         '</div>' +
-        (presenterUploadUrl ? '<a class="venue-map-link" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
+        (presenterUploadUrl ? '<a class="venue-map-link" id="presenterUploadLinkMain" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
@@ -1899,6 +1899,12 @@
             var boardNum = (p.board || '').split(' ')[0];
             allEntries.push({ type: 'poster', lastName: lastName, code: p.code, board: boardNum, psNumber: psNumber, title: p.title, dayLabel: day.label });
           });
+        } else if(block.type === 'info' && block.isPlenary && block.tag === 'Plenarvortrag'){
+          var words = (block.title || '').trim().split(/\s+/).filter(Boolean);
+          if(!words.length) return;
+          var lastName = words[words.length - 1];
+          var timeMatch = /(\d{1,2}:\d{2})/.exec(block.time || '');
+          allEntries.push({ type: 'plenary', lastName: lastName, title: block.title, dayLabel: day.label, time: timeMatch ? timeMatch[1] : (block.time || '') });
         }
       });
     });
@@ -1907,9 +1913,19 @@
       if(entry.type === 'poster'){
         return 'Postersession' + entry.psNumber + '_' + entry.dayLabel + '_' + entry.lastName + '.pptx';
       }
+      if(entry.type === 'plenary'){
+        var plenaryTimeSlug = entry.time.replace(':', '-');
+        return 'Plenar_' + entry.dayLabel + '_' + entry.lastName + '_' + plenaryTimeSlug + '.pptx';
+      }
       var timeSlug = entry.time.replace(':', '-');
       var codeSlug = entry.code.replace(/\//g, '_');
       return codeSlug + '_' + entry.dayLabel + '_' + entry.lastName + '_' + timeSlug + '.pptx';
+    }
+
+    function uploadKeyForEntry(entry){
+      if(entry.type === 'poster') return 'Postersession_' + entry.psNumber;
+      if(entry.type === 'plenary') return 'Plenar';
+      return entry.dayLabel + '_' + (entry.code || '').replace(/\//g, '_');
     }
 
     function selectEntry(entry){
@@ -1918,6 +1934,10 @@
       document.getElementById('presenterFilenameOutput').textContent = buildFilename(entry);
       filenameBox.style.display = '';
       notFoundBox.style.display = 'none';
+      var key = uploadKeyForEntry(entry);
+      var matchedUrl = presenterUploadLinks[key] || presenterUploadLinks['_unsortiert'] || '';
+      var linkEl = document.getElementById('presenterUploadLinkMain');
+      if(linkEl && matchedUrl) linkEl.setAttribute('href', matchedUrl);
     }
 
     nameInput.addEventListener('input', function(){
@@ -1936,6 +1956,8 @@
         row.className = 'presenter-result-row';
         var label = entry.type === 'poster'
           ? (entry.lastName + ', Postersession ' + entry.psNumber + ', Poster ' + entry.code + ' (Stellwand ' + entry.board + '), ' + entry.dayLabel + ', ' + entry.title.slice(0, 40) + '…')
+          : entry.type === 'plenary'
+          ? (entry.lastName + ', Plenarvortrag, ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40))
           : (entry.lastName + ', ' + entry.code + ', ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40) + '…');
         row.textContent = label;
         row.addEventListener('click', function(){
@@ -2660,6 +2682,7 @@
   }
 
   var presenterUploadUrl = '';
+  var presenterUploadLinks = {};
   function loadPresenterUploadLink(){
     fetch('presenter_upload_link.txt').then(function(r){
       return r.ok ? r.text() : '';
@@ -2667,11 +2690,14 @@
       var lines = (text || '').split('\n');
       for(var i = 0; i < lines.length; i++){
         var line = lines[i].trim();
-        if(line && line.indexOf('#') !== 0){
-          presenterUploadUrl = line;
-          break;
-        }
+        if(!line || line.indexOf('#') === 0) continue;
+        var eqIdx = line.indexOf('=');
+        if(eqIdx === -1) continue;
+        var key = line.slice(0, eqIdx).trim();
+        var url = line.slice(eqIdx + 1).trim();
+        if(key && url) presenterUploadLinks[key] = url;
       }
+      presenterUploadUrl = presenterUploadLinks['_unsortiert'] || '';
       safeRun(renderVenue, 'renderVenue');
     }).catch(function(e){
       console.error('Failed to load presenter upload link:', e);
