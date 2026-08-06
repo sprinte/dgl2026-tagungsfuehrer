@@ -757,7 +757,8 @@
   }
 
   function searchForAuthor(name, originView){
-    saveNavBackState(originView);
+    var previousQuery = document.getElementById('programmSearch').value;
+    saveNavBackState(originView, originView === 'search' ? { query: previousQuery } : null);
     // Different data sources format the same person differently (e.g. "Michael Hupfer"
     // on a poster vs "M. Hupfer" as a talk author) — matching on surname + first initial
     // bridges that gap, while still telling apart two different people who happen to
@@ -1401,7 +1402,7 @@
         item.querySelectorAll('.author-link').forEach(function(el){
           el.addEventListener('click', function(ev){
             ev.stopPropagation();
-            searchForAuthor(el.getAttribute('data-author'));
+            searchForAuthor(el.getAttribute('data-author'), 'search');
           });
         });
         item.querySelector('[data-role="search-add"]').addEventListener('click', function(ev){
@@ -1441,7 +1442,7 @@
         item.querySelectorAll('.author-link').forEach(function(el){
           el.addEventListener('click', function(ev){
             ev.stopPropagation();
-            searchForAuthor(el.getAttribute('data-author'));
+            searchForAuthor(el.getAttribute('data-author'), 'search');
           });
         });
         item.querySelector('[data-role="search-add"]').addEventListener('click', function(ev){
