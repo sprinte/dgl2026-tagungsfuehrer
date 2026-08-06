@@ -61,18 +61,22 @@
       tourIntroText: '👋 Neu hier? Dann lass mich dir kurz zeigen, wie du diese App nutzt.',
       tourStart: 'Tour starten',
       tourHelpBtn: '👋 Neu hier?',
-      presentersCardTitle: 'Für Vortragende',
-      presentersDuration: 'Für die Vorträge stehen 12 Minuten zur Verfügung, anschließend bis zu drei Minuten für Fragen. Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich).',
-      presentersNamingInfo: 'Bitte benennen Sie Ihre Datei eindeutig nach folgendem Muster:',
+      presentersCardTitle: 'Upload Ihrer Präsentation',
+      presentersDuration: 'Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien).',
+      presentersNamingInfo: 'Benennen Sie Ihre Datei bitte eindeutig nach folgendem Muster:',
+      presentersTalkHeading: 'Vortrag (12 Min. + bis zu 3 Min. Fragen)',
+      presentersTalkPattern: 'Session_Tag_Nachname_Uhrzeit.pptx',
       presentersExample: 'Beispiel: „S12_Dienstag_Oprei_11-30.pptx"',
-      presentersPosterNamingInfo: 'Halten Sie zu Ihrem Poster einen Speed Talk? Optional können Sie dazu auch eine Folie hochladen, dann bitte in diesem Muster benennen:',
-      presentersPosterExample: 'Beispiel: „Poster_22_Mittwoch_Loh.pptx"',
+      presentersPosterHeading: 'Poster Speed Talk (optionale Folie zu Ihrem Poster)',
+      presentersPosterNamingInfo: 'Poster_Session_Tag_Nachname.pptx',
+      presentersPosterExample: 'Beispiel: „Poster_S12_Dienstag_Heinrich.pptx"',
+      presentersPosterMultiExample: 'Bei mehreren zugeordneten Sessions: „Poster_S12_S14_Dienstag_Heinrich.pptx"',
       presentersWarning: 'Achtung: Es muss sich hier um den Nachnamen des gemeldeten Erstautors/der gemeldeten Erstautorin handeln, nicht um den Nachnamen des/der Vortragenden (falls abweichend)!',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Oprei',
-      presentersAutoInfo: 'Wenn Sie unten den Nachnamen eingeben, werden Session, Tag und Uhrzeit des Vortrags automatisch erkannt. Sie können den generierten Dateinamen dann direkt kopieren und für Ihre Datei nutzen.',
+      presentersAutoInfo: 'Hilfe beim Benennen: Geben Sie unten Ihren Nachnamen ein – Session, Tag und (bei Vorträgen) Uhrzeit werden automatisch erkannt, und Sie erhalten den fertigen Dateinamen zum Kopieren.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
       presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte prüfen Sie die Schreibweise oder wenden Sie sich ans Tagungsbüro.',
@@ -83,7 +87,7 @@
       presentersFilename: 'Ihr Dateiname:',
       presentersCopy: 'Kopieren',
       presentersCopied: 'Dateiname kopiert!',
-      presentersRenameInfo: 'Alternativ: Datei auswählen, wir laden eine umbenannte Kopie herunter – geschieht komplett auf Ihrem Gerät, es wird nichts hochgeladen.',
+      presentersRenameInfo: 'Alternativ: Datei auswählen, wir laden Ihnen eine bereits umbenannte Kopie herunter. Das läuft komplett lokal in Ihrem Browser – es wird nichts hochgeladen.',
       presentersRenameBtn: 'Datei auswählen & umbenennen',
       presentersRenamed: 'Heruntergeladen als "{name}" – diese Datei jetzt bei Nimbus hochladen.',
       planViewList: 'Liste',
@@ -149,18 +153,22 @@
       tourIntroText: '👋 New here? Let us quickly show you how to use this app.',
       tourStart: 'Start tour',
       tourHelpBtn: '👋 New here?',
-      presentersCardTitle: 'For Presenters',
-      presentersDuration: 'Talks are allotted 12 minutes, followed by up to three minutes for questions. Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only).',
+      presentersCardTitle: 'Upload your presentation',
+      presentersDuration: 'Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only, no access to already uploaded files).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
+      presentersTalkHeading: 'Talk (12 min. + up to 3 min. of questions)',
+      presentersTalkPattern: 'Session_Day_Surname_Time.pptx',
       presentersExample: 'Example: "S12_Tuesday_Oprei_11-30.pptx"',
-      presentersPosterNamingInfo: 'Are you giving a speed talk for your poster? You may optionally upload a slide for it too — please name it using this pattern:',
-      presentersPosterExample: 'Example: "Poster_22_Wednesday_Loh.pptx"',
+      presentersPosterHeading: 'Poster speed talk (optional slide for your poster)',
+      presentersPosterNamingInfo: 'Poster_Session_Day_Surname.pptx',
+      presentersPosterExample: 'Example: "Poster_S12_Tuesday_Heinrich.pptx"',
+      presentersPosterMultiExample: 'With multiple assigned sessions: "Poster_S12_S14_Tuesday_Heinrich.pptx"',
       presentersWarning: 'Note: This must be the surname of the registered first author, not the surname of the presenter (if different)!',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Oprei',
-      presentersAutoInfo: 'If you enter the surname below, the session, day and time of the talk will be detected automatically. You can then copy the generated file name directly and use it for your file.',
+      presentersAutoInfo: 'Help with naming: enter your surname below – session, day and (for talks) time will be detected automatically, and you\'ll get the finished file name to copy.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
       presentersNotFound: 'No contribution found under this name. Please check the spelling or contact the conference office.',
@@ -1790,12 +1798,14 @@
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
         '<div class="lunch-meta">' + t('presentersDuration') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:10px;">' + t('presentersNamingInfo') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:6px;"><code>Session_Tag_Nachname_Uhrzeit.pptx</code></div>' +
+        '<div class="lunch-meta" style="margin-top:12px;font-weight:600;color:var(--text)">' + t('presentersNamingInfo') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersTalkHeading') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersTalkPattern') + '</code></div>' +
         '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:10px;">' + t('presentersPosterNamingInfo') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:6px;"><code>Poster_Stellwand-Nr_Tag_Nachname.pptx</code></div>' +
+        '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersPosterHeading') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersPosterNamingInfo') + '</code></div>' +
         '<div class="lunch-meta">' + t('presentersPosterExample') + '</div>' +
+        '<div class="lunch-meta">' + t('presentersPosterMultiExample') + '</div>' +
         '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
         '<div style="margin-top:14px;">' +
           '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + ' ' + t('presentersRenameInfo') + '</div>' +
@@ -1891,7 +1901,8 @@
 
     function buildFilename(entry){
       if(entry.type === 'poster'){
-        return 'Poster_' + entry.board + '_' + entry.dayLabel + '_' + entry.lastName + '.pptx';
+        var posterCodeSlug = entry.code.replace(/,\s*/g, '_').replace(/\//g, '_');
+        return 'Poster_' + posterCodeSlug + '_' + entry.dayLabel + '_' + entry.lastName + '.pptx';
       }
       var timeSlug = entry.time.replace(':', '-');
       var codeSlug = entry.code.replace(/\//g, '_');
