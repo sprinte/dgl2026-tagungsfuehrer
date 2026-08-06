@@ -757,8 +757,13 @@
   }
 
   function searchForAuthor(name, originView){
-    var previousQuery = document.getElementById('programmSearch').value;
-    saveNavBackState(originView, originView === 'search' ? { query: previousQuery } : null);
+    // Only set the "back" anchor on the very first click of a chain. If we're
+    // already inside search results (originView === 'search') and an anchor
+    // exists, keep it as-is — clicking through several nested names should
+    // always return to where the chain started, not one step back at a time.
+    if(!(originView === 'search' && searchBackState)){
+      saveNavBackState(originView);
+    }
     // Different data sources format the same person differently (e.g. "Michael Hupfer"
     // on a poster vs "M. Hupfer" as a talk author) — matching on surname + first initial
     // bridges that gap, while still telling apart two different people who happen to
