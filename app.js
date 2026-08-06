@@ -211,6 +211,10 @@
     var fpEn = document.getElementById('floorplanSvgEn');
     if(fpDe) fpDe.style.display = lang === 'en' ? 'none' : '';
     if(fpEn) fpEn.style.display = lang === 'en' ? '' : 'none';
+    var fpSlotDe = document.getElementById('floorplanSlotDe');
+    var fpSlotEn = document.getElementById('floorplanSlotEn');
+    if(fpSlotDe) fpSlotDe.style.display = lang === 'en' ? 'none' : '';
+    if(fpSlotEn) fpSlotEn.style.display = lang === 'en' ? '' : 'none';
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
@@ -2652,6 +2656,8 @@
     ]).then(function(results){
       document.getElementById('floorplanSlotDe').innerHTML = results[0];
       document.getElementById('floorplanSlotEn').innerHTML = results[1];
+      document.getElementById('floorplanSlotDe').style.display = lang === 'en' ? 'none' : '';
+      document.getElementById('floorplanSlotEn').style.display = lang === 'en' ? '' : 'none';
       var fpDe = document.getElementById('floorplanSvg');
       var fpEn = document.getElementById('floorplanSvgEn');
       if(fpDe) fpDe.style.display = lang === 'en' ? 'none' : '';
