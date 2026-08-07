@@ -638,7 +638,7 @@
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together', 'Early Career Meetup', 'Vorabendtreff'];
   var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Postersession 1 – Speed Talks', 'Postersession 2 – Speed Talks', 'Postersession 1', 'Postersession 2', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
   var WORKSHOP_TITLES = ['Arbeitskreise'];
-  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'Preisvortrag': 'plenary' };
+  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'S18': 'workshop', 'Preisvortrag': 'plenary' };
 
   function blockCategory(block){
     if(block.type === 'parallel') return 'sessions';
@@ -2728,6 +2728,16 @@
     var firstRuleY = margin + 12;
     for(var ruleY = firstRuleY; ruleY <= pageHeight - margin; ruleY += lineSpacing){
       doc.line(margin, ruleY, pageWidth - margin, ruleY);
+    }
+
+    var totalPages = doc.internal.getNumberOfPages();
+    for(var pageNum = 1; pageNum <= totalPages; pageNum++){
+      doc.setPage(pageNum);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(String(pageNum) + ' / ' + totalPages, pageWidth - margin, pageHeight - 8, { align: 'right' });
+      doc.setTextColor(0);
     }
 
     doc.save('mein-dgl-2026-plan.pdf');
