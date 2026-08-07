@@ -73,6 +73,7 @@
       presentersPosterExample: 'Beispiel: „03_Heinrich_Dienstag.pptx" (Nummer = Reihenfolge beim Poster Speed Talk)',
       presentersWarning: '⚠️ Wichtig: Verwenden Sie den Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt.',
       presentersMissingContact: 'Falls Sie unsicher sind, wenden Sie sich bitte an das Tagungsbüro.',
+      presentersFormatWarning: '⚠️ Wichtig: Vorträge als PowerPoint oder PDF. Poster Speed Talks ausschließlich als PowerPoint im Format 16:9 (werden zu einer gemeinsamen Präsentation zusammengefügt).',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
@@ -166,6 +167,7 @@
       presentersPosterExample: 'Example: "03_Heinrich_Tuesday.pptx" (number = order in the poster speed talk)',
       presentersWarning: '⚠️ Important: Use the surname of the registered first author, even if someone else is presenting.',
       presentersMissingContact: 'If you\'re unsure, please contact the conference office.',
+      presentersFormatWarning: '⚠️ Important: Talks as PowerPoint or PDF. Poster speed talks exclusively as PowerPoint in 16:9 format (will be merged into one combined presentation).',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
@@ -1807,6 +1809,7 @@
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
         '<div style="margin-top:4px;">' +
           '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + ' ' + t('presentersRenameInfo') + '</div>' +
+          '<div class="lunch-meta" style="margin-bottom:10px;color:#a4283f;font-weight:600;">' + t('presentersFormatWarning') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
           '<input type="text" id="presenterLastName" class="search-input" autocomplete="off" style="margin-top:4px;margin-bottom:6px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
           '<div id="presenterResultsList"></div>' +
@@ -1822,16 +1825,18 @@
           '</div>' +
         '</div>' +
         (presenterUploadUrl ? '<a class="venue-map-link" id="presenterUploadLinkMain" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;opacity:0.4;pointer-events:none;" aria-disabled="true">' + t('presentersUploadLink') + '</a>' : '') +
-        '<div class="lunch-meta" style="margin-top:18px;font-weight:600;color:var(--text)">' + t('presentersMissing') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:6px;">' + t('presentersNamingInfo') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersTalkHeading') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersTalkPattern') + '</code></div>' +
-        '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersPosterHeading') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersPosterNamingInfo') + '</code></div>' +
-        '<div class="lunch-meta">' + t('presentersPosterExample') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
-        '<div class="lunch-meta" style="margin-top:8px;">' + t('presentersMissingContact') + '</div>' +
+        '<div id="presenterMissingSection" style="display:none;">' +
+          '<div class="lunch-meta" style="margin-top:18px;font-weight:600;color:var(--text)">' + t('presentersMissing') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:6px;">' + t('presentersNamingInfo') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersTalkHeading') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersTalkPattern') + '</code></div>' +
+          '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersPosterHeading') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersPosterNamingInfo') + '</code></div>' +
+          '<div class="lunch-meta">' + t('presentersPosterExample') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
+          '<div class="lunch-meta" style="margin-top:8px;">' + t('presentersMissingContact') + '</div>' +
+        '</div>' +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
@@ -1961,6 +1966,8 @@
       document.getElementById('presenterFilenameOutput').textContent = buildFilename(entry);
       filenameBox.style.display = '';
       notFoundBox.style.display = 'none';
+      var missingSection = document.getElementById('presenterMissingSection');
+      if(missingSection) missingSection.style.display = 'none';
       var key = uploadKeyForEntry(entry);
       var matchedUrl = presenterUploadLinks[key] || presenterUploadLinks['_unsortiert'] || '';
       var linkEl = document.getElementById('presenterUploadLinkMain');
@@ -1973,11 +1980,14 @@
       notFoundBox.style.display = 'none';
       filenameBox.style.display = 'none';
       setUploadLinkEnabled(false);
+      var missingSection = document.getElementById('presenterMissingSection');
+      if(missingSection) missingSection.style.display = 'none';
       var typed = nameInput.value.trim().toLowerCase();
       if(!typed) return;
       var matches = allEntries.filter(function(e){ return e.lastName.toLowerCase().indexOf(typed) === 0; });
       if(!matches.length){
         notFoundBox.style.display = '';
+        if(missingSection) missingSection.style.display = '';
         return;
       }
       matches.slice(0, 15).forEach(function(entry){
