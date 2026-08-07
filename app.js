@@ -386,7 +386,12 @@
     if(!startRange) return sTalks[idx].time;
     var start = startRange.start;
     var end;
-    if(idx+1 < sTalks.length){
+    if(sTalks[idx].endTime){
+      // Explicit per-talk override — only set on talks where the normal
+      // "next talk's start" / "+15min" heuristics get the wrong answer.
+      var overrideRange = parseTimeRangeMinutes(sTalks[idx].endTime);
+      end = overrideRange ? overrideRange.start : start + 15;
+    } else if(idx+1 < sTalks.length){
       var nextRange = parseTimeRangeMinutes(sTalks[idx+1].time);
       end = nextRange ? nextRange.start : start+15;
     } else {
