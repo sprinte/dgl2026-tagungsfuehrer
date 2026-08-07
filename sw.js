@@ -24,8 +24,12 @@ const CORE_ASSETS = [
   'logo_igb.png',
   'logo_hu_berlin.png',
   'logo_sbahn.svg',
+  'logo_pdf.png',
   'floorplan_de.svg',
-  'floorplan_en.svg'
+  'floorplan_en.svg',
+  'manifest.json',
+  'icon-192.png',
+  'icon-512.png'
 ];
 
 // How long we wait for the network before giving up and using the cache
