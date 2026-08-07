@@ -79,7 +79,12 @@
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Oprei',
-      presentersAutoInfo: 'Geben Sie unten Ihren Nachnamen ein und wählen Sie den passenden Beitrag aus dem Dropdown-Menü aus (die Suche funktioniert nur nach dem Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt). Sie erhalten daraufhin den fertigen Dateinamen für Ihre Präsentation, und der passende Upload-Link wird automatisch freigeschaltet.',
+      presentersStep1Title: 'Nachname eingeben',
+      presentersStep1Text: 'und passenden Beitrag aus dem Dropdown-Menü auswählen. Die Suche funktioniert nur nach dem Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt.',
+      presentersStep2Title: 'Datei umbenennen',
+      presentersStep2Text: 'Sie erhalten den fertigen Dateinamen zum Kopieren. Alternativ: Klicken Sie auf "Datei auswählen & umbenennen", dann wird eine bereits umbenannte Kopie lokal heruntergeladen.',
+      presentersStep3Title: 'Hochladen',
+      presentersStep3Text: 'über den automatisch freigeschalteten Link unten. Datenschutzhinweis: nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
       presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte wenden Sie sich an das Tagungsbüro.',
@@ -90,7 +95,6 @@
       presentersFilename: 'Ihr Dateiname:',
       presentersCopy: 'Kopieren',
       presentersCopied: 'Dateiname kopiert!',
-      presentersRenameInfo: 'Alternativ: Klicken Sie auf "Datei auswählen & umbenennen", um Ihre Datei automatisch umzubenennen. Es wird eine umbenannte Kopie lokal heruntergeladen, die Sie dann anschließend noch hochladen müssen, indem Sie auf "Zum Upload-Ordner" klicken. (Datenschutzhinweis: Über den Upload-Link ist nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien.)',
       presentersRenameBtn: 'Datei auswählen & umbenennen',
       presentersRenamed: 'Heruntergeladen als "{name}" – diese Datei jetzt bei Nimbus hochladen.',
       planViewList: 'Liste',
@@ -174,7 +178,12 @@
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Oprei',
-      presentersAutoInfo: 'Enter your surname below and select the matching contribution from the dropdown (the search only works by the surname of the registered first author, even if someone else is presenting). You\'ll then get the finished file name for your presentation, and the matching upload link will unlock automatically.',
+      presentersStep1Title: 'Enter your surname',
+      presentersStep1Text: 'and select the matching contribution from the dropdown. The search only works by the surname of the registered first author, even if someone else is presenting.',
+      presentersStep2Title: 'Rename your file',
+      presentersStep2Text: 'You\'ll get the finished file name to copy. Alternatively: click "Choose file & rename" to have an already renamed copy downloaded locally.',
+      presentersStep3Title: 'Upload',
+      presentersStep3Text: 'via the link below, which unlocks automatically. Privacy note: upload only, you cannot see files already uploaded.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
       presentersNotFound: 'No contribution found under this name. Please contact the conference office.',
@@ -185,7 +194,6 @@
       presentersFilename: 'Your file name:',
       presentersCopy: 'Copy',
       presentersCopied: 'File name copied!',
-      presentersRenameInfo: 'Alternatively: click "Choose file & rename" to have your file renamed automatically. A renamed copy will be downloaded locally, which you then still need to upload by clicking "Go to upload folder". (Privacy note: the upload link only allows uploading — you cannot see files already uploaded.)',
       presentersRenameBtn: 'Choose file & rename',
       presentersRenamed: 'Downloaded as "{name}" — now upload this file to Nimbus.',
       planViewList: 'List',
@@ -1810,8 +1818,19 @@
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
         '<div style="margin-top:4px;">' +
-          '<div class="lunch-meta" style="font-weight:600;color:var(--text);margin-bottom:6px;">' + t('presentersHowTo') + '</div>' +
-          '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + ' ' + t('presentersRenameInfo') + '</div>' +
+          '<div class="lunch-meta" style="font-weight:600;color:var(--text);margin-bottom:12px;">' + t('presentersHowTo') + '</div>' +
+          '<div style="display:flex;gap:10px;margin-bottom:12px;">' +
+            '<div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg-accent, #e6f1fb);color:var(--text-accent, #185fa5);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;">1</div>' +
+            '<div class="lunch-meta" style="margin:0;"><strong style="color:var(--text);font-weight:500;">' + t('presentersStep1Title') + '</strong> ' + t('presentersStep1Text') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:10px;margin-bottom:12px;">' +
+            '<div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg-accent, #e6f1fb);color:var(--text-accent, #185fa5);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;">2</div>' +
+            '<div class="lunch-meta" style="margin:0;"><strong style="color:var(--text);font-weight:500;">' + t('presentersStep2Title') + '</strong> ' + t('presentersStep2Text') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:10px;margin-bottom:12px;">' +
+            '<div style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--bg-accent, #e6f1fb);color:var(--text-accent, #185fa5);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;">3</div>' +
+            '<div class="lunch-meta" style="margin:0;"><strong style="color:var(--text);font-weight:500;">' + t('presentersStep3Title') + '</strong> ' + t('presentersStep3Text') + '</div>' +
+          '</div>' +
           '<div class="lunch-meta" style="margin-bottom:10px;color:#a4283f;font-weight:600;">' + t('presentersFormatWarning') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
           '<input type="text" id="presenterLastName" class="search-input" autocomplete="off" style="margin-top:4px;margin-bottom:6px;" placeholder="' + t('presentersLastNamePlaceholder') + '">' +
