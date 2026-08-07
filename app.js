@@ -65,11 +65,11 @@
       presentersDuration: 'Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien).',
       presentersNamingInfo: 'Benennen Sie Ihre Datei bitte eindeutig nach folgendem Muster:',
       presentersTalkHeading: 'Vortrag (12 Min. + bis zu 3 Min. Fragen)',
-      presentersTalkPattern: 'Uhrzeit_Nachname.pptx',
-      presentersExample: 'Beispiel: „1100_Oprei.pptx"',
+      presentersTalkPattern: 'Uhrzeit_Nachname_Session_Wochentag.pptx',
+      presentersExample: 'Beispiel: „1100_Oprei_S12_Dienstag.pptx"',
       presentersPosterHeading: 'Poster Speed Talk (optionale Folie zu Ihrem Poster)',
-      presentersPosterNamingInfo: 'Nummer_Nachname.pptx',
-      presentersPosterExample: 'Beispiel: „03_Heinrich.pptx" (Nummer = Reihenfolge beim Poster Speed Talk)',
+      presentersPosterNamingInfo: 'Nummer_Nachname_Postersession_Wochentag.pptx',
+      presentersPosterExample: 'Beispiel: „03_Heinrich_PS1_Dienstag.pptx" (Nummer = Reihenfolge beim Poster Speed Talk)',
       presentersWarning: '⚠️ Wichtig: Verwenden Sie den Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt.',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
@@ -78,7 +78,7 @@
       presentersAutoInfo: 'Hilfe beim Benennen: Geben Sie unten Ihren Nachnamen ein – Session, Tag und (bei Vorträgen) Uhrzeit werden automatisch erkannt, und Sie erhalten den fertigen Dateinamen zum Kopieren.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
-      presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden (z. B. bei Eröffnung, WRHC-Beiträgen oder Mitgliederversammlung ist das normal). Bitte nutzen Sie in diesem Fall den unten stehenden Link und benennen Sie Ihre Datei sinnvoll selbst, oder wenden Sie sich ans Tagungsbüro.',
+      presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte nutzen Sie in diesem Fall den unten stehenden Link und benennen Sie Ihre Datei sinnvoll selbst, oder wenden Sie sich an das Tagungsbüro.',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Session auswählen…',
       presentersTime: 'Tag Ihres Vortrags',
@@ -156,11 +156,11 @@
       presentersDuration: 'Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only, no access to already uploaded files).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
       presentersTalkHeading: 'Talk (12 min. + up to 3 min. of questions)',
-      presentersTalkPattern: 'Time_Surname.pptx',
-      presentersExample: 'Example: "1100_Oprei.pptx"',
+      presentersTalkPattern: 'Time_Surname_Session_Day.pptx',
+      presentersExample: 'Example: "1100_Oprei_S12_Tuesday.pptx"',
       presentersPosterHeading: 'Poster speed talk (optional slide for your poster)',
-      presentersPosterNamingInfo: 'Number_Surname.pptx',
-      presentersPosterExample: 'Example: "03_Heinrich.pptx" (number = order in the poster speed talk)',
+      presentersPosterNamingInfo: 'Number_Surname_PosterSession_Day.pptx',
+      presentersPosterExample: 'Example: "03_Heinrich_PS1_Tuesday.pptx" (number = order in the poster speed talk)',
       presentersWarning: '⚠️ Important: Use the surname of the registered first author, even if someone else is presenting.',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
@@ -169,7 +169,7 @@
       presentersAutoInfo: 'Help with naming: enter your surname below – session, day and (for talks) time will be detected automatically, and you\'ll get the finished file name to copy.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
-      presentersNotFound: 'No contribution found under this name (this is expected for the Opening, WRHC contributions, or the General Assembly). In this case, please use the link below and name your file sensibly yourself, or contact the conference office.',
+      presentersNotFound: 'No contribution found under this name. In this case, please use the link below and name your file sensibly yourself, or contact the conference office.',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Select session…',
       presentersTime: 'Day of your talk',
@@ -1911,14 +1911,15 @@
 
     function buildFilename(entry){
       if(entry.type === 'poster'){
-        return entry.orderNum + '_' + entry.lastName + '.pptx';
+        return entry.orderNum + '_' + entry.lastName + '_PS' + entry.psNumber + '_' + entry.dayLabel + '.pptx';
       }
       if(entry.type === 'plenary'){
         var plenaryTimeSlug = entry.time.replace(':', '');
-        return plenaryTimeSlug + '_' + entry.lastName + '.pptx';
+        return plenaryTimeSlug + '_' + entry.lastName + '_Plenar_' + entry.dayLabel + '.pptx';
       }
       var timeSlug = entry.time.replace(':', '');
-      return timeSlug + '_' + entry.lastName + '.pptx';
+      var codeSlug = entry.code.replace(/\//g, '_');
+      return timeSlug + '_' + entry.lastName + '_' + codeSlug + '_' + entry.dayLabel + '.pptx';
     }
 
     function uploadKeyForEntry(entry){
