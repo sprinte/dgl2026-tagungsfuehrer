@@ -30,6 +30,7 @@ Dienstag_S13=https://nimbus.igb-berlin.de/index.php/s/rBtzHm6N59KnWLN
 Dienstag_S14_16=https://nimbus.igb-berlin.de/index.php/s/amyDoL77kCMBExy
 
 # --- Mittwoch, 16.09. ---
+Mittwoch_Nachwuchspreis=https://nimbus.igb-berlin.de/index.php/s/BEoNXLA2TAs8Ha4
 Mittwoch_Plenar=https://nimbus.igb-berlin.de/index.php/s/YBx3Ys4T76FpLZE
 Mittwoch_A05=https://nimbus.igb-berlin.de/index.php/s/JADz5QoB7iGx8sw
 Mittwoch_A09=https://nimbus.igb-berlin.de/index.php/s/2GErkw4FJ6R9CyE
@@ -58,5 +59,4 @@ Donnerstag_S05=https://nimbus.igb-berlin.de/index.php/s/YQDDsfEx9JcM8Yr
 # WRHC Sessions (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/M5FCpASyiAYGmXm
 # DGL-Mitgliederversammlung (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/Mkxq3BnLk8oma2Z
 # Workshop S18: Methoden (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/EBiTAinmFJnDAtm
-# Schwoerbel-Benndorf-Nachwuchspreis (Mittwoch) = https://nimbus.igb-berlin.de/index.php/s/BEoNXLA2TAs8Ha4
 # Abschluss (Donnerstag) = https://nimbus.igb-berlin.de/index.php/s/FYgae66b6TQdJ9Y
