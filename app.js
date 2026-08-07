@@ -78,7 +78,7 @@
       presentersAutoInfo: 'Hilfe beim Benennen: Geben Sie unten Ihren Nachnamen ein – Session, Tag und (bei Vorträgen) Uhrzeit werden automatisch erkannt, Sie erhalten den fertigen Dateinamen zum Kopieren, und der passende Upload-Link wird automatisch freigeschaltet.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
-      presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte nutzen Sie in diesem Fall den unten stehenden Link und benennen Sie Ihre Datei sinnvoll selbst, oder wenden Sie sich an das Tagungsbüro.',
+      presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte wenden Sie sich an das Tagungsbüro.',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Session auswählen…',
       presentersTime: 'Tag Ihres Vortrags',
@@ -169,7 +169,7 @@
       presentersAutoInfo: 'Help with naming: enter your surname below – session, day and (for talks) time will be detected automatically, you\'ll get the finished file name to copy, and the matching upload link will unlock automatically.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
-      presentersNotFound: 'No contribution found under this name. In this case, please use the link below and name your file sensibly yourself, or contact the conference office.',
+      presentersNotFound: 'No contribution found under this name. Please contact the conference office.',
       presentersSession: 'Session',
       presentersSessionPlaceholder: 'Select session…',
       presentersTime: 'Day of your talk',
@@ -1959,10 +1959,8 @@
       resultsList.innerHTML = '';
       notFoundBox.style.display = 'none';
       filenameBox.style.display = 'none';
-      var linkEl = document.getElementById('presenterUploadLinkMain');
-      if(linkEl && presenterUploadLinks['_unsortiert']) linkEl.setAttribute('href', presenterUploadLinks['_unsortiert']);
+      setUploadLinkEnabled(false);
       var typed = nameInput.value.trim().toLowerCase();
-      setUploadLinkEnabled(!!typed);
       if(!typed) return;
       var matches = allEntries.filter(function(e){ return e.lastName.toLowerCase().indexOf(typed) === 0; });
       if(!matches.length){
