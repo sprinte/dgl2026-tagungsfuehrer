@@ -68,8 +68,8 @@
       presentersTalkPattern: 'Uhrzeit_Nachname_Session_Wochentag.pptx',
       presentersExample: 'Beispiel: „1100_Oprei_S12_Dienstag.pptx"',
       presentersPosterHeading: 'Poster Speed Talk (optionale Folie zu Ihrem Poster)',
-      presentersPosterNamingInfo: 'Nummer_Nachname_Postersession_Wochentag.pptx',
-      presentersPosterExample: 'Beispiel: „03_Heinrich_PS1_Dienstag.pptx" (Nummer = Reihenfolge beim Poster Speed Talk)',
+      presentersPosterNamingInfo: 'Nummer_Nachname_Wochentag.pptx',
+      presentersPosterExample: 'Beispiel: „03_Heinrich_Dienstag.pptx" (Nummer = Reihenfolge beim Poster Speed Talk)',
       presentersWarning: '⚠️ Wichtig: Verwenden Sie den Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt.',
       presentersUploadLink: 'Zum Upload-Ordner',
       presentersPassword: 'Passwort:',
@@ -159,8 +159,8 @@
       presentersTalkPattern: 'Time_Surname_Session_Day.pptx',
       presentersExample: 'Example: "1100_Oprei_S12_Tuesday.pptx"',
       presentersPosterHeading: 'Poster speed talk (optional slide for your poster)',
-      presentersPosterNamingInfo: 'Number_Surname_PosterSession_Day.pptx',
-      presentersPosterExample: 'Example: "03_Heinrich_PS1_Tuesday.pptx" (number = order in the poster speed talk)',
+      presentersPosterNamingInfo: 'Number_Surname_Day.pptx',
+      presentersPosterExample: 'Example: "03_Heinrich_Tuesday.pptx" (number = order in the poster speed talk)',
       presentersWarning: '⚠️ Important: Use the surname of the registered first author, even if someone else is presenting.',
       presentersUploadLink: 'Go to upload folder',
       presentersPassword: 'Password:',
@@ -1911,7 +1911,7 @@
 
     function buildFilename(entry){
       if(entry.type === 'poster'){
-        return entry.orderNum + '_' + entry.lastName + '_PS' + entry.psNumber + '_' + entry.dayLabel + '.pptx';
+        return entry.orderNum + '_' + entry.lastName + '_' + entry.dayLabel + '.pptx';
       }
       if(entry.type === 'plenary'){
         var plenaryTimeSlug = entry.time.replace(':', '');
