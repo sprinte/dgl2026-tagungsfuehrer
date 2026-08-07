@@ -12,6 +12,7 @@
       exportPlanPdfBtnText: 'Als PDF exportieren',
       pdfPlanTitle: 'Mein Plan — DGL 2026',
       pdfGeneratedOn: 'Erstellt am',
+      pdfNotesTitle: 'Notizen',
       pdfLibError: 'PDF-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
       clearPlanBtnText: 'Plan komplett löschen',
       clearPlanEmptyAlert: 'Dein Plan ist bereits leer.',
@@ -93,6 +94,7 @@
       presentersTime: 'Tag Ihres Vortrags',
       presentersTimePlaceholder: 'Tag auswählen…',
       presentersFilename: 'Ihr Dateiname:',
+      presentersExtNote: 'Endung .pptx oder .pdf – je nachdem, welches Dateiformat Sie tatsächlich hochladen.',
       presentersCopy: 'Kopieren',
       presentersCopied: 'Dateiname kopiert!',
       presentersRenameBtn: 'Datei auswählen & umbenennen',
@@ -111,6 +113,7 @@
       exportPlanPdfBtnText: 'Export as PDF',
       pdfPlanTitle: 'My Plan — DGL 2026',
       pdfGeneratedOn: 'Generated on',
+      pdfNotesTitle: 'Notes',
       pdfLibError: 'The PDF feature could not be loaded. Please check your internet connection and try again.',
       clearPlanBtnText: 'Clear entire plan',
       clearPlanEmptyAlert: 'Your plan is already empty.',
@@ -192,6 +195,7 @@
       presentersTime: 'Day of your talk',
       presentersTimePlaceholder: 'Select day…',
       presentersFilename: 'Your file name:',
+      presentersExtNote: 'Ending .pptx or .pdf – whichever file format you actually upload.',
       presentersCopy: 'Copy',
       presentersCopied: 'File name copied!',
       presentersRenameBtn: 'Choose file & rename',
@@ -1939,15 +1943,15 @@
 
     function buildFilename(entry){
       if(entry.type === 'poster'){
-        return entry.orderNum + '_' + entry.lastName + '_' + entry.dayLabel + '.pptx';
+        return entry.orderNum + '_' + entry.lastName + '_' + entry.dayLabel;
       }
       if(entry.type === 'plenary'){
         var plenaryTimeSlug = entry.time.replace(':', '');
-        return plenaryTimeSlug + '_' + entry.lastName + '_Plenar_' + entry.dayLabel + '.pptx';
+        return plenaryTimeSlug + '_' + entry.lastName + '_Plenar_' + entry.dayLabel;
       }
       var timeSlug = entry.time.replace(':', '');
       var codeSlug = entry.code.replace(/\//g, '_');
-      return timeSlug + '_' + entry.lastName + '_' + codeSlug + '_' + entry.dayLabel + '.pptx';
+      return timeSlug + '_' + entry.lastName + '_' + codeSlug + '_' + entry.dayLabel;
     }
 
     function uploadKeyForEntry(entry){
@@ -2658,6 +2662,11 @@
 
     var lastDayId = null;
     sorted.forEach(function(item){
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      var titleLines = doc.splitTextToSize(item.title || '', maxWidth);
+      var subLines = item.subtitle ? doc.splitTextToSize(item.subtitle, maxWidth) : [];
+
       if(item.dayId !== lastDayId){
         lastDayId = item.dayId;
         ensureSpace(14);
@@ -2673,7 +2682,13 @@
         doc.setTextColor(0);
         y += 7;
       }
-      ensureSpace(16);
+
+      // Reserve space for the WHOLE item (time/room + every title/subtitle line) up
+      // front, so a page break never lands in the middle of a wrapped line — that
+      // was what caused author names to visually tear across the page boundary.
+      var itemHeight = 5 + titleLines.length * 5.5 + subLines.length * 5 + 4;
+      ensureSpace(itemHeight);
+
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       var timeRoom = (item.time || '') + (item.room ? '  ·  ' + item.room : '');
@@ -2681,18 +2696,14 @@
       y += 5;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10.5);
-      var titleLines = doc.splitTextToSize(item.title || '', maxWidth);
       titleLines.forEach(function(line){
-        ensureSpace(5.5);
         doc.text(line, margin, y);
         y += 5.5;
       });
-      if(item.subtitle){
+      if(subLines.length){
         doc.setFontSize(9);
         doc.setTextColor(90);
-        var subLines = doc.splitTextToSize(item.subtitle, maxWidth);
         subLines.forEach(function(line){
-          ensureSpace(5);
           doc.text(line, margin, y);
           y += 5;
         });
@@ -2700,6 +2711,19 @@
       }
       y += 4;
     });
+
+    // Notes page: one fresh page with faint ruled lines, like a notepad.
+    doc.addPage();
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(0);
+    doc.text(t('pdfNotesTitle'), margin, margin);
+    doc.setDrawColor(225);
+    var lineSpacing = 8;
+    var firstRuleY = margin + 12;
+    for(var ruleY = firstRuleY; ruleY <= pageHeight - margin; ruleY += lineSpacing){
+      doc.line(margin, ruleY, pageWidth - margin, ruleY);
+    }
 
     doc.save('mein-dgl-2026-plan.pdf');
   });
