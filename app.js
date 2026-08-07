@@ -776,6 +776,16 @@
   function normalizeForSearch(str){
     return stripAccents(expandUmlauts(str || ''));
   }
+  // Strips leading initials (e.g. "M.", "I.") from a name's word list, however
+  // many there are, returning just the surname portion. "M. I. Arce Sánchez"
+  // -> "Arce Sánchez", not just everything-after-the-first-word.
+  function stripLeadingInitials(words){
+    var idx = 0;
+    while(idx < words.length - 1 && /^[A-ZÀ-ÿ]\.$/.test(words[idx])){
+      idx++;
+    }
+    return words.slice(idx);
+  }
   function personKeyFromName(name){
     var words = (name || '').trim().split(/\s+/).filter(Boolean);
     if(!words.length) return null;
@@ -1942,7 +1952,7 @@
               var firstAuthor = (talk.authors || '').split(' — ')[0].split(',')[0].trim();
               if(!firstAuthor) return;
               var words = firstAuthor.split(/\s+/).filter(Boolean);
-              var lastName = words.length > 1 ? words.slice(1).join(' ') : words[0];
+              var lastName = stripLeadingInitials(words).join(' ') || words[words.length-1];
               allEntries.push({ type: 'talk', lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
             });
           });
@@ -1953,7 +1963,7 @@
             var firstAuthor = (p.authorsDisplay || '').split(' — ')[0].split(',')[0].trim();
             if(!firstAuthor) return;
             var words = firstAuthor.split(/\s+/).filter(Boolean);
-            var lastName = words.length > 1 ? words.slice(1).join(' ') : words[0];
+            var lastName = stripLeadingInitials(words).join(' ') || words[words.length-1];
             var orderNum = String(pIdx + 1).padStart(2, '0');
             allEntries.push({ type: 'poster', lastName: lastName, code: p.code, orderNum: orderNum, psNumber: psNumber, title: p.title, dayLabel: psActualDay });
           });
@@ -2652,10 +2662,32 @@
     }
   });
 
+  function loadImageAsDataURL(url){
+    return fetch(url).then(function(r){
+      if(!r.ok) throw new Error('logo fetch failed');
+      return r.blob();
+    }).then(function(blob){
+      return new Promise(function(resolve, reject){
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    });
+  }
+
   document.getElementById('exportPlanPdfBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
     if(typeof window.jspdf === 'undefined'){ alert(t('pdfLibError')); return; }
 
+    loadImageAsDataURL('logo_pdf.png').then(function(dataUrl){
+      generatePlanPdf(dataUrl);
+    }).catch(function(){
+      generatePlanPdf(null);
+    });
+  });
+
+  function generatePlanPdf(logoDataUrl){
     var jsPDF = window.jspdf.jsPDF;
     var doc = new jsPDF({ unit: 'mm', format: 'a4' });
     var pageWidth = doc.internal.pageSize.getWidth();
@@ -2669,6 +2701,15 @@
         doc.addPage();
         y = margin;
       }
+    }
+
+    if(logoDataUrl){
+      // Logo spans the full content width as its own header band; the
+      // aspect ratio of the source PNG (2000x658) determines its height.
+      var logoW = maxWidth;
+      var logoH = logoW * (658 / 2000);
+      doc.addImage(logoDataUrl, 'PNG', margin, y, logoW, logoH);
+      y += logoH + 6;
     }
 
     doc.setFont('helvetica', 'bold');
@@ -2767,7 +2808,7 @@
     }
 
     doc.save('mein-dgl-2026-plan.pdf');
-  });
+  }
 
   function render(){
     renderProgrammList();
