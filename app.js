@@ -63,6 +63,7 @@
       tourHelpBtn: '👋 Neu hier?',
       presentersCardTitle: 'Upload Ihrer Präsentation',
       presentersMissing: 'Ihr Beitrag fehlt in der Liste?',
+      presentersHowTo: 'So geht\'s:',
       presentersDuration: 'Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien).',
       presentersNamingInfo: 'Benennen Sie Ihre Datei bitte eindeutig nach folgendem Muster:',
       presentersTalkHeading: 'Vortrag (12 Min. + bis zu 3 Min. Fragen, PowerPoint oder PDF)',
@@ -78,7 +79,7 @@
       presentersPassword: 'Passwort:',
       presentersLastName: 'Nachname',
       presentersLastNamePlaceholder: 'z. B. Oprei',
-      presentersAutoInfo: 'Hilfe beim Benennen: Geben Sie unten Ihren Nachnamen ein und wählen Sie den passenden Beitrag aus dem Dropdown-Menü aus (die Suche funktioniert nur nach dem Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt). Sie erhalten daraufhin den fertigen Dateinamen für Ihre Präsentation, und der passende Upload-Link wird automatisch freigeschaltet.',
+      presentersAutoInfo: 'Geben Sie unten Ihren Nachnamen ein und wählen Sie den passenden Beitrag aus dem Dropdown-Menü aus (die Suche funktioniert nur nach dem Nachnamen des/der gemeldeten Erstautor:in, auch wenn eine andere Person vorträgt). Sie erhalten daraufhin den fertigen Dateinamen für Ihre Präsentation, und der passende Upload-Link wird automatisch freigeschaltet.',
       presentersPickTalk: 'Mehrere Beiträge gefunden – welcher ist Ihrer?',
       presentersPickPlaceholder: 'Beitrag auswählen…',
       presentersNotFound: 'Kein Beitrag mit diesem Namen gefunden. Bitte wenden Sie sich an das Tagungsbüro.',
@@ -157,6 +158,7 @@
       tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'Upload your presentation',
       presentersMissing: 'Your contribution is missing from the list?',
+      presentersHowTo: 'How it works:',
       presentersDuration: 'Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only, no access to already uploaded files).',
       presentersNamingInfo: 'Please give your file a unique name following this pattern:',
       presentersTalkHeading: 'Talk (12 min. + up to 3 min. of questions, PowerPoint or PDF)',
@@ -172,7 +174,7 @@
       presentersPassword: 'Password:',
       presentersLastName: 'Last name',
       presentersLastNamePlaceholder: 'e.g. Oprei',
-      presentersAutoInfo: 'Help with naming: enter your surname below and select the matching contribution from the dropdown (the search only works by the surname of the registered first author, even if someone else is presenting). You\'ll then get the finished file name for your presentation, and the matching upload link will unlock automatically.',
+      presentersAutoInfo: 'Enter your surname below and select the matching contribution from the dropdown (the search only works by the surname of the registered first author, even if someone else is presenting). You\'ll then get the finished file name for your presentation, and the matching upload link will unlock automatically.',
       presentersPickTalk: 'Several contributions found – which one is yours?',
       presentersPickPlaceholder: 'Select contribution…',
       presentersNotFound: 'No contribution found under this name. Please contact the conference office.',
@@ -1808,6 +1810,7 @@
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
         '<div style="margin-top:4px;">' +
+          '<div class="lunch-meta" style="font-weight:600;color:var(--text);margin-bottom:6px;">' + t('presentersHowTo') + '</div>' +
           '<div class="lunch-meta" style="margin-bottom:6px;">' + t('presentersAutoInfo') + ' ' + t('presentersRenameInfo') + '</div>' +
           '<div class="lunch-meta" style="margin-bottom:10px;color:#a4283f;font-weight:600;">' + t('presentersFormatWarning') + '</div>' +
           '<label class="filter-label" for="presenterLastName">' + t('presentersLastName') + '</label>' +
