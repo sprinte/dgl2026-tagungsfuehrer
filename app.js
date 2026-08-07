@@ -1828,18 +1828,6 @@
           '</div>' +
         '</div>' +
         (presenterUploadUrl ? '<a class="venue-map-link" id="presenterUploadLinkMain" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;opacity:0.4;pointer-events:none;" aria-disabled="true">' + t('presentersUploadLink') + '</a>' : '') +
-        '<div id="presenterMissingSection" style="display:none;">' +
-          '<div class="lunch-meta" style="margin-top:18px;font-weight:600;color:var(--text)">' + t('presentersMissing') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:6px;">' + t('presentersNamingInfo') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersTalkHeading') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersTalkPattern') + '</code></div>' +
-          '<div class="lunch-meta">' + t('presentersExample') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:10px;font-weight:600;color:var(--text)">' + t('presentersPosterHeading') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:4px;"><code>' + t('presentersPosterNamingInfo') + '</code></div>' +
-          '<div class="lunch-meta">' + t('presentersPosterExample') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:8px;color:#a4283f;font-weight:600;">' + t('presentersWarning') + '</div>' +
-          '<div class="lunch-meta" style="margin-top:8px;">' + t('presentersMissingContact') + '</div>' +
-        '</div>' +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
@@ -1969,8 +1957,6 @@
       document.getElementById('presenterFilenameOutput').textContent = buildFilename(entry);
       filenameBox.style.display = '';
       notFoundBox.style.display = 'none';
-      var missingSection = document.getElementById('presenterMissingSection');
-      if(missingSection) missingSection.style.display = 'none';
       var key = uploadKeyForEntry(entry);
       var matchedUrl = presenterUploadLinks[key] || presenterUploadLinks['_unsortiert'] || '';
       var linkEl = document.getElementById('presenterUploadLinkMain');
@@ -1983,14 +1969,11 @@
       notFoundBox.style.display = 'none';
       filenameBox.style.display = 'none';
       setUploadLinkEnabled(false);
-      var missingSection = document.getElementById('presenterMissingSection');
-      if(missingSection) missingSection.style.display = 'none';
       var typed = nameInput.value.trim().toLowerCase();
       if(!typed) return;
       var matches = allEntries.filter(function(e){ return e.lastName.toLowerCase().indexOf(typed) === 0; });
       if(!matches.length){
         notFoundBox.style.display = '';
-        if(missingSection) missingSection.style.display = '';
         return;
       }
       matches.slice(0, 15).forEach(function(entry){
