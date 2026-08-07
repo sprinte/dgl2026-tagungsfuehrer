@@ -1826,7 +1826,7 @@
             '<button class="btn-secondary" id="presenterRenameBtn" style="width:100%;margin-top:6px;">' + t('presentersRenameBtn') + '</button>' +
           '</div>' +
         '</div>' +
-        (presenterUploadUrl ? '<a class="venue-map-link" id="presenterUploadLinkMain" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;">' + t('presentersUploadLink') + '</a>' : '') +
+        (presenterUploadUrl ? '<a class="venue-map-link" id="presenterUploadLinkMain" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;opacity:0.4;pointer-events:none;" aria-disabled="true">' + t('presentersUploadLink') + '</a>' : '') +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
@@ -1928,6 +1928,20 @@
       return entry.dayLabel + '_' + (entry.code || '').replace(/\//g, '_');
     }
 
+    function setUploadLinkEnabled(enabled){
+      var linkEl = document.getElementById('presenterUploadLinkMain');
+      if(!linkEl) return;
+      if(enabled){
+        linkEl.style.opacity = '';
+        linkEl.style.pointerEvents = '';
+        linkEl.removeAttribute('aria-disabled');
+      } else {
+        linkEl.style.opacity = '0.4';
+        linkEl.style.pointerEvents = 'none';
+        linkEl.setAttribute('aria-disabled', 'true');
+      }
+    }
+
     function selectEntry(entry){
       nameInput.value = entry.lastName;
       resultsList.innerHTML = '';
@@ -1938,6 +1952,7 @@
       var matchedUrl = presenterUploadLinks[key] || presenterUploadLinks['_unsortiert'] || '';
       var linkEl = document.getElementById('presenterUploadLinkMain');
       if(linkEl && matchedUrl) linkEl.setAttribute('href', matchedUrl);
+      setUploadLinkEnabled(true);
     }
 
     nameInput.addEventListener('input', function(){
@@ -1947,6 +1962,7 @@
       var linkEl = document.getElementById('presenterUploadLinkMain');
       if(linkEl && presenterUploadLinks['_unsortiert']) linkEl.setAttribute('href', presenterUploadLinks['_unsortiert']);
       var typed = nameInput.value.trim().toLowerCase();
+      setUploadLinkEnabled(!!typed);
       if(!typed) return;
       var matches = allEntries.filter(function(e){ return e.lastName.toLowerCase().indexOf(typed) === 0; });
       if(!matches.length){
