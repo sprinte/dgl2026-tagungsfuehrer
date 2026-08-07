@@ -755,6 +755,27 @@
     if(extra){ for(var k in extra){ searchBackState[k] = extra[k]; } }
     document.getElementById('searchBackBtn').style.display = 'block';
   }
+  function stripAccents(str){
+    if(!str) return str;
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/ß/g, 'ss').replace(/Ø/g, 'O').replace(/ø/g, 'o')
+      .replace(/Æ/g, 'AE').replace(/æ/g, 'ae').replace(/Œ/g, 'OE').replace(/œ/g, 'oe')
+      .replace(/Đ/g, 'D').replace(/đ/g, 'd').replace(/Ł/g, 'L').replace(/ł/g, 'l');
+  }
+  // German umlauts specifically expand to their two-letter form (ö→oe, not ö→o) —
+  // that's the conventional ASCII-safe spelling, e.g. for filenames, rather than
+  // just dropping the diaeresis like other accents.
+  function expandUmlauts(str){
+    if(!str) return str;
+    return str.replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue')
+      .replace(/Ä/g,'Ae').replace(/Ö/g,'Oe').replace(/Ü/g,'Ue').replace(/ß/g,'ss');
+  }
+  // For search matching: normalize umlauts AND their already-expanded form to the
+  // same canonical spelling, so typing "böhrer" or "boehrer" both match either
+  // stored spelling. Falls through to stripAccents for any other accented letters.
+  function normalizeForSearch(str){
+    return stripAccents(expandUmlauts(str || ''));
+  }
   function personKeyFromName(name){
     var words = (name || '').trim().split(/\s+/).filter(Boolean);
     if(!words.length) return null;
@@ -1370,7 +1391,7 @@
 
   function renderSearchResults(query, personKey){
     var wrap = document.getElementById('searchResults');
-    var q = query.trim().toLowerCase();
+    var q = normalizeForSearch(query.trim().toLowerCase());
     if(!q){
       wrap.style.display = 'none';
       document.getElementById('dayTabs').style.display = '';
@@ -1394,7 +1415,7 @@
       }).slice(0, 25);
     } else {
       matches = searchIndex.filter(function(entry){
-        return entry.text.toLowerCase().indexOf(q) !== -1;
+        return normalizeForSearch(entry.text.toLowerCase()).indexOf(q) !== -1;
       }).slice(0, 25);
     }
 
@@ -1921,7 +1942,7 @@
               var firstAuthor = (talk.authors || '').split(' — ')[0].split(',')[0].trim();
               if(!firstAuthor) return;
               var words = firstAuthor.split(/\s+/).filter(Boolean);
-              var lastName = words[words.length - 1];
+              var lastName = words.length > 1 ? words.slice(1).join(' ') : words[0];
               allEntries.push({ type: 'talk', lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
             });
           });
@@ -1932,7 +1953,7 @@
             var firstAuthor = (p.authorsDisplay || '').split(' — ')[0].split(',')[0].trim();
             if(!firstAuthor) return;
             var words = firstAuthor.split(/\s+/).filter(Boolean);
-            var lastName = words[words.length - 1];
+            var lastName = words.length > 1 ? words.slice(1).join(' ') : words[0];
             var orderNum = String(pIdx + 1).padStart(2, '0');
             allEntries.push({ type: 'poster', lastName: lastName, code: p.code, orderNum: orderNum, psNumber: psNumber, title: p.title, dayLabel: psActualDay });
           });
@@ -1947,16 +1968,17 @@
     });
 
     function buildFilename(entry){
+      var cleanName = stripAccents(expandUmlauts(entry.lastName)).replace(/\s+/g, ' ').trim();
       if(entry.type === 'poster'){
-        return entry.orderNum + '_' + entry.lastName + '_' + entry.dayLabel;
+        return entry.orderNum + '_' + cleanName + '_' + entry.dayLabel;
       }
       if(entry.type === 'plenary'){
         var plenaryTimeSlug = entry.time.replace(':', '');
-        return plenaryTimeSlug + '_' + entry.lastName + '_Plenar_' + entry.dayLabel;
+        return plenaryTimeSlug + '_' + cleanName + '_Plenar_' + entry.dayLabel;
       }
       var timeSlug = entry.time.replace(':', '');
       var codeSlug = entry.code.replace(/\//g, '_');
-      return timeSlug + '_' + entry.lastName + '_' + codeSlug + '_' + entry.dayLabel;
+      return timeSlug + '_' + cleanName + '_' + codeSlug + '_' + entry.dayLabel;
     }
 
     function uploadKeyForEntry(entry){
@@ -1997,9 +2019,13 @@
       notFoundBox.style.display = 'none';
       filenameBox.style.display = 'none';
       setUploadLinkEnabled(false);
-      var typed = nameInput.value.trim().toLowerCase();
+      var typed = normalizeForSearch(nameInput.value.trim().toLowerCase());
       if(!typed) return;
-      var matches = allEntries.filter(function(e){ return e.lastName.toLowerCase().indexOf(typed) === 0; });
+      var matches = allEntries.filter(function(e){
+        var normName = normalizeForSearch(e.lastName.toLowerCase());
+        if(normName.indexOf(typed) === 0) return true;
+        return normName.split(/\s+/).some(function(w){ return w.indexOf(typed) === 0; });
+      });
       if(!matches.length){
         notFoundBox.style.display = '';
         return;
