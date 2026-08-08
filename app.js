@@ -1448,7 +1448,7 @@
       if(m.kind === 'talk'){
         var padded = isInPlan(m.jumpId);
         item.innerHTML =
-          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
+          '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
           '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
@@ -1495,7 +1495,7 @@
       } else if(m.kind === 'poster'){
         var posterPadded = isInPlan(m.jumpId);
         item.innerHTML =
-          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
+          '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
           '<div class="search-result-title"><span class="session-tag">' + t('posterListLabel') + '</span> ' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
           '<button class="add-btn small' + (posterPadded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (posterPadded ? '&#10003;' : '+') + '</button>';
