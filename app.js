@@ -781,7 +781,9 @@
   // -> "Arce Sánchez", not just everything-after-the-first-word.
   function stripLeadingInitials(words){
     var idx = 0;
-    while(idx < words.length - 1 && /^[A-ZÀ-ÿ]\.$/.test(words[idx])){
+    // Matches "M.", hyphenated doubles like "W.-H.", and short 2-letter
+    // initials like "Zs." (common in Hungarian names).
+    while(idx < words.length - 1 && /^[A-ZÀ-ÿ][a-zà-ÿ]?\.(-[A-ZÀ-ÿ][a-zà-ÿ]?\.)*$/.test(words[idx])){
       idx++;
     }
     return words.slice(idx);
