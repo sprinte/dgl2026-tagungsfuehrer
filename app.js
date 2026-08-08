@@ -2449,6 +2449,7 @@
     document.getElementById('planListDayTabs').style.display = mode === 'list' ? '' : 'none';
     document.getElementById('planTimelineWrap').style.display = mode === 'timeline' ? '' : 'none';
     if(mode === 'timeline'){ renderPlanTimelineDayTabs(); renderPlanTimeline(); }
+    else { renderPlan(); }
   }
   document.getElementById('planViewListBtn').addEventListener('click', function(){ setPlanView('list'); });
   document.getElementById('planViewTimelineBtn').addEventListener('click', function(){ setPlanView('timeline'); });
