@@ -335,10 +335,21 @@
       var encoded = location.hash.slice(6);
       var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(encoded)))));
       if(Array.isArray(decoded) && decoded.length){
-        var msg = t('sharedPlanConfirmPrefix') + decoded.length + t('sharedPlanConfirmSuffix');
-        if(confirm(msg)){
-          plan = decoded;
-          savePlan(plan);
+        // Older shared links may still carry full item objects (title, room,
+        // abstract...); newer ones carry just {id, dayId} and get resolved
+        // back to full items from the local programme data. Support both so
+        // links created before this change keep working.
+        var resolved = decoded.map(function(entry){
+          if(entry && entry.title !== undefined) return entry;
+          if(entry && entry.id && entry.dayId) return resolvePlanItemById(entry.dayId, entry.id);
+          return null;
+        }).filter(Boolean);
+        if(resolved.length){
+          var msg = t('sharedPlanConfirmPrefix') + resolved.length + t('sharedPlanConfirmSuffix');
+          if(confirm(msg)){
+            plan = resolved;
+            savePlan(plan);
+          }
         }
       }
     }catch(e){
@@ -733,6 +744,75 @@
   }
   function planIdForTalk(dayId, block, s, talk, idx){
     return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + s.code + '_' + slug(s.title) + '_' + idx;
+  }
+
+  // Rebuilds a full plan item (title, subtitle, room, abstract, everything)
+  // from just its id/dayId — used to keep shared links/QR codes small: they
+  // only need to carry "which items", not the full text of each one, since
+  // the receiving device has the same programme data locally.
+  function resolvePlanItemById(dayId, id){
+    var day = DATA.programm.find(function(d){ return d.id === dayId; });
+    if(!day) return null;
+
+    for(var bi = 0; bi < day.blocks.length; bi++){
+      var block = day.blocks[bi];
+      if(block.type === 'info'){
+        if(planIdForBlock(dayId, block) === id){
+          var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
+          var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
+          var bioText = lang === 'en' ? block.bio_en : block.bio_de;
+          var planAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
+          var modSuffix = block.mod ? (t('mod') + ' ' + block.mod) : '';
+          var planSubtitle = [blockSubtitle, modSuffix].filter(Boolean).join(' · ');
+          return {
+            id: id, dayId: day.id, dayLabel: day.label, date: day.date,
+            time: block.time, title: blockTitle, subtitle: planSubtitle, room: block.room || '',
+            abstract: planAbstractText || '', bio: bioText || ''
+          };
+        }
+        if(block.posters){
+          for(var pi = 0; pi < block.posters.length; pi++){
+            var p = block.posters[pi];
+            if(planIdForPoster(dayId, p) === id){
+              var boardText = p.board ? (' · ' + t('posterBoard') + ' ' + p.board) : '';
+              return {
+                id: id, dayId: day.id, dayLabel: day.label, date: day.date,
+                time: block.time, title: p.title, subtitle: p.authorsDisplay + ' · ' + p.code + boardText,
+                room: '', authors: p.authorsDisplay, isPoster: true
+              };
+            }
+          }
+        }
+      } else {
+        for(var si = 0; si < block.sessions.length; si++){
+          var s = block.sessions[si];
+          var sid = planIdForSession(dayId, block, s);
+          if(sid === id){
+            var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
+            var sessionAbstractText = (lang === 'en' && s.abstract_en) ? s.abstract_en : s.abstract_de;
+            return {
+              id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
+              time: block.time, title: s.code + ' · ' + (lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room,
+              abstract: sessionAbstractText || '', code: s.code
+            };
+          }
+          if(s.talks){
+            for(var ti = 0; ti < s.talks.length; ti++){
+              var talk = s.talks[ti];
+              var tid = planIdForTalk(dayId, block, s, talk, ti);
+              if(tid === id){
+                return {
+                  id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
+                  time: computeTalkTimeRange(s.talks, ti, block.time), title: talk.title, subtitle: talk.authors + ' · ' + s.code, room: s.room,
+                  abstract: talk.abstract || '', code: s.code, authors: talk.authors
+                };
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
 
   var expandedSessions = {};
@@ -2628,7 +2708,12 @@
   }
 
   function buildPlanShareUrl(){
-    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(plan)))));
+    // Only the id + dayId travel in the link — everything else (title, room,
+    // time, abstract...) is looked back up from the programme data on
+    // whichever device opens it, since that data is identical on both. This
+    // keeps the encoded payload small so the QR code stays easy to scan.
+    var compact = plan.map(function(item){ return { id: item.id, dayId: item.dayId }; });
+    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
     return location.origin + location.pathname + '#plan=' + encoded;
   }
 
