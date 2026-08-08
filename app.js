@@ -31,9 +31,9 @@
       planConflict: 'Zeitliche Überschneidung mit:',
       aboutSpeaker: 'Zur Person',
       nextUp: 'Nächster Termin',
-      shareBtnLabel: 'Teilen',
+      shareBtnLabel: 'Als Link teilen',
       exportMenuLabel: 'Exportieren',
-      qrBtnLabel: 'QR-Code anzeigen (anderes Gerät)',
+      qrBtnLabel: 'QR-Code anzeigen',
       qrHint: 'Mit der Handy-Kamera scannen, um diesen Plan auf dem anderen Gerät zu laden.',
       qrCloseBtn: 'Schließen',
       linkCopied: 'Link kopiert!',
@@ -137,9 +137,9 @@
       planConflict: 'Overlaps with:',
       aboutSpeaker: 'About the speaker',
       nextUp: 'Next up',
-      shareBtnLabel: 'Share',
+      shareBtnLabel: 'Share as link',
       exportMenuLabel: 'Export',
-      qrBtnLabel: 'Show QR code (other device)',
+      qrBtnLabel: 'Show QR code',
       qrHint: 'Scan with your phone camera to load this plan on the other device.',
       qrCloseBtn: 'Close',
       linkCopied: 'Link copied!',
@@ -2680,11 +2680,7 @@
       var shareUrl = buildPlanShareUrl();
       var wrap = document.getElementById('qrPlanCanvasWrap');
       wrap.innerHTML = '';
-      var canvas = document.createElement('canvas');
-      wrap.appendChild(canvas);
-      QRCode.toCanvas(canvas, shareUrl, { width: 240, margin: 1 }, function(err){
-        if(err) console.error('QR generation failed:', err);
-      });
+      new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
       document.getElementById('qrPlanOverlay').style.display = 'flex';
     }
     if(typeof QRCode === 'undefined'){
