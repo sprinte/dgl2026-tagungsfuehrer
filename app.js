@@ -15,6 +15,7 @@
       pdfNotesTitle: 'Notizen',
       pdfLibError: 'PDF-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
       qrLibError: 'QR-Code-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
+      qrTooLarge: 'Dein Plan hat zu viele Einträge für einen QR-Code. Bitte nutze stattdessen "Als Link teilen".',
       clearPlanBtnText: 'Plan komplett löschen',
       clearPlanEmptyAlert: 'Dein Plan ist bereits leer.',
       clearPlanConfirm: 'Möchtest du wirklich deinen gesamten Plan löschen? Alle gemerkten Vorträge, Poster und Termine werden entfernt. Das kann nicht rückgängig gemacht werden.',
@@ -121,6 +122,7 @@
       pdfNotesTitle: 'Notes',
       pdfLibError: 'The PDF feature could not be loaded. Please check your internet connection and try again.',
       qrLibError: 'The QR code feature could not be loaded. Please check your internet connection and try again.',
+      qrTooLarge: 'Your plan has too many items for a QR code. Please use "Share as link" instead.',
       clearPlanBtnText: 'Clear entire plan',
       clearPlanEmptyAlert: 'Your plan is already empty.',
       clearPlanConfirm: 'Are you sure you want to clear your entire plan? All saved talks, posters and events will be removed. This cannot be undone.',
@@ -335,11 +337,16 @@
       var encoded = location.hash.slice(6);
       var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(encoded)))));
       if(Array.isArray(decoded) && decoded.length){
-        // Older shared links may still carry full item objects (title, room,
-        // abstract...); newer ones carry just {id, dayId} and get resolved
-        // back to full items from the local programme data. Support both so
-        // links created before this change keep working.
+        // Shared links have gone through a couple of formats as we shrank
+        // them for QR codes: newest is the item's permanent pid (a short
+        // number stored directly in the programme data — stable across
+        // future programme edits), before that {id, dayId}, and originally
+        // a full item object. Support all three.
         var resolved = decoded.map(function(entry){
+          if(typeof entry === 'string' && /^\d+$/.test(entry)){
+            var pidRef = refForPid(entry);
+            return pidRef ? resolvePlanItemById(pidRef.dayId, pidRef.id) : null;
+          }
           if(entry && entry.title !== undefined) return entry;
           if(entry && entry.id && entry.dayId) return resolvePlanItemById(entry.dayId, entry.id);
           return null;
@@ -744,6 +751,52 @@
   }
   function planIdForTalk(dayId, block, s, talk, idx){
     return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + s.code + '_' + slug(s.title) + '_' + idx;
+  }
+
+  // Every plannable item carries a permanent, explicit "pid" directly in the
+  // programme data (assigned once, reused on future data edits) — far
+  // simpler and safer than deriving a reference from position or a hash:
+  // it can't collide, and it can't shift when the programme changes
+  // elsewhere, because it isn't computed from any of that.
+  var allItemRefsCache = null;
+  function allItemRefs(){
+    if(allItemRefsCache) return allItemRefsCache;
+    var refs = [];
+    DATA.programm.forEach(function(day){
+      day.blocks.forEach(function(block){
+        if(block.type === 'info'){
+          if(block.pid) refs.push({ pid: block.pid, id: planIdForBlock(day.id, block), dayId: day.id });
+          (block.posters || []).forEach(function(p){
+            if(p.pid) refs.push({ pid: p.pid, id: planIdForPoster(day.id, p), dayId: day.id });
+          });
+        } else {
+          block.sessions.forEach(function(s){
+            if(s.pid) refs.push({ pid: s.pid, id: planIdForSession(day.id, block, s), dayId: day.id });
+            (s.talks || []).forEach(function(talk, idx){
+              if(talk.pid) refs.push({ pid: talk.pid, id: planIdForTalk(day.id, block, s, talk, idx), dayId: day.id });
+            });
+          });
+        }
+      });
+    });
+    allItemRefsCache = refs;
+    return refs;
+  }
+  var pidLookupCache = null;
+  function refForPid(pid){
+    if(!pidLookupCache){
+      pidLookupCache = {};
+      allItemRefs().forEach(function(ref){ pidLookupCache[ref.pid] = ref; });
+    }
+    return pidLookupCache[pid] || null;
+  }
+  var idToPidCache = null;
+  function pidForItem(item){
+    if(!idToPidCache){
+      idToPidCache = {};
+      allItemRefs().forEach(function(ref){ idToPidCache[ref.dayId + '|' + ref.id] = ref.pid; });
+    }
+    return idToPidCache[item.dayId + '|' + item.id] || null;
   }
 
   // Rebuilds a full plan item (title, subtitle, room, abstract, everything)
@@ -2708,11 +2761,11 @@
   }
 
   function buildPlanShareUrl(){
-    // Only the id + dayId travel in the link — everything else (title, room,
-    // time, abstract...) is looked back up from the programme data on
-    // whichever device opens it, since that data is identical on both. This
-    // keeps the encoded payload small so the QR code stays easy to scan.
-    var compact = plan.map(function(item){ return { id: item.id, dayId: item.dayId }; });
+    // Each saved item becomes its permanent pid from the programme data —
+    // short, unique by construction, and stable across future programme
+    // edits since it's an explicit stored field, not derived from anything
+    // that could shift (position) or collide (a hash).
+    var compact = plan.map(function(item){ return pidForItem(item); }).filter(Boolean);
     var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
     return location.origin + location.pathname + '#plan=' + encoded;
   }
@@ -2765,7 +2818,20 @@
       var shareUrl = buildPlanShareUrl();
       var wrap = document.getElementById('qrPlanCanvasWrap');
       wrap.innerHTML = '';
-      new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+      try{
+        new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+      }catch(e){
+        // Very large plans (many saved items) can exceed a QR code's data
+        // capacity entirely. Retry once with the lowest error-correction
+        // level (squeezes in more data), and if that still overflows, tell
+        // the person plainly instead of leaving a blank box.
+        wrap.innerHTML = '';
+        try{
+          new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
+        }catch(e2){
+          wrap.innerHTML = '<div class="lunch-meta" style="max-width:240px;">' + t('qrTooLarge') + '</div>';
+        }
+      }
       document.getElementById('qrPlanOverlay').style.display = 'flex';
     }
     if(typeof QRCode === 'undefined'){
