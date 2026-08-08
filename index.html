@@ -801,6 +801,27 @@
     justify-content:center;
     gap:6px;
   }
+  .export-menu-item{
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:12px 16px;
+    border:none;
+    border-top:1px solid var(--border, #eee);
+    background:none;
+    font-size:14.5px;
+    color:var(--text);
+    cursor:pointer;
+  }
+  .export-menu-item:first-child{
+    border-top:none;
+  }
+  .export-menu-item:hover{
+    background:var(--bg-hover, rgba(0,0,0,0.04));
+  }
+  body.dark .export-menu-item:hover{
+    background:rgba(255,255,255,0.06);
+  }
   .toast{
     position:fixed;
     bottom:80px;
@@ -1351,19 +1372,20 @@
     <h2 class="section-title" id="titlePlan">Mein Plan</h2>
     <p class="note-inline" id="planNote">Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar. Tipp: Nutze den Kalender- oder PDF-Export, um deinen Plan zu speichern, oder "Teilen", um ihn auf einem anderen Gerät zu öffnen.</p>
     <div id="nextUpBox"></div>
-    <div class="plan-actions">
-      <button class="btn-secondary" id="exportPlanBtn"><span id="exportPlanBtnText">Als Kalender exportieren (.ics)</span></button>
-      <button class="btn-secondary" id="exportPlanPdfBtn"><span id="exportPlanPdfBtnText">Als PDF exportieren</span></button>
-    </div>
-    <div class="plan-actions" style="margin-top:8px;">
-      <button class="btn-secondary share-btn" id="sharePlanBtn" aria-label="Plan teilen">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-        <span id="sharePlanBtnText">Teilen</span>
+    <div class="plan-actions" style="position:relative;">
+      <button class="btn-secondary" id="exportMenuToggle" style="width:100%;display:flex;align-items:center;justify-content:space-between;" aria-expanded="false">
+        <span style="display:flex;align-items:center;gap:8px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span id="exportMenuToggleText">Exportieren</span>
+        </span>
+        <svg id="exportMenuChevron" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.15s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
-      <button class="btn-secondary share-btn" id="qrPlanBtn" aria-label="QR-Code anzeigen" style="margin-top:8px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="14" y1="14" x2="14" y2="21"></line><line x1="21" y1="14" x2="21" y2="21"></line><line x1="17.5" y1="14" x2="17.5" y2="17.5"></line><line x1="14" y1="17.5" x2="21" y2="17.5"></line></svg>
-        <span id="qrPlanBtnText">QR-Code anzeigen (anderes Gerät)</span>
-      </button>
+      <div id="exportMenu" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border-color, #ddd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.15);overflow:hidden;z-index:50;">
+        <button class="export-menu-item" id="exportPlanBtn"><span id="exportPlanBtnText">Als Kalender exportieren (.ics)</span></button>
+        <button class="export-menu-item" id="exportPlanPdfBtn"><span id="exportPlanPdfBtnText">Als PDF exportieren</span></button>
+        <button class="export-menu-item" id="sharePlanBtn" aria-label="Plan teilen"><span id="sharePlanBtnText">Teilen</span></button>
+        <button class="export-menu-item" id="qrPlanBtn" aria-label="QR-Code anzeigen"><span id="qrPlanBtnText">QR-Code anzeigen (anderes Gerät)</span></button>
+      </div>
     </div>
     <div id="qrPlanOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
       <div style="background:var(--card);border-radius:16px;padding:24px;max-width:340px;text-align:center;">

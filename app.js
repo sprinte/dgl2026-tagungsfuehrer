@@ -14,6 +14,7 @@
       pdfGeneratedOn: 'Erstellt am',
       pdfNotesTitle: 'Notizen',
       pdfLibError: 'PDF-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
+      qrLibError: 'QR-Code-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
       clearPlanBtnText: 'Plan komplett löschen',
       clearPlanEmptyAlert: 'Dein Plan ist bereits leer.',
       clearPlanConfirm: 'Möchtest du wirklich deinen gesamten Plan löschen? Alle gemerkten Vorträge, Poster und Termine werden entfernt. Das kann nicht rückgängig gemacht werden.',
@@ -31,6 +32,7 @@
       aboutSpeaker: 'Zur Person',
       nextUp: 'Nächster Termin',
       shareBtnLabel: 'Teilen',
+      exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen (anderes Gerät)',
       qrHint: 'Mit der Handy-Kamera scannen, um diesen Plan auf dem anderen Gerät zu laden.',
       qrCloseBtn: 'Schließen',
@@ -118,6 +120,7 @@
       pdfGeneratedOn: 'Generated on',
       pdfNotesTitle: 'Notes',
       pdfLibError: 'The PDF feature could not be loaded. Please check your internet connection and try again.',
+      qrLibError: 'The QR code feature could not be loaded. Please check your internet connection and try again.',
       clearPlanBtnText: 'Clear entire plan',
       clearPlanEmptyAlert: 'Your plan is already empty.',
       clearPlanConfirm: 'Are you sure you want to clear your entire plan? All saved talks, posters and events will be removed. This cannot be undone.',
@@ -135,6 +138,7 @@
       aboutSpeaker: 'About the speaker',
       nextUp: 'Next up',
       shareBtnLabel: 'Share',
+      exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code (other device)',
       qrHint: 'Scan with your phone camera to load this plan on the other device.',
       qrCloseBtn: 'Close',
@@ -233,6 +237,7 @@
     document.getElementById('titlePlan').textContent = t('titlePlan');
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
+    document.getElementById('exportMenuToggleText').textContent = t('exportMenuLabel');
     document.getElementById('sharePlanBtnText').textContent = t('shareBtnLabel');
     document.getElementById('qrPlanBtnText').textContent = t('qrBtnLabel');
     document.getElementById('qrPlanHint').textContent = t('qrHint');
@@ -2627,8 +2632,32 @@
     return location.origin + location.pathname + '#plan=' + encoded;
   }
 
+  document.getElementById('exportMenuToggle').addEventListener('click', function(){
+    var menu = document.getElementById('exportMenu');
+    var chevron = document.getElementById('exportMenuChevron');
+    var open = menu.style.display === 'block';
+    menu.style.display = open ? 'none' : 'block';
+    chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    this.setAttribute('aria-expanded', String(!open));
+  });
+  document.addEventListener('click', function(ev){
+    var menu = document.getElementById('exportMenu');
+    var toggle = document.getElementById('exportMenuToggle');
+    if(menu.style.display === 'block' && !menu.contains(ev.target) && ev.target !== toggle && !toggle.contains(ev.target)){
+      menu.style.display = 'none';
+      document.getElementById('exportMenuChevron').style.transform = 'rotate(0deg)';
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  function closeExportMenu(){
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportMenuChevron').style.transform = 'rotate(0deg)';
+    document.getElementById('exportMenuToggle').setAttribute('aria-expanded', 'false');
+  }
+
   document.getElementById('sharePlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    closeExportMenu();
     var shareUrl = buildPlanShareUrl();
     var shareTitle = lang === 'en' ? 'My DGL 2026 Plan' : 'Mein DGL-2026-Plan';
     if(navigator.share){
@@ -2646,16 +2675,33 @@
 
   document.getElementById('qrPlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
-    if(typeof QRCode === 'undefined'){ alert(t('pdfLibError')); return; }
-    var shareUrl = buildPlanShareUrl();
-    var wrap = document.getElementById('qrPlanCanvasWrap');
-    wrap.innerHTML = '';
-    var canvas = document.createElement('canvas');
-    wrap.appendChild(canvas);
-    QRCode.toCanvas(canvas, shareUrl, { width: 240, margin: 1 }, function(err){
-      if(err) console.error('QR generation failed:', err);
-    });
-    document.getElementById('qrPlanOverlay').style.display = 'flex';
+    closeExportMenu();
+    function generate(){
+      var shareUrl = buildPlanShareUrl();
+      var wrap = document.getElementById('qrPlanCanvasWrap');
+      wrap.innerHTML = '';
+      var canvas = document.createElement('canvas');
+      wrap.appendChild(canvas);
+      QRCode.toCanvas(canvas, shareUrl, { width: 240, margin: 1 }, function(err){
+        if(err) console.error('QR generation failed:', err);
+      });
+      document.getElementById('qrPlanOverlay').style.display = 'flex';
+    }
+    if(typeof QRCode === 'undefined'){
+      // The CDN script can still be mid-flight on a slow connection even
+      // though the page itself has loaded — give it one short retry before
+      // reporting a real failure, and use a QR-specific message (not the
+      // PDF one) so the alert actually names the right thing.
+      setTimeout(function(){
+        if(typeof QRCode === 'undefined'){
+          alert(t('qrLibError'));
+        } else {
+          generate();
+        }
+      }, 800);
+      return;
+    }
+    generate();
   });
 
   document.getElementById('qrPlanCloseBtn').addEventListener('click', function(){
@@ -2667,6 +2713,7 @@
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    closeExportMenu();
     var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DGL 2026//Tagungsfuehrer//DE'];
     plan.forEach(function(item){
       var d = dateForDay(item.dayId);
@@ -2716,6 +2763,7 @@
 
   document.getElementById('exportPlanPdfBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    closeExportMenu();
     if(typeof window.jspdf === 'undefined'){ alert(t('pdfLibError')); return; }
 
     loadImageAsDataURL('logo_pdf.png').then(function(dataUrl){
