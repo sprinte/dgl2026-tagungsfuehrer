@@ -1267,6 +1267,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -1359,6 +1360,17 @@
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
         <span id="sharePlanBtnText">Teilen</span>
       </button>
+      <button class="btn-secondary share-btn" id="qrPlanBtn" aria-label="QR-Code anzeigen" style="margin-top:8px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="14" y1="14" x2="14" y2="21"></line><line x1="21" y1="14" x2="21" y2="21"></line><line x1="17.5" y1="14" x2="17.5" y2="17.5"></line><line x1="14" y1="17.5" x2="21" y2="17.5"></line></svg>
+        <span id="qrPlanBtnText">QR-Code anzeigen (anderes Gerät)</span>
+      </button>
+    </div>
+    <div id="qrPlanOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+      <div style="background:var(--card);border-radius:16px;padding:24px;max-width:340px;text-align:center;">
+        <div id="qrPlanCanvasWrap" style="display:flex;justify-content:center;margin-bottom:14px;"></div>
+        <div class="lunch-meta" id="qrPlanHint" style="margin-bottom:14px;">Mit der Handy-Kamera scannen, um diesen Plan auf dem anderen Gerät zu laden.</div>
+        <button class="btn-secondary" id="qrPlanCloseBtn">Schließen</button>
+      </div>
     </div>
     <div class="plan-actions" style="margin-top:8px;">
       <button class="btn-danger" id="clearPlanBtn"><span id="clearPlanBtnText">Plan komplett löschen</span></button>

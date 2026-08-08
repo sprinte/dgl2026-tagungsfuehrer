@@ -31,6 +31,9 @@
       aboutSpeaker: 'Zur Person',
       nextUp: 'Nächster Termin',
       shareBtnLabel: 'Teilen',
+      qrBtnLabel: 'QR-Code anzeigen (anderes Gerät)',
+      qrHint: 'Mit der Handy-Kamera scannen, um diesen Plan auf dem anderen Gerät zu laden.',
+      qrCloseBtn: 'Schließen',
       linkCopied: 'Link kopiert!',
       copyManually: 'Diesen Link kopieren:',
       sharedPlanConfirmPrefix: 'Geteilten Plan mit ',
@@ -132,6 +135,9 @@
       aboutSpeaker: 'About the speaker',
       nextUp: 'Next up',
       shareBtnLabel: 'Share',
+      qrBtnLabel: 'Show QR code (other device)',
+      qrHint: 'Scan with your phone camera to load this plan on the other device.',
+      qrCloseBtn: 'Close',
       linkCopied: 'Link copied!',
       copyManually: 'Copy this link:',
       sharedPlanConfirmPrefix: 'Load shared plan with ',
@@ -228,6 +234,9 @@
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
     document.getElementById('sharePlanBtnText').textContent = t('shareBtnLabel');
+    document.getElementById('qrPlanBtnText').textContent = t('qrBtnLabel');
+    document.getElementById('qrPlanHint').textContent = t('qrHint');
+    document.getElementById('qrPlanCloseBtn').textContent = t('qrCloseBtn');
     document.getElementById('planViewListText').textContent = t('planViewList');
     document.getElementById('planViewTimelineText').textContent = t('planViewTimeline');
     document.getElementById('lunchViewListText').textContent = t('lunchViewList');
@@ -2611,10 +2620,14 @@
     setTimeout(function(){ el.remove(); }, 2500);
   }
 
+  function buildPlanShareUrl(){
+    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(plan)))));
+    return location.origin + location.pathname + '#plan=' + encoded;
+  }
+
   document.getElementById('sharePlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
-    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(plan)))));
-    var shareUrl = location.origin + location.pathname + '#plan=' + encoded;
+    var shareUrl = buildPlanShareUrl();
     var shareTitle = lang === 'en' ? 'My DGL 2026 Plan' : 'Mein DGL-2026-Plan';
     if(navigator.share){
       navigator.share({ title: shareTitle, url: shareUrl }).catch(function(){});
@@ -2627,6 +2640,27 @@
     } else {
       prompt(t('copyManually'), shareUrl);
     }
+  });
+
+  document.getElementById('qrPlanBtn').addEventListener('click', function(){
+    if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    if(typeof QRCode === 'undefined'){ alert(t('pdfLibError')); return; }
+    var shareUrl = buildPlanShareUrl();
+    var wrap = document.getElementById('qrPlanCanvasWrap');
+    wrap.innerHTML = '';
+    var canvas = document.createElement('canvas');
+    wrap.appendChild(canvas);
+    QRCode.toCanvas(canvas, shareUrl, { width: 240, margin: 1 }, function(err){
+      if(err) console.error('QR generation failed:', err);
+    });
+    document.getElementById('qrPlanOverlay').style.display = 'flex';
+  });
+
+  document.getElementById('qrPlanCloseBtn').addEventListener('click', function(){
+    document.getElementById('qrPlanOverlay').style.display = 'none';
+  });
+  document.getElementById('qrPlanOverlay').addEventListener('click', function(ev){
+    if(ev.target.id === 'qrPlanOverlay') document.getElementById('qrPlanOverlay').style.display = 'none';
   });
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
