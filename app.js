@@ -1418,11 +1418,13 @@
       document.getElementById('dayTabs').style.display = '';
       document.getElementById('categoryFilter').style.display = '';
       document.getElementById('programmList').style.display = '';
+      document.getElementById('topicJump').style.display = '';
       return;
     }
     document.getElementById('dayTabs').style.display = 'none';
     document.getElementById('categoryFilter').style.display = 'none';
     document.getElementById('programmList').style.display = 'none';
+    document.getElementById('topicJump').style.display = 'none';
     wrap.style.display = 'block';
     wrap.innerHTML = '';
 
