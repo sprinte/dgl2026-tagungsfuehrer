@@ -35,7 +35,7 @@
       shareBtnLabel: 'Als Link teilen',
       exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen',
-      qrHint: 'Mit der Handy-Kamera scannen, um diesen Plan auf dem anderen Gerät zu laden.',
+      qrHint: 'Scanne den QR-Code, um deinen Plan auf einem anderen Gerät zu laden.',
       qrCloseBtn: 'Schließen',
       linkCopied: 'Link kopiert!',
       copyManually: 'Diesen Link kopieren:',
@@ -142,7 +142,7 @@
       shareBtnLabel: 'Share as link',
       exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code',
-      qrHint: 'Scan with your phone camera to load this plan on the other device.',
+      qrHint: 'Scan the QR code to load your plan on another device.',
       qrCloseBtn: 'Close',
       linkCopied: 'Link copied!',
       copyManually: 'Copy this link:',
@@ -2826,7 +2826,7 @@
       var wrap = document.getElementById('qrPlanCanvasWrap');
       wrap.innerHTML = '';
       try{
-        new QRCode(wrap, { text: shareUrl, width: 280, height: 280, correctLevel: QRCode.CorrectLevel.L });
+        new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
       }catch(e){
         // Very large plans (many saved items) can exceed a QR code's data
         // capacity entirely. Retry once with the lowest error-correction
