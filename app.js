@@ -334,15 +334,20 @@
   (function importSharedPlanFromHash(){
     if(location.hash.indexOf('#plan=') !== 0) return;
     try{
-      var encoded = location.hash.slice(6);
-      var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(encoded)))));
-      if(Array.isArray(decoded) && decoded.length){
-        // Shared links have gone through a couple of formats as we shrank
-        // them for QR codes: newest is the item's permanent pid (a short
-        // number stored directly in the programme data — stable across
-        // future programme edits), before that {id, dayId}, and originally
-        // a full item object. Support all three.
-        var resolved = decoded.map(function(entry){
+      var raw = location.hash.slice(6);
+      var resolved;
+      if(/^[\d,]+$/.test(raw)){
+        // Newest, plain format: "12,45,109" — just the pids, comma-separated.
+        resolved = raw.split(',').map(function(pid){
+          var ref = refForPid(pid);
+          return ref ? resolvePlanItemById(ref.dayId, ref.id) : null;
+        }).filter(Boolean);
+      } else {
+        // Older links were base64+JSON wrapped, carrying (over time) pids,
+        // {id, dayId} pairs, or full item objects. Support all of those too
+        // so links already sent out keep working.
+        var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(raw)))));
+        resolved = (Array.isArray(decoded) ? decoded : []).map(function(entry){
           if(typeof entry === 'string' && /^\d+$/.test(entry)){
             var pidRef = refForPid(entry);
             return pidRef ? resolvePlanItemById(pidRef.dayId, pidRef.id) : null;
@@ -351,12 +356,12 @@
           if(entry && entry.id && entry.dayId) return resolvePlanItemById(entry.dayId, entry.id);
           return null;
         }).filter(Boolean);
-        if(resolved.length){
-          var msg = t('sharedPlanConfirmPrefix') + resolved.length + t('sharedPlanConfirmSuffix');
-          if(confirm(msg)){
-            plan = resolved;
-            savePlan(plan);
-          }
+      }
+      if(resolved.length){
+        var msg = t('sharedPlanConfirmPrefix') + resolved.length + t('sharedPlanConfirmSuffix');
+        if(confirm(msg)){
+          plan = resolved;
+          savePlan(plan);
         }
       }
     }catch(e){
@@ -2761,13 +2766,14 @@
   }
 
   function buildPlanShareUrl(){
-    // Each saved item becomes its permanent pid from the programme data —
-    // short, unique by construction, and stable across future programme
-    // edits since it's an explicit stored field, not derived from anything
-    // that could shift (position) or collide (a hash).
+    // Plain comma-separated pids directly in the URL — no JSON wrapper, no
+    // base64. Both add real overhead (base64 alone is +33%, plus its +/=
+    // characters then need percent-encoding on top) for something that's
+    // fundamentally just a short list of small numbers and doesn't need
+    // obfuscating. This is the biggest lever left for keeping the QR code
+    // scannable once a plan has many items.
     var compact = plan.map(function(item){ return pidForItem(item); }).filter(Boolean);
-    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(compact)))));
-    return location.origin + location.pathname + '#plan=' + encoded;
+    return location.origin + location.pathname + '#plan=' + compact.join(',');
   }
 
   document.getElementById('exportMenuToggle').addEventListener('click', function(){
@@ -2819,7 +2825,7 @@
       var wrap = document.getElementById('qrPlanCanvasWrap');
       wrap.innerHTML = '';
       try{
-        new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+        new QRCode(wrap, { text: shareUrl, width: 280, height: 280, correctLevel: QRCode.CorrectLevel.L });
       }catch(e){
         // Very large plans (many saved items) can exceed a QR code's data
         // capacity entirely. Retry once with the lowest error-correction
