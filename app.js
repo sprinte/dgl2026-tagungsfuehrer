@@ -35,6 +35,7 @@
       shareBtnLabel: 'Als Link teilen',
       exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen',
+      posterViewLabel: 'Plakat ansehen',
       qrHint: 'Scanne den QR-Code, um deinen Plan auf einem anderen Gerät zu laden.',
       qrCloseBtn: 'Schließen',
       linkCopied: 'Link kopiert!',
@@ -142,6 +143,7 @@
       shareBtnLabel: 'Share as link',
       exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code',
+      posterViewLabel: 'View poster',
       qrHint: 'Scan the QR code to load your plan on another device.',
       qrCloseBtn: 'Close',
       linkCopied: 'Link copied!',
@@ -384,6 +386,13 @@
   function esc(s){
     if(s === null || s === undefined) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function posterIconBtn(item){
+    var src = lang === 'en' ? (item.poster_en || item.poster_de) : (item.poster_de || item.poster_en);
+    if(!src) return '';
+    return '<button class="poster-icon-btn" data-poster="' + esc(src) + '" aria-label="' + esc(t('posterViewLabel')) + '" title="' + esc(t('posterViewLabel')) + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>' +
+    '</button>';
   }
 
   // ---------- Shared time helpers ----------
@@ -1159,6 +1168,7 @@
               (block.room ? '<span class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</span>' : '') +
             '</div>' +
             '<div class="session-btns">' +
+              posterIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '">&#9656;</div>' : '') +
               (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
@@ -1342,6 +1352,7 @@
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
+              posterIconBtn(s) +
               '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add">' + (sadded ? '&#10003;' : '+') + '</button>' +
               (hasTalks ? '<div class="chevron' + (talksOpen ? ' open' : '') + '">&#9656;</div>' : '') +
             '</div>';
@@ -2873,6 +2884,26 @@
   });
   document.getElementById('qrPlanOverlay').addEventListener('click', function(ev){
     if(ev.target.id === 'qrPlanOverlay') document.getElementById('qrPlanOverlay').style.display = 'none';
+  });
+
+  // Poster lightbox — delegated on document since poster-icon-btn elements
+  // get created fresh on every renderProgrammList() call, so a listener
+  // attached once here keeps working after re-renders without re-binding.
+  document.addEventListener('click', function(ev){
+    var btn = ev.target.closest && ev.target.closest('.poster-icon-btn');
+    if(btn){
+      ev.stopPropagation();
+      var src = btn.getAttribute('data-poster');
+      var img = document.getElementById('posterLightboxImg');
+      img.src = src;
+      document.getElementById('posterLightboxOverlay').style.display = 'flex';
+    }
+  });
+  document.getElementById('posterLightboxCloseBtn').addEventListener('click', function(){
+    document.getElementById('posterLightboxOverlay').style.display = 'none';
+  });
+  document.getElementById('posterLightboxOverlay').addEventListener('click', function(ev){
+    if(ev.target.id === 'posterLightboxOverlay') document.getElementById('posterLightboxOverlay').style.display = 'none';
   });
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
