@@ -36,6 +36,12 @@
       exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen',
       posterViewLabel: 'Plakat ansehen',
+      addToPlanLabel: 'Zum Plan hinzufügen',
+      removeFromPlanLabel: 'Vom Plan entfernen',
+      showTalksLabel: 'Vorträge anzeigen',
+      showPostersLabel: 'Poster anzeigen',
+      showDetailsLabel: 'Details anzeigen',
+      showMoreInfoLabel: 'Mehr Informationen',
       qrHint: 'Scanne den QR-Code, um deinen Plan auf einem anderen Gerät zu laden.',
       qrCloseBtn: 'Schließen',
       linkCopied: 'Link kopiert!',
@@ -144,6 +150,12 @@
       exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code',
       posterViewLabel: 'View poster',
+      addToPlanLabel: 'Add to plan',
+      removeFromPlanLabel: 'Remove from plan',
+      showTalksLabel: 'Show talks',
+      showPostersLabel: 'Show posters',
+      showDetailsLabel: 'Show details',
+      showMoreInfoLabel: 'More information',
       qrHint: 'Scan the QR code to load your plan on another device.',
       qrCloseBtn: 'Close',
       linkCopied: 'Link copied!',
@@ -1169,9 +1181,9 @@
             '</div>' +
             '<div class="session-btns">' +
               posterIconBtn(block) +
-              (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
-              (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '">&#9656;</div>' : '') +
-              (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow">&#8594;</div>' : '') +
+              (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
+              (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(t('showPostersLabel')) + '">&#9656;</div>' : '') +
+              (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
         if(block.linkUrl || block.linkMapsUrl){
@@ -1353,8 +1365,8 @@
             '</div>' +
             '<div class="session-btns">' +
               posterIconBtn(s) +
-              '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add">' + (sadded ? '&#10003;' : '+') + '</button>' +
-              (hasTalks ? '<div class="chevron' + (talksOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+              '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add" title="' + esc(sadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(sadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (sadded ? '&#10003;' : '+') + '</button>' +
+              (hasTalks ? '<div class="chevron' + (talksOpen ? ' open' : '') + '" title="' + esc(t('showTalksLabel')) + '">&#9656;</div>' : '') +
             '</div>';
           row.appendChild(header);
 
@@ -1626,7 +1638,7 @@
           '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
-          '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
+          '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
         item.style.cursor = 'pointer';
         item.style.position = 'relative';
         if(roomClickable){
@@ -1673,7 +1685,7 @@
           '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
           '<div class="search-result-title"><span class="session-tag">' + t('posterListLabel') + '</span> ' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
-          '<button class="add-btn small' + (posterPadded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (posterPadded ? '&#10003;' : '+') + '</button>';
+          '<button class="add-btn small' + (posterPadded ? ' added' : '') + '" data-role="search-add" title="' + esc(posterPadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(posterPadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" style="position:absolute;top:12px;right:12px;">' + (posterPadded ? '&#10003;' : '+') + '</button>';
         item.style.position = 'relative';
         item.querySelectorAll('.author-link').forEach(function(el){
           el.addEventListener('click', function(ev){
@@ -1969,7 +1981,7 @@
           '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
           '<span class="badge-cost">' + esc(cost) + '</span>' +
         '</div>' +
-        (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '');
+        (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '" title="' + esc(t('showDetailsLabel')) + '">&#9656;</div>' : '');
       card.appendChild(header);
 
       if(hasDetails){
@@ -2018,7 +2030,7 @@
       '<div class="card" id="officeCardLink" style="cursor:pointer;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">' +
           '<div class="card-section-heading" style="margin:0;">' + t('officeCardTitle') + '</div>' +
-          '<div class="chevron link-arrow">&#8594;</div>' +
+          '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' +
         '</div>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('officeContact') + '</strong> Dr. Hildegard Feldmann (F&U confirm)</div>' +
         '<div class="lunch-meta" style="margin-top:6px;"><strong style="color:var(--text)">' + t('officeHours') + '</strong></div>' +
@@ -2395,8 +2407,8 @@
               (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
-              '<button class="remove-btn" data-id="' + item.id + '">&times;</button>' +
-              (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '">&#9656;</div>' : '') +
+              '<button class="remove-btn" data-id="' + item.id + '" title="' + esc(t('removeFromPlanLabel')) + '" aria-label="' + esc(t('removeFromPlanLabel')) + '">&times;</button>' +
+              (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '" title="' + esc(t('showDetailsLabel')) + '">&#9656;</div>' : '') +
             '</div>';
         card.appendChild(mainDiv);
         if(conflicts[idx].length){
