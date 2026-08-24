@@ -6,7 +6,7 @@
       titleProgramm: 'Programm', titleLunch: 'Mittagessen in der Nähe', titleExk: 'Exkursionen', titleVenue: 'Info', titlePlan: 'Mein Plan',
       mod: 'Mod.:', noAbstract: 'Kein Abstract verfügbar.',
       planEmpty: 'Noch nichts geplant.<br>Tippe im Programm auf das + Symbol, um Sessions oder Beiträge hinzuzufügen.',
-      planNote: 'Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar. Tipp: Nutze den Kalender- oder PDF-Export, um deinen Plan zu speichern, oder "Teilen", um ihn auf einem anderen Gerät zu öffnen.',
+      planNote: 'Dein Plan wird lokal in diesem Browser gespeichert. Auf einem anderen Gerät oder in einem anderen Browser ist er nicht sichtbar. Tipp: Nutze "Exportieren", um deinen Plan als Kalender oder PDF zu speichern, oder um ihn per Link/QR-Code auf einem anderen Gerät zu öffnen.',
       exportBtn: 'Als Kalender exportieren (.ics)',
       exportEmptyAlert: 'Dein Plan ist noch leer.',
       exportPlanPdfBtnText: 'Als PDF exportieren',
@@ -14,6 +14,8 @@
       pdfGeneratedOn: 'Erstellt am',
       pdfNotesTitle: 'Notizen',
       pdfLibError: 'PDF-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
+      qrLibError: 'QR-Code-Funktion konnte nicht geladen werden. Bitte Internetverbindung prüfen und erneut versuchen.',
+      qrTooLarge: 'Dein Plan hat zu viele Einträge für einen QR-Code. Bitte nutze stattdessen "Als Link teilen".',
       clearPlanBtnText: 'Plan komplett löschen',
       clearPlanEmptyAlert: 'Dein Plan ist bereits leer.',
       clearPlanConfirm: 'Möchtest du wirklich deinen gesamten Plan löschen? Alle gemerkten Vorträge, Poster und Termine werden entfernt. Das kann nicht rückgängig gemacht werden.',
@@ -30,7 +32,11 @@
       planConflict: 'Zeitliche Überschneidung mit:',
       aboutSpeaker: 'Zur Person',
       nextUp: 'Nächster Termin',
-      shareBtnLabel: 'Teilen',
+      shareBtnLabel: 'Als Link teilen',
+      exportMenuLabel: 'Exportieren',
+      qrBtnLabel: 'QR-Code anzeigen',
+      qrHint: 'Scanne den QR-Code, um deinen Plan auf einem anderen Gerät zu laden.',
+      qrCloseBtn: 'Schließen',
       linkCopied: 'Link kopiert!',
       copyManually: 'Diesen Link kopieren:',
       sharedPlanConfirmPrefix: 'Geteilten Plan mit ',
@@ -107,7 +113,7 @@
       titleProgramm: 'Programme', titleLunch: 'Lunch nearby', titleExk: 'Excursions', titleVenue: 'Info', titlePlan: 'My Plan',
       mod: 'Chairs:', noAbstract: 'No abstract available.',
       planEmpty: 'Nothing planned yet.<br>Tap the + icon in the programme to add sessions or talks.',
-      planNote: 'Your plan is stored locally in this browser. It is not visible on another device or in another browser. Tip: use the calendar or PDF export to save your plan, or "Share" to open it on another device.',
+      planNote: 'Your plan is stored locally in this browser. It is not visible on another device or in another browser. Tip: use "Export" to save your plan as a calendar or PDF, or to open it on another device via link/QR code.',
       exportBtn: 'Export to calendar (.ics)',
       exportEmptyAlert: 'Your plan is still empty.',
       exportPlanPdfBtnText: 'Export as PDF',
@@ -115,6 +121,8 @@
       pdfGeneratedOn: 'Generated on',
       pdfNotesTitle: 'Notes',
       pdfLibError: 'The PDF feature could not be loaded. Please check your internet connection and try again.',
+      qrLibError: 'The QR code feature could not be loaded. Please check your internet connection and try again.',
+      qrTooLarge: 'Your plan has too many items for a QR code. Please use "Share as link" instead.',
       clearPlanBtnText: 'Clear entire plan',
       clearPlanEmptyAlert: 'Your plan is already empty.',
       clearPlanConfirm: 'Are you sure you want to clear your entire plan? All saved talks, posters and events will be removed. This cannot be undone.',
@@ -131,7 +139,11 @@
       planConflict: 'Overlaps with:',
       aboutSpeaker: 'About the speaker',
       nextUp: 'Next up',
-      shareBtnLabel: 'Share',
+      shareBtnLabel: 'Share as link',
+      exportMenuLabel: 'Export',
+      qrBtnLabel: 'Show QR code',
+      qrHint: 'Scan the QR code to load your plan on another device.',
+      qrCloseBtn: 'Close',
       linkCopied: 'Link copied!',
       copyManually: 'Copy this link:',
       sharedPlanConfirmPrefix: 'Load shared plan with ',
@@ -227,7 +239,11 @@
     document.getElementById('titlePlan').textContent = t('titlePlan');
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
+    document.getElementById('exportMenuToggleText').textContent = t('exportMenuLabel');
     document.getElementById('sharePlanBtnText').textContent = t('shareBtnLabel');
+    document.getElementById('qrPlanBtnText').textContent = t('qrBtnLabel');
+    document.getElementById('qrPlanHint').textContent = t('qrHint');
+    document.getElementById('qrPlanCloseBtn').textContent = t('qrCloseBtn');
     document.getElementById('planViewListText').textContent = t('planViewList');
     document.getElementById('planViewTimelineText').textContent = t('planViewTimeline');
     document.getElementById('lunchViewListText').textContent = t('lunchViewList');
@@ -318,12 +334,33 @@
   (function importSharedPlanFromHash(){
     if(location.hash.indexOf('#plan=') !== 0) return;
     try{
-      var encoded = location.hash.slice(6);
-      var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(encoded)))));
-      if(Array.isArray(decoded) && decoded.length){
-        var msg = t('sharedPlanConfirmPrefix') + decoded.length + t('sharedPlanConfirmSuffix');
+      var raw = location.hash.slice(6);
+      var resolved;
+      if(/^[\d,]+$/.test(raw)){
+        // Newest, plain format: "12,45,109" — just the pids, comma-separated.
+        resolved = raw.split(',').map(function(pid){
+          var ref = refForPid(pid);
+          return ref ? resolvePlanItemById(ref.dayId, ref.id) : null;
+        }).filter(Boolean);
+      } else {
+        // Older links were base64+JSON wrapped, carrying (over time) pids,
+        // {id, dayId} pairs, or full item objects. Support all of those too
+        // so links already sent out keep working.
+        var decoded = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(raw)))));
+        resolved = (Array.isArray(decoded) ? decoded : []).map(function(entry){
+          if(typeof entry === 'string' && /^\d+$/.test(entry)){
+            var pidRef = refForPid(entry);
+            return pidRef ? resolvePlanItemById(pidRef.dayId, pidRef.id) : null;
+          }
+          if(entry && entry.title !== undefined) return entry;
+          if(entry && entry.id && entry.dayId) return resolvePlanItemById(entry.dayId, entry.id);
+          return null;
+        }).filter(Boolean);
+      }
+      if(resolved.length){
+        var msg = t('sharedPlanConfirmPrefix') + resolved.length + t('sharedPlanConfirmSuffix');
         if(confirm(msg)){
-          plan = decoded;
+          plan = resolved;
           savePlan(plan);
         }
       }
@@ -721,6 +758,121 @@
     return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + s.code + '_' + slug(s.title) + '_' + idx;
   }
 
+  // Every plannable item carries a permanent, explicit "pid" directly in the
+  // programme data (assigned once, reused on future data edits) — far
+  // simpler and safer than deriving a reference from position or a hash:
+  // it can't collide, and it can't shift when the programme changes
+  // elsewhere, because it isn't computed from any of that.
+  var allItemRefsCache = null;
+  function allItemRefs(){
+    if(allItemRefsCache) return allItemRefsCache;
+    var refs = [];
+    DATA.programm.forEach(function(day){
+      day.blocks.forEach(function(block){
+        if(block.type === 'info'){
+          if(block.pid) refs.push({ pid: block.pid, id: planIdForBlock(day.id, block), dayId: day.id });
+          (block.posters || []).forEach(function(p){
+            if(p.pid) refs.push({ pid: p.pid, id: planIdForPoster(day.id, p), dayId: day.id });
+          });
+        } else {
+          block.sessions.forEach(function(s){
+            if(s.pid) refs.push({ pid: s.pid, id: planIdForSession(day.id, block, s), dayId: day.id });
+            (s.talks || []).forEach(function(talk, idx){
+              if(talk.pid) refs.push({ pid: talk.pid, id: planIdForTalk(day.id, block, s, talk, idx), dayId: day.id });
+            });
+          });
+        }
+      });
+    });
+    allItemRefsCache = refs;
+    return refs;
+  }
+  var pidLookupCache = null;
+  function refForPid(pid){
+    if(!pidLookupCache){
+      pidLookupCache = {};
+      allItemRefs().forEach(function(ref){ pidLookupCache[ref.pid] = ref; });
+    }
+    return pidLookupCache[pid] || null;
+  }
+  var idToPidCache = null;
+  function pidForItem(item){
+    if(!idToPidCache){
+      idToPidCache = {};
+      allItemRefs().forEach(function(ref){ idToPidCache[ref.dayId + '|' + ref.id] = ref.pid; });
+    }
+    return idToPidCache[item.dayId + '|' + item.id] || null;
+  }
+
+  // Rebuilds a full plan item (title, subtitle, room, abstract, everything)
+  // from just its id/dayId — used to keep shared links/QR codes small: they
+  // only need to carry "which items", not the full text of each one, since
+  // the receiving device has the same programme data locally.
+  function resolvePlanItemById(dayId, id){
+    var day = DATA.programm.find(function(d){ return d.id === dayId; });
+    if(!day) return null;
+
+    for(var bi = 0; bi < day.blocks.length; bi++){
+      var block = day.blocks[bi];
+      if(block.type === 'info'){
+        if(planIdForBlock(dayId, block) === id){
+          var blockTitle = (lang === 'en' && block.title_en) ? block.title_en : block.title;
+          var blockSubtitle = (lang === 'en' && block.subtitle_en) ? block.subtitle_en : block.subtitle;
+          var bioText = lang === 'en' ? block.bio_en : block.bio_de;
+          var planAbstractText = (lang === 'en' && block.abstract_en) ? block.abstract_en : block.abstract;
+          var modSuffix = block.mod ? (t('mod') + ' ' + block.mod) : '';
+          var planSubtitle = [blockSubtitle, modSuffix].filter(Boolean).join(' · ');
+          return {
+            id: id, dayId: day.id, dayLabel: day.label, date: day.date,
+            time: block.time, title: blockTitle, subtitle: planSubtitle, room: block.room || '',
+            abstract: planAbstractText || '', bio: bioText || ''
+          };
+        }
+        if(block.posters){
+          for(var pi = 0; pi < block.posters.length; pi++){
+            var p = block.posters[pi];
+            if(planIdForPoster(dayId, p) === id){
+              var boardText = p.board ? (' · ' + t('posterBoard') + ' ' + p.board) : '';
+              return {
+                id: id, dayId: day.id, dayLabel: day.label, date: day.date,
+                time: block.time, title: p.title, subtitle: p.authorsDisplay + ' · ' + p.code + boardText,
+                room: '', authors: p.authorsDisplay, isPoster: true
+              };
+            }
+          }
+        }
+      } else {
+        for(var si = 0; si < block.sessions.length; si++){
+          var s = block.sessions[si];
+          var sid = planIdForSession(dayId, block, s);
+          if(sid === id){
+            var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
+            var sessionAbstractText = (lang === 'en' && s.abstract_en) ? s.abstract_en : s.abstract_de;
+            return {
+              id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
+              time: block.time, title: s.code + ' · ' + (lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix, subtitle: s.mod ? t('mod') + ' ' + s.mod : '', room: s.room,
+              abstract: sessionAbstractText || '', code: s.code
+            };
+          }
+          if(s.talks){
+            for(var ti = 0; ti < s.talks.length; ti++){
+              var talk = s.talks[ti];
+              var tid = planIdForTalk(dayId, block, s, talk, ti);
+              if(tid === id){
+                return {
+                  id: tid, dayId: day.id, dayLabel: day.label, date: day.date,
+                  time: computeTalkTimeRange(s.talks, ti, block.time), title: talk.title, subtitle: talk.authors + ' · ' + s.code, room: s.room,
+                  abstract: talk.abstract || '', code: s.code, authors: talk.authors
+                };
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   var expandedSessions = {};
   var expandedSessionAbstract = {};
   var expandedInfoAbstract = {};
@@ -781,7 +933,9 @@
   // -> "Arce Sánchez", not just everything-after-the-first-word.
   function stripLeadingInitials(words){
     var idx = 0;
-    while(idx < words.length - 1 && /^[A-ZÀ-ÿ]\.$/.test(words[idx])){
+    // Matches "M.", hyphenated doubles like "W.-H.", and short 2-letter
+    // initials like "Zs." (common in Hungarian names).
+    while(idx < words.length - 1 && /^[A-ZÀ-ÿ][a-zà-ÿ]?\.(-[A-ZÀ-ÿ][a-zà-ÿ]?\.)*$/.test(words[idx])){
       idx++;
     }
     return words.slice(idx);
@@ -1373,6 +1527,16 @@
 
   var dayLabelMap = {};
   DATA.programm.forEach(function(d){ dayLabelMap[d.id] = { de: d.label, en: d.label_en }; });
+  // Plan items store dayLabel in whichever language was active when they were
+  // added — fine until someone switches languages afterwards (e.g. adds
+  // items in German, then views "Mein Plan"/exports in English). This looks
+  // the correct-for-right-now label back up instead of trusting the stored,
+  // possibly stale-language string.
+  function displayDayLabel(item){
+    var dl = dayLabelMap[item.dayId];
+    if(!dl) return item.dayLabel;
+    return (lang === 'en' && dl.en) ? dl.en : dl.de;
+  }
 
   function jumpToEntry(m){
     currentDay = m.dayId;
@@ -1407,11 +1571,13 @@
       document.getElementById('dayTabs').style.display = '';
       document.getElementById('categoryFilter').style.display = '';
       document.getElementById('programmList').style.display = '';
+      document.getElementById('topicJump').style.display = '';
       return;
     }
     document.getElementById('dayTabs').style.display = 'none';
     document.getElementById('categoryFilter').style.display = 'none';
     document.getElementById('programmList').style.display = 'none';
+    document.getElementById('topicJump').style.display = 'none';
     wrap.style.display = 'block';
     wrap.innerHTML = '';
 
@@ -1446,7 +1612,7 @@
       if(m.kind === 'talk'){
         var padded = isInPlan(m.jumpId);
         item.innerHTML =
-          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
+          '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
           '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
@@ -1493,7 +1659,7 @@
       } else if(m.kind === 'poster'){
         var posterPadded = isInPlan(m.jumpId);
         item.innerHTML =
-          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
+          '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
           '<div class="search-result-title"><span class="session-tag">' + t('posterListLabel') + '</span> ' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
           '<button class="add-btn small' + (posterPadded ? ' added' : '') + '" data-role="search-add" style="position:absolute;top:12px;right:12px;">' + (posterPadded ? '&#10003;' : '+') + '</button>';
@@ -2293,6 +2459,7 @@
     document.getElementById('planListDayTabs').style.display = mode === 'list' ? '' : 'none';
     document.getElementById('planTimelineWrap').style.display = mode === 'timeline' ? '' : 'none';
     if(mode === 'timeline'){ renderPlanTimelineDayTabs(); renderPlanTimeline(); }
+    else { renderPlan(); }
   }
   document.getElementById('planViewListBtn').addEventListener('click', function(){ setPlanView('list'); });
   document.getElementById('planViewTimelineBtn').addEventListener('click', function(){ setPlanView('timeline'); });
@@ -2609,10 +2776,44 @@
     setTimeout(function(){ el.remove(); }, 2500);
   }
 
+  function buildPlanShareUrl(){
+    // Plain comma-separated pids directly in the URL — no JSON wrapper, no
+    // base64. Both add real overhead (base64 alone is +33%, plus its +/=
+    // characters then need percent-encoding on top) for something that's
+    // fundamentally just a short list of small numbers and doesn't need
+    // obfuscating. This is the biggest lever left for keeping the QR code
+    // scannable once a plan has many items.
+    var compact = plan.map(function(item){ return pidForItem(item); }).filter(Boolean);
+    return location.origin + location.pathname + '#plan=' + compact.join(',');
+  }
+
+  document.getElementById('exportMenuToggle').addEventListener('click', function(){
+    var menu = document.getElementById('exportMenu');
+    var chevron = document.getElementById('exportMenuChevron');
+    var open = menu.style.display === 'block';
+    menu.style.display = open ? 'none' : 'block';
+    chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+    this.setAttribute('aria-expanded', String(!open));
+  });
+  document.addEventListener('click', function(ev){
+    var menu = document.getElementById('exportMenu');
+    var toggle = document.getElementById('exportMenuToggle');
+    if(menu.style.display === 'block' && !menu.contains(ev.target) && ev.target !== toggle && !toggle.contains(ev.target)){
+      menu.style.display = 'none';
+      document.getElementById('exportMenuChevron').style.transform = 'rotate(0deg)';
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  function closeExportMenu(){
+    document.getElementById('exportMenu').style.display = 'none';
+    document.getElementById('exportMenuChevron').style.transform = 'rotate(0deg)';
+    document.getElementById('exportMenuToggle').setAttribute('aria-expanded', 'false');
+  }
+
   document.getElementById('sharePlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
-    var encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(plan)))));
-    var shareUrl = location.origin + location.pathname + '#plan=' + encoded;
+    closeExportMenu();
+    var shareUrl = buildPlanShareUrl();
     var shareTitle = lang === 'en' ? 'My DGL 2026 Plan' : 'Mein DGL-2026-Plan';
     if(navigator.share){
       navigator.share({ title: shareTitle, url: shareUrl }).catch(function(){});
@@ -2627,8 +2828,56 @@
     }
   });
 
+  document.getElementById('qrPlanBtn').addEventListener('click', function(){
+    if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    closeExportMenu();
+    function generate(){
+      var shareUrl = buildPlanShareUrl();
+      var wrap = document.getElementById('qrPlanCanvasWrap');
+      wrap.innerHTML = '';
+      try{
+        new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
+      }catch(e){
+        // Very large plans (many saved items) can exceed a QR code's data
+        // capacity entirely. Retry once with the lowest error-correction
+        // level (squeezes in more data), and if that still overflows, tell
+        // the person plainly instead of leaving a blank box.
+        wrap.innerHTML = '';
+        try{
+          new QRCode(wrap, { text: shareUrl, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.L });
+        }catch(e2){
+          wrap.innerHTML = '<div class="lunch-meta" style="max-width:240px;">' + t('qrTooLarge') + '</div>';
+        }
+      }
+      document.getElementById('qrPlanOverlay').style.display = 'flex';
+    }
+    if(typeof QRCode === 'undefined'){
+      // The CDN script can still be mid-flight on a slow connection even
+      // though the page itself has loaded — give it one short retry before
+      // reporting a real failure, and use a QR-specific message (not the
+      // PDF one) so the alert actually names the right thing.
+      setTimeout(function(){
+        if(typeof QRCode === 'undefined'){
+          alert(t('qrLibError'));
+        } else {
+          generate();
+        }
+      }, 800);
+      return;
+    }
+    generate();
+  });
+
+  document.getElementById('qrPlanCloseBtn').addEventListener('click', function(){
+    document.getElementById('qrPlanOverlay').style.display = 'none';
+  });
+  document.getElementById('qrPlanOverlay').addEventListener('click', function(ev){
+    if(ev.target.id === 'qrPlanOverlay') document.getElementById('qrPlanOverlay').style.display = 'none';
+  });
+
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    closeExportMenu();
     var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DGL 2026//Tagungsfuehrer//DE'];
     plan.forEach(function(item){
       var d = dateForDay(item.dayId);
@@ -2678,6 +2927,7 @@
 
   document.getElementById('exportPlanPdfBtn').addEventListener('click', function(){
     if(plan.length === 0){ alert(t('exportEmptyAlert')); return; }
+    closeExportMenu();
     if(typeof window.jspdf === 'undefined'){ alert(t('pdfLibError')); return; }
 
     loadImageAsDataURL('logo_pdf.png').then(function(dataUrl){
@@ -2749,7 +2999,7 @@
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.setTextColor(0, 61, 115);
-        var dayHeading = (item.dayLabel || item.dayId) + (item.date ? ', ' + item.date : '');
+        var dayHeading = (displayDayLabel(item) || item.dayId) + (item.date ? ', ' + item.date : '');
         doc.text(dayHeading, margin, y);
         doc.setTextColor(0);
         y += 7;
