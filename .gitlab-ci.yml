@@ -6,9 +6,15 @@ deploy:
     # single base64 line instead and decoded to a temp file here.
     - "$keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)"
     - "[System.IO.File]::WriteAllBytes(\"$PWD\\deploy_key\", $keyBytes)"
-    - "icacls \"$PWD\\deploy_key\" /inheritance:r"
-    - "icacls \"$PWD\\deploy_key\" /remove:g \"Users\" \"Authenticated Users\" \"Everyone\" \"BUILTIN\\Users\""
-    - "icacls \"$PWD\\deploy_key\" /grant:r \"$($env:USERNAME):(F)\""
+    # Build a completely fresh ACL with inheritance off and only the
+    # current user granted access — avoids icacls's reliance on
+    # locale-specific group names (e.g. German Windows doesn't have a
+    # group literally called "Everyone").
+    - "$acl = New-Object System.Security.AccessControl.FileSecurity"
+    - "$acl.SetAccessRuleProtection($true, $false)"
+    - "$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($env:USERNAME, 'FullControl', 'Allow')"
+    - "$acl.AddAccessRule($rule)"
+    - "Set-Acl -Path \"$PWD\\deploy_key\" -AclObject $acl"
     - "ssh -o StrictHostKeyChecking=no -i \"$PWD\\deploy_key\" aoprei@dgl2026.igb-berlin.de \"cd /var/www/nginx && git pull\""
     - "Remove-Item \"$PWD\\deploy_key\""
   rules:
