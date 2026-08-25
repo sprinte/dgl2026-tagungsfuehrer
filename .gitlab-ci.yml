@@ -1,18 +1,14 @@
 deploy:
   stage: deploy
   script:
-    # The "File" type variable doesn't resolve reliably on this Windows
-    # shell runner (known GitLab Runner issue), so the key is stored as a
-    # single base64 line instead and decoded to a temp file here.
     - "$keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)"
     - "[System.IO.File]::WriteAllBytes(\"$PWD\\deploy_key\", $keyBytes)"
-    - "$identity = $env:USERDOMAIN + '\\' + $env:USERNAME"
-    - "$acl = New-Object System.Security.AccessControl.FileSecurity"
-    - "$acl.SetAccessRuleProtection($true, $false)"
-    - "$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 'FullControl', 'Allow')"
-    - "$acl.AddAccessRule($rule)"
-    - "Set-Acl -Path \"$PWD\\deploy_key\" -AclObject $acl"
-    - "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o StrictHostKeyChecking=no -i \"$PWD\\deploy_key\" aoprei@dgl2026.igb-berlin.de \"cd /var/www/nginx && git pull\""
+    - "Write-Host \"Key byte length: $($keyBytes.Length)\""
+    - "$lines = Get-Content \"$PWD\\deploy_key\""
+    - "Write-Host \"Number of lines: $($lines.Count)\""
+    - "Write-Host \"First line: $($lines[0])\""
+    - "Write-Host \"Last line: $($lines[-1])\""
+    - "ssh -o StrictHostKeyChecking=no -i \"$PWD\\deploy_key\" aoprei@dgl2026.igb-berlin.de \"cd /var/www/nginx && git pull\""
     - "Remove-Item \"$PWD\\deploy_key\""
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
