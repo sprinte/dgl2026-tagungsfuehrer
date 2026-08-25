@@ -1,14 +1,13 @@
 deploy:
   stage: deploy
-  before_script:
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan -H dgl2026.igb-berlin.de >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
   script:
-    - ssh aoprei@dgl2026.igb-berlin.de "cd /var/www/nginx && git pull"
+    # Windows OpenSSH refuses to use a private key file that other users
+    # can read (same issue we hit with Git Bash earlier) — the file GitLab
+    # creates for a "File" type variable doesn't guarantee tight permissions,
+    # so lock it down explicitly before using it.
+    - icacls "$env:SSH_PRIVATE_KEY" /inheritance:r
+    - icacls "$env:SSH_PRIVATE_KEY" /grant:r "$($env:USERNAME):(R)"
+    - ssh -o StrictHostKeyChecking=no -i "$env:SSH_PRIVATE_KEY" aoprei@dgl2026.igb-berlin.de "cd /var/www/nginx && git pull"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   tags:
