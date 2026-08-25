@@ -3050,7 +3050,7 @@
   // get created fresh on every renderProgrammList() call, so a listener
   // attached once here keeps working after re-renders without re-binding.
   document.addEventListener('click', function(ev){
-    var btn = ev.target.closest && ev.target.closest('.poster-icon-btn');
+    var btn = ev.target.closest && ev.target.closest('[data-poster]');
     if(btn){
       ev.stopPropagation();
       var src = btn.getAttribute('data-poster');
