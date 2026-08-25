@@ -1,13 +1,15 @@
 deploy:
   stage: deploy
   script:
-    # Windows OpenSSH refuses to use a private key file that other users
-    # can read (same issue we hit with Git Bash earlier) — the file GitLab
-    # creates for a "File" type variable doesn't guarantee tight permissions,
-    # so lock it down explicitly before using it.
-    - icacls "$env:SSH_PRIVATE_KEY" /inheritance:r
-    - icacls "$env:SSH_PRIVATE_KEY" /grant:r "$($env:USERNAME):(R)"
-    - ssh -o StrictHostKeyChecking=no -i "$env:SSH_PRIVATE_KEY" aoprei@dgl2026.igb-berlin.de "cd /var/www/nginx && git pull"
+    # The "File" type variable doesn't resolve reliably on this Windows
+    # shell runner (known GitLab Runner issue), so the key is stored as a
+    # single base64 line instead and decoded to a temp file here.
+    - $keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)
+    - [System.IO.File]::WriteAllBytes("$PWD\deploy_key", $keyBytes)
+    - icacls "$PWD\deploy_key" /inheritance:r
+    - icacls "$PWD\deploy_key" /grant:r "$($env:USERNAME):(R)"
+    - ssh -o StrictHostKeyChecking=no -i "$PWD\deploy_key" aoprei@dgl2026.igb-berlin.de "cd /var/www/nginx && git pull"
+    - Remove-Item "$PWD\deploy_key"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   tags:
