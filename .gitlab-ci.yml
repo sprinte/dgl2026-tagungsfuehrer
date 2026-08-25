@@ -3,13 +3,15 @@ deploy:
   script:
     # The "File" type variable doesn't resolve reliably on this Windows
     # shell runner (known GitLab Runner issue), so the key is stored as a
-    # single base64 line instead and decoded to a temp file here.
-    - $keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)
-    - [System.IO.File]::WriteAllBytes("$PWD\deploy_key", $keyBytes)
-    - icacls "$PWD\deploy_key" /inheritance:r
-    - icacls "$PWD\deploy_key" /grant:r "$($env:USERNAME):(R)"
-    - ssh -o StrictHostKeyChecking=no -i "$PWD\deploy_key" aoprei@dgl2026.igb-berlin.de "cd /var/www/nginx && git pull"
-    - Remove-Item "$PWD\deploy_key"
+    # single base64 line instead and decoded to a temp file here. Every
+    # line is quoted because the colons in PowerShell syntax ($env:VAR,
+    # ::Method) otherwise confuse the YAML parser.
+    - "$keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)"
+    - "[System.IO.File]::WriteAllBytes(\"$PWD\\deploy_key\", $keyBytes)"
+    - "icacls \"$PWD\\deploy_key\" /inheritance:r"
+    - "icacls \"$PWD\\deploy_key\" /grant:r \"$($env:USERNAME):(R)\""
+    - "ssh -o StrictHostKeyChecking=no -i \"$PWD\\deploy_key\" aoprei@dgl2026.igb-berlin.de \"cd /var/www/nginx && git pull\""
+    - "Remove-Item \"$PWD\\deploy_key\""
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   tags:
