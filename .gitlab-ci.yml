@@ -3,7 +3,8 @@ deploy:
   script:
     - "$keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)"
     - "[System.IO.File]::WriteAllBytes(\"$PWD\\deploy_key\", $keyBytes)"
-    - "Write-Host \"Key byte length: $($keyBytes.Length)\""
+    - "$hash = Get-FileHash \"$PWD\\deploy_key\" -Algorithm SHA256"
+    - "Write-Host \"SHA256 of decoded key: $($hash.Hash)\""
     - "$identity = $env:USERDOMAIN + '\\' + $env:USERNAME"
     - "$acl = New-Object System.Security.AccessControl.FileSecurity"
     - "$acl.SetAccessRuleProtection($true, $false)"
