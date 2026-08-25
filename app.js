@@ -36,6 +36,7 @@
       exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen',
       posterViewLabel: 'Plakat ansehen',
+      showOnMapLabel: 'Auf Karte anzeigen',
       addToPlanLabel: 'Zum Plan hinzufügen',
       removeFromPlanLabel: 'Vom Plan entfernen',
       showTalksLabel: 'Vorträge anzeigen',
@@ -155,6 +156,7 @@
       exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code',
       posterViewLabel: 'View poster',
+      showOnMapLabel: 'Show on map',
       addToPlanLabel: 'Add to plan',
       removeFromPlanLabel: 'Remove from plan',
       showTalksLabel: 'Show talks',
@@ -414,6 +416,14 @@
     if(!src) return '';
     return '<button class="poster-icon-btn" data-poster="' + esc(src) + '" aria-label="' + esc(t('posterViewLabel')) + '" title="' + esc(t('posterViewLabel')) + '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="12" y2="16"></line></svg>' +
+    '</button>';
+  }
+  var SOCIAL_VENUE_BLOCK_TITLES = { 'Vorabendtreff': 'preEvening', 'Gesellschaftsabend': 'social' };
+  function mapIconBtn(block){
+    var venueKey = SOCIAL_VENUE_BLOCK_TITLES[block.title];
+    if(!venueKey) return '';
+    return '<button class="poster-icon-btn" data-venue="' + venueKey + '" aria-label="' + esc(t('showOnMapLabel')) + '" title="' + esc(t('showOnMapLabel')) + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
     '</button>';
   }
 
@@ -1191,6 +1201,7 @@
             '</div>' +
             '<div class="session-btns">' +
               posterIconBtn(block) +
+              mapIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
               (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
@@ -2917,6 +2928,32 @@
   });
   document.getElementById('posterLightboxOverlay').addEventListener('click', function(ev){
     if(ev.target.id === 'posterLightboxOverlay') document.getElementById('posterLightboxOverlay').style.display = 'none';
+  });
+
+  // "Show on map" for Vorabendtreff/Gesellschaftsabend — jumps to the
+  // Mittagessen tab's map view and centres/opens the popup for that venue.
+  function jumpToVenueOnMap(venueKey){
+    switchToView('lunch');
+    setLunchView('map');
+    setTimeout(function(){
+      if(!lunchMapInstance) return;
+      var venue = DATA.venue;
+      var v = venueKey === 'social' ? venue.socialVenue : venue.preEveningVenue;
+      if(!v) return;
+      lunchMapInstance.setView([v.lat, v.lng], 17);
+      lunchMapInstance.eachLayer(function(layer){
+        if(layer.getLatLng && layer.getPopup && Math.abs(layer.getLatLng().lat - v.lat) < 1e-6 && Math.abs(layer.getLatLng().lng - v.lng) < 1e-6){
+          layer.openPopup();
+        }
+      });
+    }, 150);
+  }
+  document.addEventListener('click', function(ev){
+    var mapBtn = ev.target.closest && ev.target.closest('[data-venue]');
+    if(mapBtn){
+      ev.stopPropagation();
+      jumpToVenueOnMap(mapBtn.getAttribute('data-venue'));
+    }
   });
 
   // ---------- Poster lightbox pinch-zoom (mirrors the floor plan zoom
