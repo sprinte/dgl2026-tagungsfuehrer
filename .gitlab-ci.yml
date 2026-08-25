@@ -6,15 +6,12 @@ deploy:
     # single base64 line instead and decoded to a temp file here.
     - "$keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)"
     - "[System.IO.File]::WriteAllBytes(\"$PWD\\deploy_key\", $keyBytes)"
+    - "$identity = $env:USERDOMAIN + '\\' + $env:USERNAME"
     - "$acl = New-Object System.Security.AccessControl.FileSecurity"
     - "$acl.SetAccessRuleProtection($true, $false)"
-    - "$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($env:USERDOMAIN + '\\' + $env:USERNAME, 'FullControl', 'Allow')"
+    - "$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 'FullControl', 'Allow')"
     - "$acl.AddAccessRule($rule)"
     - "Set-Acl -Path \"$PWD\\deploy_key\" -AclObject $acl"
-    # Use Windows' own native OpenSSH explicitly — if Git for Windows is on
-    # PATH, plain "ssh" may resolve to its bundled MSYS OpenSSH instead,
-    # which checks permissions differently and can reject a key that
-    # Windows ACLs consider perfectly locked down.
     - "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o StrictHostKeyChecking=no -i \"$PWD\\deploy_key\" aoprei@dgl2026.igb-berlin.de \"cd /var/www/nginx && git pull\""
     - "Remove-Item \"$PWD\\deploy_key\""
   rules:
