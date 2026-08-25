@@ -70,10 +70,9 @@
       officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
       wlanCardTitle: 'WLAN',
-      wlanNetwork1Name: 'BerlinFreeWiFi',
-      wlanNetwork1Note: 'kein Passwort',
-      wlanNetwork2Name: 'eduroam',
-      wlanNetwork2Note: 'nur mit bestehendem Uni-Account',
+      wlanMainName: 'BerlinFreeWiFi',
+      wlanMainNote: 'kein Passwort notwendig',
+      wlanEduroamNote: 'Mit bestehendem Uni-Account lässt sich auch das leistungsstärkere eduroam nutzen.',
       tourNext: 'Weiter',
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
@@ -190,10 +189,9 @@
       officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
       officeHoursFr: 'Friday: closed',
       wlanCardTitle: 'Wi-Fi',
-      wlanNetwork1Name: 'BerlinFreeWiFi',
-      wlanNetwork1Note: 'no password',
-      wlanNetwork2Name: 'eduroam',
-      wlanNetwork2Note: 'only with existing university account',
+      wlanMainName: 'BerlinFreeWiFi',
+      wlanMainNote: 'no password required',
+      wlanEduroamNote: 'If you already have a university account, you can also use the more powerful eduroam.',
       tourNext: 'Next',
       tourDone: 'Done',
       tourSkip: 'Skip',
@@ -2054,14 +2052,11 @@
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('wlanCardTitle') + '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">' +
-          '<span style="font-size:14px;font-weight:600;color:var(--text);">' + esc(t('wlanNetwork1Name')) + '</span>' +
-          '<span class="lunch-meta">' + esc(t('wlanNetwork1Note')) + '</span>' +
+        '<div style="font-size:15px;margin-bottom:6px;">' +
+          '<strong style="color:var(--text);">' + esc(t('wlanMainName')) + '</strong>' +
+          '<span class="lunch-meta"> – ' + esc(t('wlanMainNote')) + '</span>' +
         '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:baseline;">' +
-          '<span style="font-size:14px;font-weight:600;color:var(--text);">' + esc(t('wlanNetwork2Name')) + '</span>' +
-          '<span class="lunch-meta">' + esc(t('wlanNetwork2Note')) + '</span>' +
-        '</div>' +
+        '<div class="lunch-meta" style="font-size:12.5px;">' + esc(t('wlanEduroamNote')) + '</div>' +
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
