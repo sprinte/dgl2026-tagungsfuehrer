@@ -1,13 +1,15 @@
-pages:
+deploy:
   stage: deploy
-  tags:
-    - dgl2026
-  pages: true
+  before_script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H dgl2026.igb-berlin.de >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - New-Item -ItemType Directory -Force -Path public
-    - Copy-Item -Path *.html,*.js,*.json,*.svg,*.png,*.txt -Destination public
-  artifacts:
-    paths:
-      - public
+    - ssh aoprei@dgl2026.igb-berlin.de "cd /var/www/nginx && git pull"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+  tags:
+    - dgl2026
