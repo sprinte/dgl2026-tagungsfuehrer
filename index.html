@@ -1434,9 +1434,13 @@
   </div>
 </div>
 
-<div id="posterLightboxOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;">
-  <button id="posterLightboxCloseBtn" aria-label="Schließen" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:32px;line-height:1;cursor:pointer;">&times;</button>
-  <img id="posterLightboxImg" src="" alt="" style="max-width:92vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+<div id="posterLightboxOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;overflow:hidden;">
+  <button id="posterLightboxCloseBtn" aria-label="Schließen" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#fff;font-size:32px;line-height:1;cursor:pointer;z-index:1;">&times;</button>
+  <div id="posterZoomContainer" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <div id="posterZoomContent" style="transform-origin:0 0;">
+      <img id="posterLightboxImg" src="" alt="" style="max-width:92vw;max-height:88vh;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);display:block;">
+    </div>
+  </div>
 </div>
 
 <nav class="bottom-nav">

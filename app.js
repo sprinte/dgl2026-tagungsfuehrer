@@ -70,7 +70,7 @@
       officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
       wlanCardTitle: 'WLAN',
-      wlanComingSoon: 'Infos folgen.',
+      wlanInfo: 'Im Erwin-Schrödinger-Zentrum steht für alle Tagungsteilnehmer:innen <strong>BerlinFreeWiFi</strong> zur Verfügung (kein Passwort nötig). Deutlich leistungsstärker ist <strong>eduroam</strong> – das kann aber nur nutzen, wer bereits über die eigene Universität einen eduroam-Zugang hat.',
       tourNext: 'Weiter',
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
@@ -187,7 +187,7 @@
       officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
       officeHoursFr: 'Friday: closed',
       wlanCardTitle: 'Wi-Fi',
-      wlanComingSoon: 'Details to follow.',
+      wlanInfo: 'At the Erwin Schrödinger Centre, <strong>BerlinFreeWiFi</strong> is available to all conference attendees (no password required). <strong>eduroam</strong> is noticeably more powerful, but can only be used if you already have eduroam access through your own university.',
       tourNext: 'Next',
       tourDone: 'Done',
       tourSkip: 'Skip',
@@ -2048,7 +2048,7 @@
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('wlanCardTitle') + '</div>' +
-        '<div class="lunch-meta">' + t('wlanComingSoon') + '</div>' +
+        '<div class="lunch-meta">' + t('wlanInfo') + '</div>' +
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('presentersCardTitle') + '</div>' +
@@ -2904,6 +2904,103 @@
     if(ev.target.id === 'qrPlanOverlay') document.getElementById('qrPlanOverlay').style.display = 'none';
   });
 
+  document.getElementById('posterLightboxCloseBtn').addEventListener('click', function(){
+    document.getElementById('posterLightboxOverlay').style.display = 'none';
+  });
+  document.getElementById('posterLightboxOverlay').addEventListener('click', function(ev){
+    if(ev.target.id === 'posterLightboxOverlay') document.getElementById('posterLightboxOverlay').style.display = 'none';
+  });
+
+  // ---------- Poster lightbox pinch-zoom (mirrors the floor plan zoom
+  // above, but with its own state so that working code stays untouched) ----------
+  var pzState = { scale: 1, tx: 0, ty: 0, pointers: {} };
+  var pzGesture = null;
+  function pzApplyTransform(){
+    var content = document.getElementById('posterZoomContent');
+    content.style.transform = 'translate(' + pzState.tx + 'px,' + pzState.ty + 'px) scale(' + pzState.scale + ')';
+  }
+  function pzResetZoom(){
+    pzState.scale = 1; pzState.tx = 0; pzState.ty = 0;
+    pzGesture = null;
+    pzApplyTransform();
+  }
+  function pzStartGesture(midX, midY, dist){
+    var content = document.getElementById('posterZoomContent');
+    var rect = content.getBoundingClientRect();
+    pzGesture = {
+      flexLeft: rect.left - pzState.tx,
+      flexTop: rect.top - pzState.ty,
+      anchorLx: (midX - rect.left) / pzState.scale,
+      anchorLy: (midY - rect.top) / pzState.scale,
+      startScale: pzState.scale,
+      startDist: dist
+    };
+  }
+  function pzUpdateGesture(midX, midY, dist){
+    if(!pzGesture) return;
+    var newScale = Math.min(6, Math.max(1, pzGesture.startScale * (dist / pzGesture.startDist)));
+    pzState.scale = newScale;
+    pzState.tx = midX - pzGesture.flexLeft - newScale * pzGesture.anchorLx;
+    pzState.ty = midY - pzGesture.flexTop - newScale * pzGesture.anchorLy;
+    pzApplyTransform();
+  }
+  function pzZoomAt(clientX, clientY, newScale){
+    newScale = Math.min(6, Math.max(1, newScale));
+    var content = document.getElementById('posterZoomContent');
+    var rect = content.getBoundingClientRect();
+    var flexLeft = rect.left - pzState.tx;
+    var flexTop = rect.top - pzState.ty;
+    var anchorLx = (clientX - rect.left) / pzState.scale;
+    var anchorLy = (clientY - rect.top) / pzState.scale;
+    pzState.scale = newScale;
+    pzState.tx = clientX - flexLeft - newScale * anchorLx;
+    pzState.ty = clientY - flexTop - newScale * anchorLy;
+    pzApplyTransform();
+  }
+  (function initPosterZoom(){
+    var container = document.getElementById('posterZoomContainer');
+    container.style.touchAction = 'none';
+    container.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      container.setPointerCapture(e.pointerId);
+      pzState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if(Object.keys(pzState.pointers).length === 2){
+        pzGesture = null;
+      }
+    });
+    container.addEventListener('pointermove', function(e){
+      if(!pzState.pointers[e.pointerId]) return;
+      e.preventDefault();
+      var prev = pzState.pointers[e.pointerId];
+      pzState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(pzState.pointers);
+      if(ids.length === 1){
+        pzState.tx += e.clientX - prev.x;
+        pzState.ty += e.clientY - prev.y;
+        pzApplyTransform();
+      } else if(ids.length === 2){
+        var p1 = pzState.pointers[ids[0]], p2 = pzState.pointers[ids[1]];
+        var dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        var mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        if(!pzGesture){
+          pzStartGesture(mid.x, mid.y, dist);
+        } else {
+          pzUpdateGesture(mid.x, mid.y, dist);
+        }
+      }
+    });
+    function releasePointer(e){
+      delete pzState.pointers[e.pointerId];
+      pzGesture = null;
+    }
+    container.addEventListener('pointerup', releasePointer);
+    container.addEventListener('pointercancel', releasePointer);
+    container.addEventListener('wheel', function(e){
+      e.preventDefault();
+      pzZoomAt(e.clientX, e.clientY, pzState.scale - e.deltaY * 0.0015 * pzState.scale);
+    }, { passive: false });
+  })();
+
   // Poster lightbox — delegated on document since poster-icon-btn elements
   // get created fresh on every renderProgrammList() call, so a listener
   // attached once here keeps working after re-renders without re-binding.
@@ -2914,14 +3011,9 @@
       var src = btn.getAttribute('data-poster');
       var img = document.getElementById('posterLightboxImg');
       img.src = src;
+      pzResetZoom();
       document.getElementById('posterLightboxOverlay').style.display = 'flex';
     }
-  });
-  document.getElementById('posterLightboxCloseBtn').addEventListener('click', function(){
-    document.getElementById('posterLightboxOverlay').style.display = 'none';
-  });
-  document.getElementById('posterLightboxOverlay').addEventListener('click', function(ev){
-    if(ev.target.id === 'posterLightboxOverlay') document.getElementById('posterLightboxOverlay').style.display = 'none';
   });
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
