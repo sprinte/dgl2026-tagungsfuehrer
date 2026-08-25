@@ -2933,6 +2933,7 @@
   // "Show on map" for Vorabendtreff/Gesellschaftsabend — jumps to the
   // Mittagessen tab's map view and centres/opens the popup for that venue.
   function jumpToVenueOnMap(venueKey){
+    saveNavBackState('programm');
     switchToView('lunch');
     setLunchView('map');
     setTimeout(function(){
