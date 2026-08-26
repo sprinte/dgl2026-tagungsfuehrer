@@ -84,6 +84,8 @@
       tourStart: 'Tour starten',
       tourHelpBtn: '👋 Neu hier?',
       presentersCardTitle: 'Upload Ihrer Präsentation',
+      posterPreisTitle: 'Posterpreis',
+      posterPreisText: 'Mit dem DGL-Posterpreis werden herausragende Poster prämiert. Jeder Posterbeitrag kann zur Teilnahme angemeldet werden. Falls dies im Rahmen der Beitragsanmeldung nicht erfolgt ist, besteht direkt zu Beginn der Tagung die Option der nachträglichen Anmeldung zum Posterpreis beim Tagungsbüro. Stimmberechtigt sind alle Teilnehmenden der Tagung. Stimmzettel zur Posterprämierung liegen im Tagungsbüro aus. Darauf ist auch die Prozedur zur Abstimmung beschrieben. Die Preisverleihung erfolgt am Donnerstagmittag während des Abschlussplenums (Hörsaal 0/115).\n\nDer verantwortliche Organisator des Posterpreises ist:\nProf. Dr. René Sahm\nFG "Gewässerökologie in der Landschaftsplanung"\nUniversität Kassel',
       presentersMissing: 'Ihr Beitrag fehlt in der Liste?',
       presentersHowTo: 'So geht\'s:',
       presentersDuration: 'Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien).',
@@ -206,6 +208,8 @@
       tourStart: 'Start tour',
       tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'Upload your presentation',
+      posterPreisTitle: 'Poster Award',
+      posterPreisText: 'The DGL Poster Prize is awarded to outstanding posters. Any poster presentation may be entered for the prize. If this has not been done as part of the registration process, participants may register for the Poster Prize retrospectively at the conference office at the very start of the conference. All conference participants are eligible to vote. Ballot papers for the Poster Prize are available at the conference office. These also describe the voting procedure. The award ceremony will take place on Thursday at midday during the closing plenary session (Lecture Theatre 0/115).\n\nThe organiser responsible for the Poster Prize is:\nProf. Dr. René Sahm\nFG "Gewässerökologie in der Landschaftsplanung"\nUniversität Kassel',
       presentersMissing: 'Your contribution is missing from the list?',
       presentersHowTo: 'How it works:',
       presentersDuration: 'Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only, no access to already uploaded files).',
@@ -2140,6 +2144,10 @@
           '</div>' +
         '</div>' +
         (presenterUploadUrl ? '<a class="venue-map-link" id="presenterUploadLinkMain" href="' + esc(presenterUploadUrl) + '" target="_blank" rel="noopener" style="margin-top:12px;opacity:0.4;pointer-events:none;" aria-disabled="true">' + t('presentersUploadLink') + '</a>' : '') +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-section-heading">' + t('posterPreisTitle') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:8px;white-space:pre-line;">' + esc(t('posterPreisText')) + '</div>' +
       '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
