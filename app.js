@@ -1446,7 +1446,7 @@
           header.innerHTML =
             '<div class="session-main">' +
               '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.displayCode || s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
-              '<div class="session-title">' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
+              '<div class="session-title"' + (s.category === 'plenary' ? ' style="font-weight:600;"' : '') + '>' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
               (s.topicTitle ? '<div class="session-mod">' + esc(lang === 'en' && s.topicTitle_en ? s.topicTitle_en : s.topicTitle) + '</div>' : '') +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
