@@ -1159,14 +1159,14 @@
         d.blocks.forEach(function(b){
           if(currentCategoryFilter === 'wrhc'){
             if(b.type === 'parallel'){
-              var wsaSessions = b.sessions.filter(function(s){ return !!s.isWSA; });
+              var wsaSessions = b.sessions.filter(function(s){ return !!(s.isWSA || s.wrhcFilter); });
               if(wsaSessions.length){
                 var clonedWsaBlock = {};
                 for(var wk in b){ clonedWsaBlock[wk] = b[wk]; }
                 clonedWsaBlock.sessions = wsaSessions;
                 pairs.push({ day: d, block: clonedWsaBlock });
               }
-            } else if(b.isWSA){
+            } else if(b.isWSA || b.wrhcFilter){
               pairs.push({ day: d, block: b });
             }
             return;
