@@ -729,7 +729,7 @@
   // (e.g. the joint DGL/WSA opening is findable via either "Eröffnung" or "WSA").
   var SPECIAL_NO_PRESENTER_BLOCKS = {
     'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung' },
-    'Preisverleihung / WSA Mitgliederversammlung': { keywords: 'WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA' },
+    'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA' },
     'DGL Praxispreis': { keywords: 'DGL Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'Praxispreis' },
     'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
     'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', keySuffix: 'Abschluss', filenameLabel: 'Abschluss' }
