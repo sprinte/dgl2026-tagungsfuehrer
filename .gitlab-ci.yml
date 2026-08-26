@@ -1,20 +1,8 @@
 deploy:
   stage: deploy
   script:
-    - "$keyBytes = [System.Convert]::FromBase64String($env:SSH_PRIVATE_KEY_B64)"
-    - "[System.IO.File]::WriteAllBytes(\"$PWD\\deploy_key\", $keyBytes)"
-    - "$identity = $env:USERDOMAIN + '\\' + $env:USERNAME"
-    - "$acl = New-Object System.Security.AccessControl.FileSecurity"
-    - "$acl.SetAccessRuleProtection($true, $false)"
-    - "$owner = New-Object System.Security.Principal.NTAccount($identity)"
-    - "$acl.SetOwner($owner)"
-    - "$rule = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 'FullControl', 'Allow')"
-    - "$acl.AddAccessRule($rule)"
-    - "Set-Acl -Path \"$PWD\\deploy_key\" -AclObject $acl"
-    - "Write-Host \"Owner: $((Get-Acl \"$PWD\\deploy_key\").Owner)\""
-    - "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o StrictHostKeyChecking=no -i \"$PWD\\deploy_key\" aoprei@dgl2026.igb-berlin.de \"cd /var/www/nginx && git pull\""
-    - "Remove-Item \"$PWD\\deploy_key\""
+    - cd /var/www/nginx && git pull
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   tags:
-    - dgl2026
+    - dgl2026-local
