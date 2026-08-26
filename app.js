@@ -3569,14 +3569,19 @@
   var UPDATE_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   var loadedAppDataVersion = null;
   function checkForUpdate(){
-    fetch('app-data.js', { method: 'HEAD', cache: 'no-store' }).then(function(res){
-      var version = res.headers.get('Last-Modified') || res.headers.get('ETag');
-      if(!version) return;
+    Promise.all([
+      fetch('app.js', { method: 'HEAD', cache: 'no-store' }),
+      fetch('app-data.js', { method: 'HEAD', cache: 'no-store' })
+    ]).then(function(results){
+      var v1 = results[0].headers.get('Last-Modified') || results[0].headers.get('ETag');
+      var v2 = results[1].headers.get('Last-Modified') || results[1].headers.get('ETag');
+      if(!v1 && !v2) return;
+      var combined = (v1 || '') + '|' + (v2 || '');
       if(loadedAppDataVersion === null){
-        loadedAppDataVersion = version;
+        loadedAppDataVersion = combined;
         return;
       }
-      if(version !== loadedAppDataVersion){
+      if(combined !== loadedAppDataVersion){
         showUpdateBanner();
       }
     }).catch(function(){ /* offline or unreachable — just skip this check */ });
