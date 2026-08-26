@@ -3597,7 +3597,10 @@
   checkForUpdate();
   setInterval(checkForUpdate, UPDATE_CHECK_INTERVAL_MS);
   document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'visible') checkForUpdate();
+    if(document.visibilityState === 'visible'){
+      checkForUpdate();
+      loadAnnouncement();
+    }
   });
 
   // ---------- Guided tour ----------
