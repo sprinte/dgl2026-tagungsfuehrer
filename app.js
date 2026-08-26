@@ -66,9 +66,9 @@
       officeContact: 'Ansprechpartnerin:',
       officeHours: 'Öffnungszeiten:',
       officeHoursMo: 'Montag: 9:00–18:00 Uhr',
-      officeHoursDi: 'Dienstag: 8:00–18:00 Uhr',
+      officeHoursDi: 'Dienstag: 8:00–17:00 Uhr',
       officeHoursMi: 'Mittwoch: 8:00–18:00 Uhr',
-      officeHoursDo: 'Donnerstag: 8:00–14:00 Uhr',
+      officeHoursDo: 'Donnerstag: 8:00–13:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
       wlanCardTitle: 'WLAN',
       wlanMainName: 'BerlinFreeWiFi',
@@ -188,9 +188,9 @@
       officeContact: 'Contact:',
       officeHours: 'Opening hours:',
       officeHoursMo: 'Monday: 9:00 am–6:00 pm',
-      officeHoursDi: 'Tuesday: 8:00 am–6:00 pm',
+      officeHoursDi: 'Tuesday: 8:00 am–5:00 pm',
       officeHoursMi: 'Wednesday: 8:00 am–6:00 pm',
-      officeHoursDo: 'Thursday: 8:00 am–2:00 pm',
+      officeHoursDo: 'Thursday: 8:00 am–1:00 pm',
       officeHoursFr: 'Friday: closed',
       wlanCardTitle: 'Wi-Fi',
       wlanMainName: 'BerlinFreeWiFi',
@@ -729,11 +729,11 @@
   // so multiple words let one event be found under several search terms
   // (e.g. the joint DGL/WSA opening is findable via either "Eröffnung" or "WSA").
   var SPECIAL_NO_PRESENTER_BLOCKS = {
-    'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung' },
-    'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA' },
-    'DGL Praxispreis': { keywords: 'DGL Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'Praxispreis' },
-    'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
-    'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', keySuffix: 'Abschluss', filenameLabel: 'Abschluss' }
+    'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA DGL', displayName: 'WSA/DGL Eröffnung / Opening', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung' },
+    'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', displayName: 'WSA-Praxispreis / WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA' },
+    'DGL Praxispreis': { keywords: 'DGL Praxispreis', displayName: 'DGL Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'Praxispreis' },
+    'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', displayName: 'DGL-Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
+    'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', displayName: 'Abschlussplenum, Posterpreisvergabe', keySuffix: 'Abschluss', filenameLabel: 'Abschluss' }
   };
 
   function blockCategory(block){
@@ -1491,7 +1491,7 @@
               trow.id = 'row-' + tid;
               trow.innerHTML =
                 '<div class="talk-main">' +
-                  '<div class="talk-time">' + esc(talk.time) + '</div>' +
+                  (s.code === 'WRHC' ? '' : '<div class="talk-time">' + esc(talk.time) + '</div>') +
                   '<div class="talk-title">' + esc(talk.title) + '</div>' +
                   '<div class="talk-authors">' + renderAuthorsHtml(talk.authors) + '</div>' +
                 '</div>' +
@@ -1571,7 +1571,7 @@
               text: [s.code, s.title, s.title_en, s.mod].filter(Boolean).join(' '),
               title: s.code + ' · ' + s.title, title_en: s.title_en ? (s.code + ' · ' + s.title_en) : null, sub: s.mod ? ('Mod.: ' + s.mod) : '',
               hasTalks: !!(s.talks && s.talks.length),
-              code: s.code, isContinuation: !!s.isContinuation, mod: s.mod || ''
+              code: s.code, isContinuation: !!s.isContinuation, mod: s.mod || '', isWSA: !!s.isWSA
             });
             (s.talks || []).forEach(function(talk, idx){
               var tid = planIdForTalk(day.id, block, s, talk, idx);
@@ -1581,7 +1581,7 @@
                 title: talk.title, sub: talk.authors,
                 authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code,
                 dayLabel: day.label, date: day.date,
-                planTime: computeTalkTimeRange(s.talks, idx, block.time)
+                planTime: computeTalkTimeRange(s.talks, idx, block.time), isWSA: !!s.isWSA
               });
             });
           });
@@ -1677,7 +1677,7 @@
       if(m.kind === 'talk'){
         var padded = isInPlan(m.jumpId);
         item.innerHTML =
-          '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
+          '<div class="search-result-day">' + (m.code ? '<span class="session-tag' + (m.isWSA ? ' session-tag-wsa' : '') + '">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + (m.isWSA ? '' : ' · ' + esc(m.timeLabel)) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
           '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
@@ -2249,7 +2249,7 @@
           var special = SPECIAL_NO_PRESENTER_BLOCKS[block.title];
           var specialTimeMatch = /(\d{1,2}:\d{2})/.exec(block.time || '');
           allEntries.push({
-            type: 'special', lastName: special.keywords, uploadKey: day.label + '_' + special.keySuffix,
+            type: 'special', lastName: special.keywords, displayName: special.displayName, uploadKey: day.label + '_' + special.keySuffix,
             filenameLabel: special.filenameLabel, title: block.title, dayLabel: day.label,
             time: specialTimeMatch ? specialTimeMatch[1] : (block.time || '')
           });
@@ -2297,7 +2297,7 @@
     }
 
     function selectEntry(entry){
-      nameInput.value = entry.lastName;
+      nameInput.value = entry.displayName || entry.lastName;
       resultsList.innerHTML = '';
       document.getElementById('presenterFilenameOutput').textContent = buildFilename(entry);
       filenameBox.style.display = '';
