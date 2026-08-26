@@ -733,11 +733,11 @@
   // so multiple words let one event be found under several search terms
   // (e.g. the joint DGL/WSA opening is findable via either "Eröffnung" or "WSA").
   var SPECIAL_NO_PRESENTER_BLOCKS = {
-    'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA DGL', displayName: 'WSA/DGL Eröffnung / Opening', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung' },
-    'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', displayName: 'WSA-Praxispreis / WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA' },
-    'DGL Praxispreis': { keywords: 'DGL Praxispreis', displayName: 'DGL Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'Praxispreis' },
+    'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA DGL', displayName: 'WSA/DGL Eröffnung / Opening', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung', titleDe: 'Eröffnung', titleEn: 'Opening' },
+    'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', displayName: 'WSA-Praxispreis / WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA-Mitgliederversammlung' },
+    'DGL Praxispreis': { keywords: 'DGL Praxispreis', displayName: 'DGL-Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'DGL-Praxispreis' },
     'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', displayName: 'DGL-Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
-    'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', displayName: 'Abschlussplenum, Posterpreisvergabe', keySuffix: 'Abschluss', filenameLabel: 'Abschluss' }
+    'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', displayName: 'Abschlussplenum, Posterpreisvergabe', keySuffix: 'Abschluss', filenameLabel: 'Abschlussplenum' }
   };
 
   function blockCategory(block){
@@ -2258,7 +2258,7 @@
           var specialTimeMatch = /(\d{1,2}:\d{2})/.exec(block.time || '');
           allEntries.push({
             type: 'special', lastName: special.keywords, displayName: special.displayName, uploadKey: day.label + '_' + special.keySuffix,
-            filenameLabel: special.filenameLabel, title: block.title, dayLabel: day.label,
+            filenameLabel: special.filenameLabel, title: (lang === 'en') ? (special.titleEn || block.title_en || block.title) : (special.titleDe || block.title), dayLabel: day.label,
             time: specialTimeMatch ? specialTimeMatch[1] : (block.time || '')
           });
         }
