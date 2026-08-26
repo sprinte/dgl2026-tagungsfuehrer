@@ -3871,3 +3871,4 @@
   };
 
 })();
+// Test-Kommentar für Update-Banner-Check, kann ignoriert/gelöscht werden
