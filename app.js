@@ -37,6 +37,8 @@
       qrBtnLabel: 'QR-Code anzeigen',
       posterViewLabel: 'Plakat ansehen',
       remoteTalkLabel: 'Wird per Videokonferenz zugeschaltet',
+      updateBannerText: 'Es gibt eine neue Version der App.',
+      updateBannerReload: 'Aktualisieren',
       showOnMapLabel: 'Auf Karte anzeigen',
       addToPlanLabel: 'Zum Plan hinzufügen',
       removeFromPlanLabel: 'Vom Plan entfernen',
@@ -86,6 +88,13 @@
       tourHelpBtn: '👋 Neu hier?',
       presentersCardTitle: 'Upload Ihrer Präsentation',
       posterPreisTitle: 'Posterpreis',
+      feedbackTitle: 'Feedback',
+      feedbackText: 'Ist dir ein Fehler aufgefallen, oder hast du einen Verbesserungsvorschlag für diese App? Schreib uns gerne kurz.',
+      feedbackPlaceholder: 'Deine Nachricht...',
+      feedbackSend: 'Absenden',
+      feedbackSending: 'Wird gesendet...',
+      feedbackSuccess: 'Danke, deine Nachricht wurde gesendet!',
+      feedbackError: 'Senden fehlgeschlagen. Bitte versuch es später nochmal.',
       posterPreisText: 'Der DGL-Posterpreis prämiert herausragende Poster. Anmeldung meist automatisch bei der Beitragsanmeldung – sonst direkt im Tagungsbüro nachholbar. Alle Teilnehmenden sind stimmberechtigt; Stimmzettel inkl. Ablauf liegen dort aus.\n\nPreisverleihung: Donnerstagmittag, Abschlussplenum (Hörsaal 0/115)\n\nOrganisator: Prof. Dr. René Sahm, Universität Kassel',
       presentersMissing: 'Ihr Beitrag fehlt in der Liste?',
       presentersHowTo: 'So geht\'s:',
@@ -162,6 +171,8 @@
       qrBtnLabel: 'Show QR code',
       posterViewLabel: 'View poster',
       remoteTalkLabel: 'Joining via video conference',
+      updateBannerText: 'A new version of the app is available.',
+      updateBannerReload: 'Reload',
       showOnMapLabel: 'Show on map',
       addToPlanLabel: 'Add to plan',
       removeFromPlanLabel: 'Remove from plan',
@@ -211,6 +222,13 @@
       tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'Upload your presentation',
       posterPreisTitle: 'Poster Award',
+      feedbackTitle: 'Feedback',
+      feedbackText: 'Spotted an error, or have a suggestion for improving this app? Feel free to let us know.',
+      feedbackPlaceholder: 'Your message...',
+      feedbackSend: 'Send',
+      feedbackSending: 'Sending...',
+      feedbackSuccess: 'Thanks, your message has been sent!',
+      feedbackError: 'Sending failed. Please try again later.',
       posterPreisText: 'The DGL Poster Prize honours outstanding posters. Registration usually happens automatically with your submission – otherwise it can be done at the conference office at the start of the conference. All participants are eligible to vote; ballot papers with voting instructions are available there.\n\nAward ceremony: Thursday midday, closing plenary (Lecture Theatre 0/115)\n\nOrganiser: Prof. Dr. René Sahm, Universität Kassel',
       presentersMissing: 'Your contribution is missing from the list?',
       presentersHowTo: 'How it works:',
@@ -254,6 +272,10 @@
   };
   var LANG_KEY = 'dgl2026_lang_v1';
   var lang = 'de';
+  try{
+    var savedLang = localStorage.getItem(LANG_KEY);
+    if(savedLang === 'de' || savedLang === 'en') lang = savedLang;
+  }catch(e){}
   function t(key){ return I18N[lang][key]; }
 
   function applyStaticI18n(){
@@ -296,6 +318,7 @@
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
+    document.documentElement.lang = lang;
   }
 
   document.querySelectorAll('.lang-btn').forEach(function(btn){
@@ -2167,6 +2190,18 @@
         '<div class="card-section-heading">' + t('posterPreisTitle') + '</div>' +
         '<div class="lunch-meta" style="margin-top:8px;white-space:pre-line;">' + esc(t('posterPreisText')) + '</div>' +
       '</div>' +
+      '<div class="card">' +
+        '<div class="card-section-heading">' + t('feedbackTitle') + '</div>' +
+        '<div class="lunch-meta" style="margin-top:8px;margin-bottom:12px;">' + esc(t('feedbackText')) + '</div>' +
+        '<form id="feedbackForm">' +
+          '<input type="hidden" name="access_key" value="d34663c6-e472-4cea-b82f-700382995963">' +
+          '<input type="hidden" name="subject" value="Feedback DGL 2026 Tagungsführer">' +
+          '<input type="checkbox" name="botcheck" style="display:none;" tabindex="-1" autocomplete="off">' +
+          '<textarea name="message" id="feedbackMessage" required rows="4" placeholder="' + esc(t('feedbackPlaceholder')) + '" style="width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px;resize:vertical;"></textarea>' +
+          '<button type="submit" id="feedbackSubmitBtn" style="margin-top:10px;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;">' + esc(t('feedbackSend')) + '</button>' +
+          '<div id="feedbackStatus" style="margin-top:8px;font-size:13px;"></div>' +
+        '</form>' +
+      '</div>' +
       '<div class="card social-card">' +
         '<div class="card-section-heading">' + t('followUs') + '</div>' +
         '<div class="social-links">' +
@@ -2219,6 +2254,37 @@
       var isOpen = body.style.display !== 'none';
       body.style.display = isOpen ? 'none' : 'block';
       chevron.classList.toggle('open', !isOpen);
+    });
+    document.getElementById('feedbackForm').addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var form = ev.target;
+      var statusEl = document.getElementById('feedbackStatus');
+      var submitBtn = document.getElementById('feedbackSubmitBtn');
+      var messageField = document.getElementById('feedbackMessage');
+      if(!messageField.value.trim()) return;
+      submitBtn.disabled = true;
+      statusEl.style.color = '';
+      statusEl.textContent = t('feedbackSending');
+      var formData = new FormData(form);
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      }).then(function(res){ return res.json(); }).then(function(data){
+        submitBtn.disabled = false;
+        if(data.success){
+          statusEl.style.color = 'var(--accent)';
+          statusEl.textContent = t('feedbackSuccess');
+          form.reset();
+        } else {
+          statusEl.style.color = '#c0392b';
+          statusEl.textContent = t('feedbackError');
+        }
+      }).catch(function(){
+        submitBtn.disabled = false;
+        statusEl.style.color = '#c0392b';
+        statusEl.textContent = t('feedbackError');
+      });
     });
     setupPresenterForm();
   }
@@ -3468,6 +3534,47 @@
     }).catch(function(){ /* no announcement file or not reachable — silently ignore */ });
   }
   loadAnnouncement();
+
+  // ---------- Update-available banner ----------
+  // Detects when app-data.js has changed on the server since this page was
+  // loaded, using its Last-Modified header as an automatic "version" — no
+  // manual version bumping needed on every deploy. Relevant mainly for
+  // people who leave a tab open for a long time (e.g. across the whole
+  // conference); a normal fresh page load already gets the latest content
+  // via the service worker's network-first strategy.
+  var UPDATE_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+  var loadedAppDataVersion = null;
+  function checkForUpdate(){
+    fetch('app-data.js', { method: 'HEAD', cache: 'no-store' }).then(function(res){
+      var version = res.headers.get('Last-Modified') || res.headers.get('ETag');
+      if(!version) return;
+      if(loadedAppDataVersion === null){
+        loadedAppDataVersion = version;
+        return;
+      }
+      if(version !== loadedAppDataVersion){
+        showUpdateBanner();
+      }
+    }).catch(function(){ /* offline or unreachable — just skip this check */ });
+  }
+  function showUpdateBanner(){
+    var banner = document.getElementById('updateBanner');
+    if(banner.style.display === 'flex') return; // already shown
+    document.getElementById('updateBannerText').textContent = t('updateBannerText');
+    document.getElementById('updateBannerReloadBtn').textContent = t('updateBannerReload');
+    banner.style.display = 'flex';
+  }
+  document.getElementById('updateBannerReloadBtn').addEventListener('click', function(){
+    window.location.reload();
+  });
+  document.getElementById('updateBannerDismissBtn').addEventListener('click', function(){
+    document.getElementById('updateBanner').style.display = 'none';
+  });
+  checkForUpdate();
+  setInterval(checkForUpdate, UPDATE_CHECK_INTERVAL_MS);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') checkForUpdate();
+  });
 
   // ---------- Guided tour ----------
   var TOUR_DISMISS_KEY = 'dgl2026_tour_done';
