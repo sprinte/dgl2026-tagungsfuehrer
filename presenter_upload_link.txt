@@ -9,7 +9,7 @@ Postersession_1=https://nimbus.igb-berlin.de/index.php/s/xoKbdgwN55HAsHM
 Postersession_2=https://nimbus.igb-berlin.de/index.php/s/ZNk7d2B3mC9QZy6
 
 # --- Montag, 14.09. ---
-Montag_Plenar=https://nimbus.igb-berlin.de/index.php/s/GqewQcM4mXamzzA
+Montag_Plenarvortrag=https://nimbus.igb-berlin.de/index.php/s/GqewQcM4mXamzzA
 Montag_A01=https://nimbus.igb-berlin.de/index.php/s/zc5XYFoi5gnEEMw
 Montag_A02=https://nimbus.igb-berlin.de/index.php/s/9zZF7tJBDpAMdSo
 Montag_A03=https://nimbus.igb-berlin.de/index.php/s/5n4xmpLFR9eajoe

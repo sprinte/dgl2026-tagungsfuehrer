@@ -727,7 +727,7 @@
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together', 'Early Career Meetup', 'Vorabendtreff'];
   var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Postersession 1 – Speed Talks', 'Postersession 2 – Speed Talks', 'Postersession 1', 'Postersession 2', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
   var WORKSHOP_TITLES = ['Arbeitskreise'];
-  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'S18': 'workshop', 'Preisvortrag': 'plenary' };
+  var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'S18': 'workshop', 'Preisvortrag': 'plenary', 'WRHC-W1': 'workshop', 'WRHC-W2': 'workshop', 'WRHC-W3': 'workshop' };
 
   // Programme blocks with no individual presenter to search by (ceremonies,
   // assemblies, opening/closing) — keyed by exact block title. "keywords"
@@ -1422,7 +1422,7 @@
           var contSuffix = s.partTotal ? (lang === 'en' ? ' (Part ' + s.partIndex + '/' + s.partTotal + ')' : ' (Teil ' + s.partIndex + '/' + s.partTotal + ')') : '';
           header.innerHTML =
             '<div class="session-main">' +
-              '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
+              '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.displayCode || s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
               '<div class="session-title">' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
@@ -1592,7 +1592,7 @@
               text: [s.code, s.title, s.title_en, s.mod].filter(Boolean).join(' '),
               title: s.code + ' · ' + s.title, title_en: s.title_en ? (s.code + ' · ' + s.title_en) : null, sub: s.mod ? ('Mod.: ' + s.mod) : '',
               hasTalks: !!(s.talks && s.talks.length),
-              code: s.code, partIndex: s.partIndex || 1, mod: s.mod || '', isWSA: !!s.isWSA
+              code: s.code, displayCode: s.displayCode, partIndex: s.partIndex || 1, mod: s.mod || '', isWSA: !!s.isWSA
             });
             (s.talks || []).forEach(function(talk, idx){
               var tid = planIdForTalk(day.id, block, s, talk, idx);
@@ -1600,7 +1600,7 @@
                 kind: 'talk', dayId: day.id, jumpId: tid, sid: sid, timeLabel: talk.time,
                 text: [talk.title, talk.authors, s.code].filter(Boolean).join(' '),
                 title: talk.title, sub: talk.authors,
-                authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code,
+                authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code, displayCode: s.displayCode,
                 dayLabel: day.label, date: day.date,
                 planTime: computeTalkTimeRange(s.talks, idx, block.time), isWSA: !!s.isWSA
               });
@@ -1698,7 +1698,7 @@
       if(m.kind === 'talk'){
         var padded = isInPlan(m.jumpId);
         item.innerHTML =
-          '<div class="search-result-day">' + (m.code ? '<span class="session-tag' + (m.isWSA ? ' session-tag-wsa' : '') + '">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + (m.isWSA ? '' : ' · ' + esc(m.timeLabel)) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
+          '<div class="search-result-day">' + (m.code ? '<span class="session-tag' + (m.isWSA ? ' session-tag-wsa' : '') + '">' + esc(m.displayCode || m.code) + '</span> ' : '') + esc(dayLabel) + (m.isWSA ? '' : ' · ' + esc(m.timeLabel)) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
           '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
