@@ -55,7 +55,7 @@
       sharedPlanConfirmSuffix: ' Einträgen laden? Das ersetzt deinen aktuellen Plan.',
       lunchViewList: 'Liste',
       lunchViewMap: 'Auf Karte anzeigen',
-      catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catWorkshop: 'Workshops', catSocial: 'Social',
+      catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catWorkshop: 'Workshops', catSocial: 'Social', catWrhc: 'WRHC',
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
       followUs: 'DGL auf Social Media',
       posterListLabel: 'Poster',
@@ -180,7 +180,7 @@
       sharedPlanConfirmSuffix: ' items? This will replace your current plan.',
       lunchViewList: 'List',
       lunchViewMap: 'Show on map',
-      catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catWorkshop: 'Workshops', catSocial: 'Social',
+      catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catWorkshop: 'Workshops', catSocial: 'Social', catWrhc: 'WRHC',
       noItemsInCategory: 'No programme items in this category.',
       followUs: 'DGL on Social Media',
       posterListLabel: 'Posters',
@@ -737,9 +737,9 @@
   var SPECIAL_NO_PRESENTER_BLOCKS = {
     'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA DGL', displayName: 'WSA/DGL Eröffnung / Opening', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung', titleDe: 'Eröffnung', titleEn: 'Opening' },
     'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', displayName: 'WSA-Praxispreis / WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA-Mitgliederversammlung' },
-    'DGL Praxispreis': { keywords: 'DGL Praxispreis', displayName: 'DGL-Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'DGL-Praxispreis' },
+    'DGL-Praxispreis': { keywords: 'DGL Praxispreis', displayName: 'DGL-Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'DGL-Praxispreis' },
     'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', displayName: 'DGL-Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
-    'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', displayName: 'Abschlussplenum, Posterpreisvergabe', keySuffix: 'Abschluss', filenameLabel: 'Abschlussplenum' }
+    'Abschlussplenum': { keywords: 'DGL Abschluss Posterpreis', displayName: 'Abschlussplenum', keySuffix: 'Abschluss', filenameLabel: 'Abschlussplenum' }
   };
 
   function blockCategory(block){
@@ -765,7 +765,8 @@
       { key: 'sessions', label: t('catSessions') },
       { key: 'plenary', label: t('catPlenary') },
       { key: 'workshop', label: t('catWorkshop') },
-      { key: 'social', label: t('catSocial') }
+      { key: 'social', label: t('catSocial') },
+      { key: 'wrhc', label: t('catWrhc') }
     ];
     wrap.innerHTML = '';
     cats.forEach(function(c){
@@ -1156,6 +1157,20 @@
     } else {
       DATA.programm.forEach(function(d){
         d.blocks.forEach(function(b){
+          if(currentCategoryFilter === 'wrhc'){
+            if(b.type === 'parallel'){
+              var wsaSessions = b.sessions.filter(function(s){ return !!s.isWSA; });
+              if(wsaSessions.length){
+                var clonedWsaBlock = {};
+                for(var wk in b){ clonedWsaBlock[wk] = b[wk]; }
+                clonedWsaBlock.sessions = wsaSessions;
+                pairs.push({ day: d, block: clonedWsaBlock });
+              }
+            } else if(b.isWSA){
+              pairs.push({ day: d, block: b });
+            }
+            return;
+          }
           if(b.type === 'parallel'){
             var matchingSessions = b.sessions.filter(function(s){ return sessionCategory(s) === currentCategoryFilter; });
             if(matchingSessions.length){
