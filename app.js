@@ -523,7 +523,7 @@
     var r = blockDateRange(dayId, timeStr);
     if(!r) return false;
     var now = nowDate();
-    return now >= r.start && now <= r.end;
+    return now >= r.start && now < r.end;
   }
   function ordinalSuffix(n){
     var j = n % 10, k = n % 100;
