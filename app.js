@@ -418,7 +418,7 @@
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="12" y2="16"></line></svg>' +
     '</button>';
   }
-  var SOCIAL_VENUE_BLOCK_TITLES = { 'Vorabendtreff': 'preEvening', 'Gesellschaftsabend': 'social' };
+  var SOCIAL_VENUE_BLOCK_TITLES = { 'Vorabendtreff': 'preEvening', 'Gesellschaftsabend': 'social', 'Early Career Meetup': 'earlyCareer' };
   function mapIconBtn(block){
     var venueKey = SOCIAL_VENUE_BLOCK_TITLES[block.title];
     if(!venueKey) return '';
@@ -1954,6 +1954,21 @@
         .bindPopup('<strong>' + esc(pv.name) + '</strong><br>' + esc(pv.address) + '<br>' + (lang === 'en' ? 'Pre-conference get-together' : 'Vorabendtreff'))
         .bindTooltip(pv.name + (lang === 'en' ? ' (Pre-conference get-together)' : ' (Vorabendtreff)'), { direction: 'top', offset: [0, -17], className: 'venue-tooltip social-tooltip' });
     }
+
+    if(venue.earlyCareerVenue){
+      var ecv = venue.earlyCareerVenue;
+      var earlyCareerIcon = L.divIcon({
+        className: '', html:
+          '<div style="position:relative;width:34px;height:34px;">' +
+            '<div class="venue-pulse" style="background:rgba(122,166,44,.35);"></div>' +
+            '<div style="position:relative;background:#7aa62c;color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.45);">&#127881;</div>' +
+          '</div>',
+        iconSize: [34,34], iconAnchor: [17,17]
+      });
+      L.marker([ecv.lat, ecv.lng], { icon: earlyCareerIcon, zIndexOffset: 900 }).addTo(lunchMapInstance)
+        .bindPopup('<strong>' + esc(ecv.name) + '</strong><br>' + esc(ecv.address) + '<br>' + (lang === 'en' ? 'Early Career Meetup' : 'Early Career Meetup'))
+        .bindTooltip(ecv.name + ' (Early Career Meetup)', { direction: 'top', offset: [0, -17], className: 'venue-tooltip social-tooltip' });
+    }
   }
 
   function setLunchView(mode){
@@ -2939,7 +2954,7 @@
     setTimeout(function(){
       if(!lunchMapInstance) return;
       var venue = DATA.venue;
-      var v = venueKey === 'social' ? venue.socialVenue : venue.preEveningVenue;
+      var v = venueKey === 'social' ? venue.socialVenue : (venueKey === 'earlyCareer' ? venue.earlyCareerVenue : venue.preEveningVenue);
       if(!v) return;
       lunchMapInstance.setView([v.lat, v.lng], 17);
       lunchMapInstance.eachLayer(function(layer){
