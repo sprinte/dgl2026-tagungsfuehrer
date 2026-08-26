@@ -1,10 +1,182 @@
-{
-  "id": "2026-09-14-a",
-  "enabled": false,
-  "begins": "2026-09-14T00:00:00",
-  "expires": "2026-09-19T00:00:00",
-  "title_de": "Wichtiger Hinweis",
-  "title_en": "Important notice",
-  "message_de": "Hier steht dein Text, der als Pop-up angezeigt wird.",
-  "message_en": "This is where your text appears as a pop-up."
-}
+[
+  {
+    "id": "eroeffnung-reminder",
+    "enabled": true,
+    "begins": "2026-09-14T10:15:00",
+    "expires": "2026-09-14T10:35:00",
+    "title_de": "Die Eröffnung beginnt gleich!",
+    "title_en": "The opening starts soon!",
+    "message_de": "In ca. 15 Minuten startet die Eröffnung im Hörsaal 0/115.",
+    "message_en": "The opening ceremony starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "abschluss-reminder",
+    "enabled": true,
+    "begins": "2026-09-17T12:15:00",
+    "expires": "2026-09-17T12:40:00",
+    "title_de": "Das Abschlussplenum beginnt gleich!",
+    "title_en": "The closing plenary starts soon!",
+    "message_de": "In ca. 15 Minuten startet das Abschlussplenum mit Posterpreisvergabe im Hörsaal 0/115.",
+    "message_en": "The closing plenary with the poster award ceremony starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "plenar-mo-reminder",
+    "enabled": true,
+    "begins": "2026-09-14T15:15:00",
+    "expires": "2026-09-14T15:35:00",
+    "title_de": "Plenarvortrag beginnt gleich!",
+    "title_en": "Plenary talk starting soon!",
+    "message_de": "In ca. 15 Minuten startet der Plenarvortrag von Masahiro Ryo & Jeannette Völker im Hörsaal 0/115.",
+    "message_en": "The plenary talk by Masahiro Ryo & Jeannette Völker starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "plenar-di-reminder",
+    "enabled": true,
+    "begins": "2026-09-15T08:45:00",
+    "expires": "2026-09-15T09:05:00",
+    "title_de": "Plenarvortrag beginnt gleich!",
+    "title_en": "Plenary talk starting soon!",
+    "message_de": "In ca. 15 Minuten startet der Plenarvortrag von Damien Bouffard im Hörsaal 0/115.",
+    "message_en": "The plenary talk by Damien Bouffard starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "plenar-mi-reminder",
+    "enabled": true,
+    "begins": "2026-09-16T13:30:00",
+    "expires": "2026-09-16T13:50:00",
+    "title_de": "Plenarvortrag beginnt gleich!",
+    "title_en": "Plenary talk starting soon!",
+    "message_de": "In ca. 15 Minuten startet der Plenarvortrag von Ursula Gaedke im Hörsaal 0/115.",
+    "message_en": "The plenary talk by Ursula Gaedke starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "plenar-do-reminder",
+    "enabled": true,
+    "begins": "2026-09-17T08:45:00",
+    "expires": "2026-09-17T09:05:00",
+    "title_de": "Plenarvortrag beginnt gleich!",
+    "title_en": "Plenary talk starting soon!",
+    "message_de": "In ca. 15 Minuten startet der Plenarvortrag von Gabriel Singer im Hörsaal 0/115.",
+    "message_en": "The plenary talk by Gabriel Singer starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "praxispreis-reminder",
+    "enabled": true,
+    "begins": "2026-09-14T16:30:00",
+    "expires": "2026-09-14T16:50:00",
+    "title_de": "DGL-Praxispreis beginnt gleich!",
+    "title_en": "DGL Practice Award starting soon!",
+    "message_de": "In ca. 15 Minuten startet die Verleihung des DGL-Praxispreises im Hörsaal 0/115.",
+    "message_en": "The DGL Practice Award ceremony starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "nachwuchspreis-reminder",
+    "enabled": true,
+    "begins": "2026-09-16T08:45:00",
+    "expires": "2026-09-16T09:05:00",
+    "title_de": "DGL-Nachwuchspreis beginnt gleich!",
+    "title_en": "DGL Early Career Award starting soon!",
+    "message_de": "In ca. 15 Minuten startet der Schwoerbel-Benndorf-Nachwuchspreis der DGL im Hörsaal 0/115.",
+    "message_en": "The DGL Schwoerbel-Benndorf Early Career Award starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "mitgliederversammlung-reminder",
+    "enabled": true,
+    "begins": "2026-09-15T17:00:00",
+    "expires": "2026-09-15T17:20:00",
+    "title_de": "DGL-Mitgliederversammlung beginnt gleich!",
+    "title_en": "DGL General Assembly starting soon!",
+    "message_de": "In ca. 15 Minuten startet die DGL-Mitgliederversammlung im Hörsaal 0/115.",
+    "message_en": "The DGL General Assembly starts in about 15 minutes in Lecture Theatre 0/115."
+  },
+  {
+    "id": "get-together-reminder",
+    "enabled": true,
+    "begins": "2026-09-14T17:50:00",
+    "expires": "2026-09-14T18:15:00",
+    "title_de": "Get Together beginnt gleich!",
+    "title_en": "Get Together starting soon!",
+    "message_de": "Das Get Together beginnt gleich im Foyer. Wir freuen uns auf dich!",
+    "message_en": "The Get Together starts soon in the foyer. We look forward to seeing you!"
+  },
+  {
+    "id": "gesellschaftsabend-reminder",
+    "enabled": true,
+    "begins": "2026-09-16T18:00:00",
+    "expires": "2026-09-16T19:05:00",
+    "title_de": "Gesellschaftsabend heute Abend",
+    "title_en": "Conference dinner tonight",
+    "message_de": "In einer Stunde beginnt der Gesellschaftsabend. Bis gleich!",
+    "message_en": "The conference dinner starts in one hour. See you there!"
+  },
+  {
+    "id": "upload-reminder-mo",
+    "enabled": true,
+    "begins": "2026-09-14T08:30:00",
+    "expires": "2026-09-14T09:00:00",
+    "title_de": "Vortrag hochladen nicht vergessen",
+    "title_en": "Don't forget to upload your talk",
+    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
+    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
+  },
+  {
+    "id": "upload-reminder-di",
+    "enabled": true,
+    "begins": "2026-09-15T08:30:00",
+    "expires": "2026-09-15T08:55:00",
+    "title_de": "Vortrag hochladen nicht vergessen",
+    "title_en": "Don't forget to upload your talk",
+    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
+    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
+  },
+  {
+    "id": "upload-reminder-mi",
+    "enabled": true,
+    "begins": "2026-09-16T08:30:00",
+    "expires": "2026-09-16T08:55:00",
+    "title_de": "Vortrag hochladen nicht vergessen",
+    "title_en": "Don't forget to upload your talk",
+    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
+    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
+  },
+  {
+    "id": "upload-reminder-do",
+    "enabled": true,
+    "begins": "2026-09-17T08:30:00",
+    "expires": "2026-09-17T08:55:00",
+    "title_de": "Vortrag hochladen nicht vergessen",
+    "title_en": "Don't forget to upload your talk",
+    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
+    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
+  },
+  {
+    "id": "poster-speedtalks-reminder",
+    "enabled": true,
+    "begins": "2026-09-15T12:45:00",
+    "expires": "2026-09-15T13:05:00",
+    "title_de": "Poster Speed Talks beginnen gleich!",
+    "title_en": "Poster speed talks starting soon!",
+    "message_de": "In ca. 15 Minuten starten die Poster Speed Talks.",
+    "message_en": "The poster speed talks start in about 15 minutes."
+  },
+  {
+    "id": "posterpreis-stimmzettel-reminder",
+    "enabled": true,
+    "begins": "2026-09-16T17:30:00",
+    "expires": "2026-09-16T18:30:00",
+    "title_de": "Jetzt für den Posterpreis abstimmen!",
+    "title_en": "Vote for the Poster Award now!",
+    "message_de": "Die Postersession ist vorbei – vergiss nicht, deinen Stimmzettel für den Posterpreis im Tagungsbüro abzugeben.",
+    "message_en": "The poster session is over – don't forget to hand in your ballot for the Poster Award at the conference office."
+  },
+  {
+    "id": "feedback-reminder",
+    "enabled": true,
+    "begins": "2026-09-17T10:45:00",
+    "expires": "2026-09-17T11:15:00",
+    "title_de": "Wie gefällt dir die App?",
+    "title_en": "How do you like the app?",
+    "message_de": "Kurze Kaffeepause – falls dir etwas auf- oder eingefallen ist: Im Info-Tab kannst du uns ganz einfach Feedback zur App schicken.",
+    "message_en": "Quick coffee break – if anything's come to mind: you can easily send us feedback about the app in the Info tab."
+  }
+]

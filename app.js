@@ -3510,18 +3510,41 @@
   }, 60000);
 
   // ---------- Announcement popup ----------
-  var ANNOUNCEMENT_DISMISS_KEY = 'dgl2026_announcement_dismissed_id';
+  // Supports MULTIPLE time-scheduled announcements in announcement.json (an
+  // array). Each is shown automatically once its begins/expires window is
+  // active, and only once per person (tracked by id). Re-checked periodically
+  // so a newly-active announcement appears even in an already-open tab.
+  var ANNOUNCEMENT_DISMISS_KEY = 'dgl2026_announcement_dismissed_ids_v2';
+  function getDismissedAnnouncementIds(){
+    try{
+      var raw = localStorage.getItem(ANNOUNCEMENT_DISMISS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){ return []; }
+  }
+  function markAnnouncementDismissed(id){
+    try{
+      var ids = getDismissedAnnouncementIds();
+      if(ids.indexOf(id) === -1) ids.push(id);
+      localStorage.setItem(ANNOUNCEMENT_DISMISS_KEY, JSON.stringify(ids));
+    }catch(e){}
+  }
   function loadAnnouncement(){
+    if(document.getElementById('announcementOverlay').style.display === 'flex') return; // one at a time
     fetch('announcement.json', { cache: 'no-store' }).then(function(res){
       if(!res.ok) throw new Error('no announcement file');
       return res.json();
-    }).then(function(a){
-      if(!a || !a.enabled) return;
-      if(a.begins && new Date(a.begins) > new Date()) return;
-      if(a.expires && new Date(a.expires) < new Date()) return;
-      var dismissedId = null;
-      try{ dismissedId = localStorage.getItem(ANNOUNCEMENT_DISMISS_KEY); }catch(e){}
-      if(dismissedId === a.id) return;
+    }).then(function(list){
+      if(!Array.isArray(list)) list = [list]; // tolerate the old single-object format too
+      var now = new Date();
+      var dismissed = getDismissedAnnouncementIds();
+      var a = list.find(function(item){
+        if(!item || !item.enabled) return false;
+        if(item.begins && new Date(item.begins) > now) return false;
+        if(item.expires && new Date(item.expires) < now) return false;
+        if(dismissed.indexOf(item.id) !== -1) return false;
+        return true;
+      });
+      if(!a) return;
       var title = lang === 'en' ? (a.title_en || a.title_de) : (a.title_de || a.title_en);
       var message = lang === 'en' ? (a.message_en || a.message_de) : (a.message_de || a.message_en);
       document.getElementById('announcementTitle').textContent = title || '';
@@ -3529,10 +3552,11 @@
       document.getElementById('announcementOverlay').style.display = 'flex';
       document.getElementById('announcementCloseBtn').onclick = function(){
         document.getElementById('announcementOverlay').style.display = 'none';
-        try{ localStorage.setItem(ANNOUNCEMENT_DISMISS_KEY, a.id); }catch(e){}
+        markAnnouncementDismissed(a.id);
       };
     }).catch(function(){ /* no announcement file or not reachable — silently ignore */ });
   }
+  setInterval(loadAnnouncement, 2 * 60 * 1000);
   loadAnnouncement();
 
   // ---------- Update-available banner ----------
