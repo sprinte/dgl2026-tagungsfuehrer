@@ -86,7 +86,7 @@
       tourHelpBtn: '👋 Neu hier?',
       presentersCardTitle: 'Upload Ihrer Präsentation',
       posterPreisTitle: 'Posterpreis',
-      posterPreisText: 'Mit dem DGL-Posterpreis werden herausragende Poster prämiert. Jeder Posterbeitrag kann zur Teilnahme angemeldet werden. Falls dies im Rahmen der Beitragsanmeldung nicht erfolgt ist, besteht direkt zu Beginn der Tagung die Option der nachträglichen Anmeldung zum Posterpreis beim Tagungsbüro. Stimmberechtigt sind alle Teilnehmenden der Tagung. Stimmzettel zur Posterprämierung liegen im Tagungsbüro aus. Darauf ist auch die Prozedur zur Abstimmung beschrieben. Die Preisverleihung erfolgt am Donnerstagmittag während des Abschlussplenums (Hörsaal 0/115).\n\nDer verantwortliche Organisator des Posterpreises ist:\nProf. Dr. René Sahm\nFG "Gewässerökologie in der Landschaftsplanung"\nUniversität Kassel',
+      posterPreisText: 'Der DGL-Posterpreis prämiert herausragende Poster. Anmeldung meist automatisch bei der Beitragsanmeldung – sonst direkt im Tagungsbüro nachholbar. Alle Teilnehmenden sind stimmberechtigt; Stimmzettel inkl. Ablauf liegen dort aus.\n\nPreisverleihung: Donnerstagmittag, Abschlussplenum (Hörsaal 0/115)\n\nOrganisator: Prof. Dr. René Sahm, Universität Kassel',
       presentersMissing: 'Ihr Beitrag fehlt in der Liste?',
       presentersHowTo: 'So geht\'s:',
       presentersDuration: 'Bitte laden Sie Ihre Präsentation als PowerPoint oder PDF über den unten stehenden Link in den Nimbus-Ordner hoch (nur Hochladen möglich, keine Einsicht in bereits hochgeladene Dateien).',
@@ -211,7 +211,7 @@
       tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'Upload your presentation',
       posterPreisTitle: 'Poster Award',
-      posterPreisText: 'The DGL Poster Prize is awarded to outstanding posters. Any poster presentation may be entered for the prize. If this has not been done as part of the registration process, participants may register for the Poster Prize retrospectively at the conference office at the very start of the conference. All conference participants are eligible to vote. Ballot papers for the Poster Prize are available at the conference office. These also describe the voting procedure. The award ceremony will take place on Thursday at midday during the closing plenary session (Lecture Theatre 0/115).\n\nThe organiser responsible for the Poster Prize is:\nProf. Dr. René Sahm\nFG "Gewässerökologie in der Landschaftsplanung"\nUniversität Kassel',
+      posterPreisText: 'The DGL Poster Prize honours outstanding posters. Registration usually happens automatically with your submission – otherwise it can be done at the conference office at the start of the conference. All participants are eligible to vote; ballot papers with voting instructions are available there.\n\nAward ceremony: Thursday midday, closing plenary (Lecture Theatre 0/115)\n\nOrganiser: Prof. Dr. René Sahm, Universität Kassel',
       presentersMissing: 'Your contribution is missing from the list?',
       presentersHowTo: 'How it works:',
       presentersDuration: 'Please upload your presentation as PowerPoint or PDF to the Nimbus folder using the link below (upload only, no access to already uploaded files).',
@@ -1424,6 +1424,7 @@
             '<div class="session-main">' +
               '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.displayCode || s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
               '<div class="session-title">' + esc(lang === 'en' && s.title_en ? s.title_en : s.title) + contSuffix + '</div>' +
+              (s.topicTitle ? '<div class="session-mod">' + esc(lang === 'en' && s.topicTitle_en ? s.topicTitle_en : s.topicTitle) + '</div>' : '') +
               (s.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(s.mod) + '</div>' : '') +
             '</div>' +
             '<div class="session-btns">' +
