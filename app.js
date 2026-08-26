@@ -912,7 +912,7 @@
           var s = block.sessions[si];
           var sid = planIdForSession(dayId, block, s);
           if(sid === id){
-            var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
+            var contSuffix = s.partTotal ? (lang === 'en' ? ' (Part ' + s.partIndex + '/' + s.partTotal + ')' : ' (Teil ' + s.partIndex + '/' + s.partTotal + ')') : '';
             var sessionAbstractText = (lang === 'en' && s.abstract_en) ? s.abstract_en : s.abstract_de;
             return {
               id: sid, dayId: day.id, dayLabel: day.label, date: day.date,
@@ -1419,7 +1419,7 @@
           header.className = 'session-header';
           header.setAttribute('data-sid', sid);
           if(hasAbstract) header.setAttribute('data-has-abstract', '1');
-          var contSuffix = s.isContinuation ? (lang === 'en' ? " (cont'd)" : ' (Forts.)') : '';
+          var contSuffix = s.partTotal ? (lang === 'en' ? ' (Part ' + s.partIndex + '/' + s.partTotal + ')' : ' (Teil ' + s.partIndex + '/' + s.partTotal + ')') : '';
           header.innerHTML =
             '<div class="session-main">' +
               '<span class="session-tag' + (s.isWSA ? ' session-tag-wsa' : '') + '">' + esc(s.code) + '</span>' + sessionLangFlags(s.lang) + '<span class="session-room' + (FLOORPLAN_ROOM_MAP[s.room] ? ' room-link' : '') + '" data-room="' + esc(s.room) + '">' + esc(s.room) + '</span>' +
@@ -1592,7 +1592,7 @@
               text: [s.code, s.title, s.title_en, s.mod].filter(Boolean).join(' '),
               title: s.code + ' · ' + s.title, title_en: s.title_en ? (s.code + ' · ' + s.title_en) : null, sub: s.mod ? ('Mod.: ' + s.mod) : '',
               hasTalks: !!(s.talks && s.talks.length),
-              code: s.code, isContinuation: !!s.isContinuation, mod: s.mod || '', isWSA: !!s.isWSA
+              code: s.code, partIndex: s.partIndex || 1, mod: s.mod || '', isWSA: !!s.isWSA
             });
             (s.talks || []).forEach(function(talk, idx){
               var tid = planIdForTalk(day.id, block, s, talk, idx);
@@ -1800,7 +1800,7 @@
     var seen = {};
     searchIndex.forEach(function(entry){
       var dedupKey = entry.code + '|' + entry.title;
-      if(entry.kind === 'session' && !entry.isContinuation && entry.code && entry.title.indexOf('Closing Remarks') === -1 && !seen[dedupKey]){
+      if(entry.kind === 'session' && entry.partIndex === 1 && entry.code && entry.title.indexOf('Closing Remarks') === -1 && !seen[dedupKey]){
         seen[dedupKey] = true;
         var group;
         if(entry.code === 'WRHC') group = 2;
