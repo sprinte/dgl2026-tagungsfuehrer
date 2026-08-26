@@ -1534,12 +1534,11 @@
               var talkRange = computeTalkTimeRange(s.talks, idx, block.time);
               var talkIsNow = isToday(day.id) && isBlockNow(day.id, talkRange);
               var trow = document.createElement('div');
-              trow.className = 'talk-row' + (talkIsNow ? ' now-live' : '');
+              trow.className = 'talk-row';
               trow.id = 'row-' + tid;
               trow.innerHTML =
                 '<div class="talk-main">' +
-                  (talkIsNow ? '<div class="live-badge"><span class="dot"></span>' + t('liveNow') + '</div>' : '') +
-                  (s.code === 'WRHC' ? '' : '<div class="talk-time">' + esc(talk.time) + '</div>') +
+                  (s.code === 'WRHC' ? '' : '<div class="talk-time" style="display:flex;align-items:center;gap:6px;">' + esc(talk.time) + (talkIsNow ? '<span class="live-badge"><span class="dot"></span>' + t('liveNow') + '</span>' : '') + '</div>') +
                   '<div class="talk-title">' + (talk.remote ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;flex-shrink:0;" aria-label="' + esc(t('remoteTalkLabel')) + '"><title>' + esc(t('remoteTalkLabel')) + '</title><rect x="2" y="6" width="14" height="12" rx="2"></rect><polygon points="23 7 16 12 23 17 23 7"></polygon></svg>' : '') + esc(talk.title) + '</div>' +
                   '<div class="talk-authors">' + renderAuthorsHtml(talk.authors) + '</div>' +
                 '</div>' +
