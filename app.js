@@ -74,6 +74,8 @@
       wlanMainName: 'BerlinFreeWiFi',
       wlanMainNote: 'kein Passwort notwendig',
       wlanEduroamNote: 'Mit bestehendem Uni-Account lässt sich auch das leistungsstärkere eduroam nutzen.',
+      impressumTitle: 'Impressum',
+      impressumText: 'Anbieter:\nForschungsverbund Berlin e. V.\nRudower Chaussee 17\n12489 Berlin\nDeutschland\nE-Mail: info(at)fv-berlin.de\nTelefon: +49 30 6392-3330\n\nInstitut:\nLeibniz-Institut für Gewässerökologie und Binnenfischerei (IGB)\nim Forschungsverbund Berlin e. V.\nMüggelseedamm 310\n12587 Berlin\nDeutschland\nTelefon: +49 (0)30 64181-500\nE-Mail: info(at)igb-berlin.de\n\nVereinsregister:\nDas IGB ist ein nicht rechtsfähiges Institut im Forschungsverbund Berlin e. V. Der Forschungsverbund Berlin ist im Vereinsregister des Amtsgerichts Berlin-Charlottenburg unter der Registernummer VR 12174 B eingetragen.\n\nVertretung und Organisationsform:\nDer Forschungsverbund Berlin e. V. wird gemeinschaftlich durch den Sprecher des Vorstands und den Geschäftsführer Martin Böhnke vertreten. Bei institutsspezifischen Geschäften wird der Forschungsverbund Berlin e. V. durch den Geschäftsführer Martin Böhnke gemeinsam mit dem jeweiligen geschäftsführenden Direktor des betreffenden Instituts vertreten.\nFür diese Seiten ist die Direktorin a. i. des Leibniz-Instituts für Gewässerökologie und Binnenfischerei (IGB), Prof. Dr. Sonja Jähnig, verantwortlich.\nDer Forschungsverbund Berlin e. V. vereint sieben wissenschaftlich selbstständige Institute unter einer juristischen Person.\n\nUmsatzsteueridentnummer:\nDE 136785011\n\nRedaktionelle Verantwortlichkeit:\nRedaktionsverantwortlich für die Onlinedienste des Forschungsverbunds Berlin e. V. sind der Geschäftsführer Martin Böhnke für die nichtwissenschaftlichen und die Direktorin a. i. des IGB, Prof. Dr. Sonja Jähnig, für die wissenschaftlichen Inhalte.\n\nAnsprechpartnerin für den Tagungsführer:\nAnna Oprei, anna.oprei@igb-berlin.de',
       tourNext: 'Weiter',
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
@@ -194,6 +196,8 @@
       wlanMainName: 'BerlinFreeWiFi',
       wlanMainNote: 'no password required',
       wlanEduroamNote: 'If you already have a university account, you can also use the more powerful eduroam.',
+      impressumTitle: 'Legal notice (Impressum)',
+      impressumText: 'This legal notice is provided in German, as required for German websites.\n\nAnbieter:\nForschungsverbund Berlin e. V.\nRudower Chaussee 17\n12489 Berlin\nDeutschland\nE-Mail: info(at)fv-berlin.de\nTelefon: +49 30 6392-3330\n\nInstitut:\nLeibniz-Institut für Gewässerökologie und Binnenfischerei (IGB)\nim Forschungsverbund Berlin e. V.\nMüggelseedamm 310\n12587 Berlin\nDeutschland\nTelefon: +49 (0)30 64181-500\nE-Mail: info(at)igb-berlin.de\n\nVereinsregister:\nDas IGB ist ein nicht rechtsfähiges Institut im Forschungsverbund Berlin e. V. Der Forschungsverbund Berlin ist im Vereinsregister des Amtsgerichts Berlin-Charlottenburg unter der Registernummer VR 12174 B eingetragen.\n\nVertretung und Organisationsform:\nDer Forschungsverbund Berlin e. V. wird gemeinschaftlich durch den Sprecher des Vorstands und den Geschäftsführer Martin Böhnke vertreten. Bei institutsspezifischen Geschäften wird der Forschungsverbund Berlin e. V. durch den Geschäftsführer Martin Böhnke gemeinsam mit dem jeweiligen geschäftsführenden Direktor des betreffenden Instituts vertreten.\nFür diese Seiten ist die Direktorin a. i. des Leibniz-Instituts für Gewässerökologie und Binnenfischerei (IGB), Prof. Dr. Sonja Jähnig, verantwortlich.\nDer Forschungsverbund Berlin e. V. vereint sieben wissenschaftlich selbstständige Institute unter einer juristischen Person.\n\nUmsatzsteueridentnummer:\nDE 136785011\n\nRedaktionelle Verantwortlichkeit:\nRedaktionsverantwortlich für die Onlinedienste des Forschungsverbunds Berlin e. V. sind der Geschäftsführer Martin Böhnke für die nichtwissenschaftlichen und die Direktorin a. i. des IGB, Prof. Dr. Sonja Jähnig, für die wissenschaftlichen Inhalte.\n\nAnsprechpartnerin für den Tagungsführer:\nAnna Oprei, anna.oprei@igb-berlin.de',
       tourNext: 'Next',
       tourDone: 'Done',
       tourSkip: 'Skip',
@@ -2169,9 +2173,25 @@
             '<img src="logo_hu_berlin.png" alt="HU Berlin">' +
           '</a>' +
         '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="session-header" id="impressumHeader" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;">' +
+          '<div class="card-section-heading" style="margin:0;">' + t('impressumTitle') + '</div>' +
+          '<div class="chevron" id="impressumChevron" title="' + esc(t('showDetailsLabel')) + '">&#9656;</div>' +
+        '</div>' +
+        '<div id="impressumBody" style="display:none;margin-top:10px;">' +
+          '<div class="lunch-meta" style="white-space:pre-line;line-height:1.6;">' + t('impressumText') + '</div>' +
+        '</div>' +
       '</div>';
     document.getElementById('officeCardLink').addEventListener('click', function(){
       openFloorplanLightbox(['tagungsbuero']);
+    });
+    document.getElementById('impressumHeader').addEventListener('click', function(){
+      var body = document.getElementById('impressumBody');
+      var chevron = document.getElementById('impressumChevron');
+      var isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      chevron.classList.toggle('open', !isOpen);
     });
     setupPresenterForm();
   }
