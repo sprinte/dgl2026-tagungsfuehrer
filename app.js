@@ -1041,6 +1041,9 @@
       document.getElementById('programmSearch').value = restoredQuery;
       document.getElementById('searchClearBtn').style.display = restoredQuery ? 'block' : 'none';
       renderSearchResults(restoredQuery);
+    } else if(searchBackState.originView === 'lunch'){
+      switchToView('lunch');
+      setLunchView('list');
     } else {
       document.getElementById('programmSearch').value = '';
       document.getElementById('searchClearBtn').style.display = 'none';
@@ -2959,25 +2962,30 @@
       var venue = DATA.venue;
       var v = venueKey === 'social' ? venue.socialVenue : (venueKey === 'earlyCareer' ? venue.earlyCareerVenue : venue.preEveningVenue);
       if(!v) return;
-      lunchMapInstance.setView([v.lat, v.lng], 17);
+      lunchMapInstance.closePopup();
+      lunchMapInstance.invalidateSize();
+      lunchMapInstance.setView([v.lat, v.lng], 17, { animate: false });
       lunchMapInstance.eachLayer(function(layer){
         if(layer.getLatLng && layer.getPopup && Math.abs(layer.getLatLng().lat - v.lat) < 1e-6 && Math.abs(layer.getLatLng().lng - v.lng) < 1e-6){
           layer.openPopup();
         }
       });
-    }, 150);
+    }, 200);
   }
   function jumpToLunchOnMap(lat, lng){
+    saveNavBackState('lunch');
     setLunchView('map');
     setTimeout(function(){
       if(!lunchMapInstance) return;
-      lunchMapInstance.setView([lat, lng], 17);
+      lunchMapInstance.closePopup();
+      lunchMapInstance.invalidateSize();
+      lunchMapInstance.setView([lat, lng], 17, { animate: false });
       lunchMapInstance.eachLayer(function(layer){
         if(layer.getLatLng && layer.getPopup && Math.abs(layer.getLatLng().lat - lat) < 1e-6 && Math.abs(layer.getLatLng().lng - lng) < 1e-6){
           layer.openPopup();
         }
       });
-    }, 150);
+    }, 200);
   }
   document.addEventListener('click', function(ev){
     var mapBtn = ev.target.closest && ev.target.closest('[data-venue]');
@@ -3473,8 +3481,8 @@
     },
     {
       selector: '.session-header[data-has-abstract="1"]',
-      text: 'Klicke hier, um mehr Informationen zur Session (z. B. Abstract) zu sehen.',
-      text_en: 'Click here to see more information about the session (e.g. the abstract).'
+      text: 'Klicke auf den Titel einer Session, um das Abstract zu sehen.',
+      text_en: 'Click the title of a session to see its abstract.'
     },
     {
       selector: '.session-header .chevron',
@@ -3484,8 +3492,8 @@
     {
       selector: '.talk-main',
       beforeStep: tourSetupExpandedSession,
-      text: 'Klicke auf einen Vortrag, um das Abstract angezeigt zu bekommen.',
-      text_en: 'Click a talk to see its abstract.'
+      text: 'Klicke auf den Titel eines Vortrags, um das Abstract angezeigt zu bekommen.',
+      text_en: 'Click the title of a talk to see its abstract.'
     },
     {
       selector: '.author-link',
