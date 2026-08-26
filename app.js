@@ -3876,4 +3876,4 @@
   };
 
 })();
-// Test-Kommentar für Update-Banner-Check
+// Test-Kommentar für Update-Banner-Check, kann gelöscht werden
