@@ -17,6 +17,9 @@ Montag_S01=https://nimbus.igb-berlin.de/index.php/s/WYcnWyiCiKKrFMz
 Montag_S03=https://nimbus.igb-berlin.de/index.php/s/gAwsCPNpBxisRdQ
 Montag_S04=https://nimbus.igb-berlin.de/index.php/s/8RqXDQZJ3mPdarF
 Montag_S19=https://nimbus.igb-berlin.de/index.php/s/7PPZGXWHQAEKw7Y
+Montag_Eroeffnung=https://nimbus.igb-berlin.de/index.php/s/9LF4SbtiF7Cn6rt
+Montag_WSA=https://nimbus.igb-berlin.de/index.php/s/GskLAnTSKx9KCFW
+Montag_Praxispreis=https://nimbus.igb-berlin.de/index.php/s/3aFrE7icd739ptJ
 
 # --- Dienstag, 15.09. ---
 Dienstag_Plenar=https://nimbus.igb-berlin.de/index.php/s/QxaSFJcgFgLrr9b
@@ -30,6 +33,7 @@ Dienstag_S12=https://nimbus.igb-berlin.de/index.php/s/ijAC9iGQasx52En
 Dienstag_S13=https://nimbus.igb-berlin.de/index.php/s/rBtzHm6N59KnWLN
 Dienstag_S14_16=https://nimbus.igb-berlin.de/index.php/s/amyDoL77kCMBExy
 Dienstag_S18=https://nimbus.igb-berlin.de/index.php/s/EBiTAinmFJnDAtm
+Dienstag_Mitgliederversammlung=https://nimbus.igb-berlin.de/index.php/s/Mkxq3BnLk8oma2Z
 
 # --- Mittwoch, 16.09. ---
 Mittwoch_Nachwuchspreis=https://nimbus.igb-berlin.de/index.php/s/BEoNXLA2TAs8Ha4
@@ -51,13 +55,10 @@ Donnerstag_A08=https://nimbus.igb-berlin.de/index.php/s/QBqsiaWEgKGDfNd
 Donnerstag_A09=https://nimbus.igb-berlin.de/index.php/s/d6PKexmiYLXF84k
 Donnerstag_A10=https://nimbus.igb-berlin.de/index.php/s/PYWW2tFJ7riETfS
 Donnerstag_S05=https://nimbus.igb-berlin.de/index.php/s/YQDDsfEx9JcM8Yr
+Donnerstag_Abschluss=https://nimbus.igb-berlin.de/index.php/s/FYgae66b6TQdJ9Y
 
 # --- Links, die es bei dir zusätzlich gibt, aber (noch) keiner App-internen
 # Session entsprechen (siehe Hinweis im Chat) — zur Referenz mit aufgeführt,
 # werden von der App aktuell nicht automatisch angesteuert:
-# Eröffnung (Montag) = https://nimbus.igb-berlin.de/index.php/s/9LF4SbtiF7Cn6rt
 # WRHC Sessions (Montag) = https://nimbus.igb-berlin.de/index.php/s/PkcMHpiJzCMSbJB
-# WRHC-Praxispreis (Montag) = https://nimbus.igb-berlin.de/index.php/s/3aFrE7icd739ptJ
 # WRHC Sessions (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/M5FCpASyiAYGmXm
-# DGL-Mitgliederversammlung (Dienstag) = https://nimbus.igb-berlin.de/index.php/s/Mkxq3BnLk8oma2Z
-# Abschluss (Donnerstag) = https://nimbus.igb-berlin.de/index.php/s/FYgae66b6TQdJ9Y

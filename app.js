@@ -718,6 +718,19 @@
   var WORKSHOP_TITLES = ['Arbeitskreise'];
   var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'S18': 'workshop', 'Preisvortrag': 'plenary' };
 
+  // Programme blocks with no individual presenter to search by (ceremonies,
+  // assemblies, opening/closing) — keyed by exact block title. "keywords"
+  // is a space-separated list; the search matches on any single word in it,
+  // so multiple words let one event be found under several search terms
+  // (e.g. the joint DGL/WSA opening is findable via either "Eröffnung" or "WSA").
+  var SPECIAL_NO_PRESENTER_BLOCKS = {
+    'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung' },
+    'Preisverleihung / WSA Mitgliederversammlung': { keywords: 'WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA' },
+    'DGL Praxispreis': { keywords: 'DGL Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'Praxispreis' },
+    'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
+    'Abschlussplenum, Posterpreisvergabe': { keywords: 'DGL Abschluss Posterpreis', keySuffix: 'Abschluss', filenameLabel: 'Abschluss' }
+  };
+
   function blockCategory(block){
     if(block.type === 'parallel') return 'sessions';
     if(block.isPlenary) return 'plenary';
@@ -2208,6 +2221,17 @@
           var lastName = words[words.length - 1];
           var timeMatch = /(\d{1,2}:\d{2})/.exec(block.time || '');
           allEntries.push({ type: 'plenary', lastName: lastName, title: block.title, dayLabel: day.label, time: timeMatch ? timeMatch[1] : (block.time || '') });
+        } else if(block.type === 'info' && SPECIAL_NO_PRESENTER_BLOCKS[block.title]){
+          // Events with no individual presenter to search by (ceremonies,
+          // assemblies, opening/closing) — each gets its own search
+          // keyword(s) and upload key instead of a surname.
+          var special = SPECIAL_NO_PRESENTER_BLOCKS[block.title];
+          var specialTimeMatch = /(\d{1,2}:\d{2})/.exec(block.time || '');
+          allEntries.push({
+            type: 'special', lastName: special.keywords, uploadKey: day.label + '_' + special.keySuffix,
+            filenameLabel: special.filenameLabel, title: block.title, dayLabel: day.label,
+            time: specialTimeMatch ? specialTimeMatch[1] : (block.time || '')
+          });
         }
       });
     });
@@ -2221,6 +2245,10 @@
         var plenaryTimeSlug = entry.time.replace(':', '');
         return plenaryTimeSlug + '_' + cleanName + '_Plenar_' + entry.dayLabel;
       }
+      if(entry.type === 'special'){
+        var specialTimeSlug = entry.time.replace(':', '');
+        return specialTimeSlug + '_' + entry.filenameLabel + '_' + entry.dayLabel;
+      }
       var timeSlug = entry.time.replace(':', '');
       var codeSlug = entry.code.replace(/\//g, '_');
       return timeSlug + '_' + cleanName + '_' + codeSlug + '_' + entry.dayLabel;
@@ -2229,6 +2257,7 @@
     function uploadKeyForEntry(entry){
       if(entry.type === 'poster') return 'Postersession_' + entry.psNumber;
       if(entry.type === 'plenary') return entry.dayLabel + '_Plenar';
+      if(entry.type === 'special') return entry.uploadKey;
       return entry.dayLabel + '_' + (entry.code || '').replace(/\//g, '_');
     }
 
