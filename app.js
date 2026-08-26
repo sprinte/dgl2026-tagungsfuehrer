@@ -1874,9 +1874,10 @@
           '<div class="lunch-dist">' + l.distMin + ' ' + t('min') + '<br>' + l.distM + ' m</div>' +
         '</div>' +
         '<div class="lunch-links">' +
-          '<a class="pill-link" href="' + mapsUrl + '" target="_blank" rel="noopener">' + t('route') + '</a>' +
+          '<a class="pill-link" href="' + mapsUrl + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
           (l.link ? '<a class="pill-link" href="' + esc(l.link) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '') +
           (l.phone ? '<a class="pill-link" href="tel:' + esc(l.phone.replace(/\s+/g,'')) + '">' + esc(l.phone) + '</a>' : '') +
+          (l.lat != null && l.lng != null ? '<button class="pill-link" data-lunch-lat="' + l.lat + '" data-lunch-lng="' + l.lng + '" style="background:none;font:inherit;cursor:pointer;">' + esc(t('showOnMapLabel')) + '</button>' : '') +
         '</div>';
       list.appendChild(card);
       if(isCafe){
@@ -2964,11 +2965,29 @@
       });
     }, 150);
   }
+  function jumpToLunchOnMap(lat, lng){
+    setLunchView('map');
+    setTimeout(function(){
+      if(!lunchMapInstance) return;
+      lunchMapInstance.setView([lat, lng], 17);
+      lunchMapInstance.eachLayer(function(layer){
+        if(layer.getLatLng && layer.getPopup && Math.abs(layer.getLatLng().lat - lat) < 1e-6 && Math.abs(layer.getLatLng().lng - lng) < 1e-6){
+          layer.openPopup();
+        }
+      });
+    }, 150);
+  }
   document.addEventListener('click', function(ev){
     var mapBtn = ev.target.closest && ev.target.closest('[data-venue]');
     if(mapBtn){
       ev.stopPropagation();
       jumpToVenueOnMap(mapBtn.getAttribute('data-venue'));
+      return;
+    }
+    var lunchBtn = ev.target.closest && ev.target.closest('[data-lunch-lat]');
+    if(lunchBtn){
+      ev.stopPropagation();
+      jumpToLunchOnMap(parseFloat(lunchBtn.getAttribute('data-lunch-lat')), parseFloat(lunchBtn.getAttribute('data-lunch-lng')));
     }
   });
 
