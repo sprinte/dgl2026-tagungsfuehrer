@@ -2332,6 +2332,8 @@
           ? (entry.lastName + ', Postersession ' + entry.psNumber + ', Speed Talk Nr. ' + entry.orderNum + ', Poster ' + entry.code + ', ' + entry.dayLabel + ', ' + entry.title.slice(0, 40) + '…')
           : entry.type === 'plenary'
           ? (entry.lastName + ', Plenarvortrag, ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40))
+          : entry.type === 'special'
+          ? (entry.title.slice(0, 50) + ', ' + entry.dayLabel + ' ' + entry.time + ' Uhr')
           : (entry.lastName + ', ' + entry.code + ', ' + entry.dayLabel + ' ' + entry.time + ' Uhr, ' + entry.title.slice(0, 40) + '…');
         row.textContent = label;
         row.addEventListener('click', function(){
