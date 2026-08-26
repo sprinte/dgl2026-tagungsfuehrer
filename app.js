@@ -735,7 +735,7 @@
   // so multiple words let one event be found under several search terms
   // (e.g. the joint DGL/WSA opening is findable via either "Eröffnung" or "WSA").
   var SPECIAL_NO_PRESENTER_BLOCKS = {
-    'Eröffnung / Opening': { keywords: 'Eröffnung Opening WSA DGL', displayName: 'WSA/DGL Eröffnung / Opening', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung', titleDe: 'Eröffnung', titleEn: 'Opening' },
+    'Eröffnung': { keywords: 'Eröffnung Opening WSA DGL', displayName: 'WSA/DGL Eröffnung / Opening', keySuffix: 'Eroeffnung', filenameLabel: 'Eroeffnung', titleDe: 'Eröffnung', titleEn: 'Opening Ceremony' },
     'WSA-Praxispreis / WSA Mitgliederversammlung': { keywords: 'WSA Praxispreis Mitgliederversammlung', displayName: 'WSA-Praxispreis / WSA Mitgliederversammlung', keySuffix: 'WSA', filenameLabel: 'WSA-Mitgliederversammlung' },
     'DGL-Praxispreis': { keywords: 'DGL Praxispreis', displayName: 'DGL-Praxispreis', keySuffix: 'Praxispreis', filenameLabel: 'DGL-Praxispreis' },
     'DGL-Mitgliederversammlung': { keywords: 'DGL Mitgliederversammlung', displayName: 'DGL-Mitgliederversammlung', keySuffix: 'Mitgliederversammlung', filenameLabel: 'DGL-Mitgliederversammlung' },
