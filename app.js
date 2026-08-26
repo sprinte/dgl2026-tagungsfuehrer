@@ -1871,13 +1871,15 @@
             '<div class="lunch-meta">' + esc(l.address || '') + '</div>' +
             (noteDisplay ? '<div class="lunch-note">' + esc(noteDisplay) + '</div>' : '') +
           '</div>' +
-          '<div class="lunch-dist">' + l.distMin + ' ' + t('min') + '<br>' + l.distM + ' m</div>' +
+          '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">' +
+            (l.lat != null && l.lng != null ? '<button class="poster-icon-btn" data-lunch-lat="' + l.lat + '" data-lunch-lng="' + l.lng + '" aria-label="' + esc(t('showOnMapLabel')) + '" title="' + esc(t('showOnMapLabel')) + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>' : '') +
+            '<div class="lunch-dist">' + l.distMin + ' ' + t('min') + '<br>' + l.distM + ' m</div>' +
+          '</div>' +
         '</div>' +
         '<div class="lunch-links">' +
           '<a class="pill-link" href="' + mapsUrl + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' +
           (l.link ? '<a class="pill-link" href="' + esc(l.link) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '') +
           (l.phone ? '<a class="pill-link" href="tel:' + esc(l.phone.replace(/\s+/g,'')) + '">' + esc(l.phone) + '</a>' : '') +
-          (l.lat != null && l.lng != null ? '<button class="pill-link" data-lunch-lat="' + l.lat + '" data-lunch-lng="' + l.lng + '" style="background:none;font:inherit;cursor:pointer;">' + esc(t('showOnMapLabel')) + '</button>' : '') +
         '</div>';
       list.appendChild(card);
       if(isCafe){
