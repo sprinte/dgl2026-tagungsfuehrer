@@ -3530,8 +3530,8 @@
       localStorage.setItem(ANNOUNCEMENT_DISMISS_KEY, JSON.stringify(ids));
     }catch(e){}
   }
-  function loadAnnouncement(){
-    if(document.getElementById('announcementOverlay').style.display === 'flex') return; // one at a time
+  function loadAnnouncement(onDone){
+    if(document.getElementById('announcementOverlay').style.display === 'flex'){ if(onDone) onDone(true); return; } // one at a time
     fetch('announcement.json', { cache: 'no-store' }).then(function(res){
       if(!res.ok) throw new Error('no announcement file');
       return res.json();
@@ -3546,7 +3546,7 @@
         if(dismissed.indexOf(item.id) !== -1) return false;
         return true;
       });
-      if(!a) return;
+      if(!a){ if(onDone) onDone(false); return; }
       var title = lang === 'en' ? (a.title_en || a.title_de) : (a.title_de || a.title_en);
       var message = lang === 'en' ? (a.message_en || a.message_de) : (a.message_de || a.message_en);
       document.getElementById('announcementTitle').textContent = title || '';
@@ -3555,11 +3555,17 @@
       document.getElementById('announcementCloseBtn').onclick = function(){
         document.getElementById('announcementOverlay').style.display = 'none';
         markAnnouncementDismissed(a.id);
+        document.dispatchEvent(new Event('dgl:announcementDismissed'));
       };
-    }).catch(function(){ /* no announcement file or not reachable — silently ignore */ });
+      if(onDone) onDone(true);
+    }).catch(function(){ if(onDone) onDone(false); /* no announcement file or not reachable — silently ignore */ });
   }
   setInterval(loadAnnouncement, 2 * 60 * 1000);
-  loadAnnouncement();
+  var initialAnnouncementCheckResult = null; // null = not resolved yet, else true/false
+  loadAnnouncement(function(wasShown){
+    initialAnnouncementCheckResult = wasShown;
+    document.dispatchEvent(new CustomEvent('dgl:announcementCheckDone', { detail: { wasShown: wasShown } }));
+  });
 
   // ---------- Update-available banner ----------
   // Detects when app-data.js has changed on the server since this page was
@@ -3855,10 +3861,32 @@
     var done = null;
     try{ done = localStorage.getItem(TOUR_DISMISS_KEY); }catch(e){}
     if(done) return;
-    setTimeout(function(){
-      switchToView('programm');
-      startTour();
-    }, 600);
+    function beginAfterDelay(){
+      setTimeout(function(){
+        switchToView('programm');
+        startTour();
+      }, 600);
+    }
+    function proceedOnceKnown(wasShown){
+      if(wasShown){
+        // Wait for the announcement to be dismissed first, so the two
+        // overlays never fight for the same screen space.
+        document.addEventListener('dgl:announcementDismissed', function onDismiss(){
+          document.removeEventListener('dgl:announcementDismissed', onDismiss);
+          beginAfterDelay();
+        });
+      } else {
+        beginAfterDelay();
+      }
+    }
+    if(initialAnnouncementCheckResult !== null){
+      proceedOnceKnown(initialAnnouncementCheckResult);
+    } else {
+      document.addEventListener('dgl:announcementCheckDone', function onCheckDone(ev){
+        document.removeEventListener('dgl:announcementCheckDone', onCheckDone);
+        proceedOnceKnown(ev.detail.wasShown);
+      });
+    }
   })();
 
   // ---------- Debug/testing interface (safe to ignore, not shown to end users) ----------
