@@ -731,6 +731,17 @@
     border-radius:50%;
     background:#fff;
   }
+  .live-dot-blink{
+    display:inline-block;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--accent);
+    animation:liveDotBlink 1s ease-in-out infinite;
+  }
+  @keyframes liveDotBlink{
+    0%, 100%{ opacity:1; }
+    50%{ opacity:0.25; }
+  }
 
   /* Plan conflict warning */
   .plan-conflict{
