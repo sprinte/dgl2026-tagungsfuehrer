@@ -1,15 +1,5 @@
 [
   {
-    "id": "test-announcement-temporaer",
-    "enabled": true,
-    "begins": "2026-08-26T22:00:00",
-    "expires": "2026-09-10T22:00:00",
-    "title_de": "Testankündigung",
-    "title_en": "Test announcement",
-    "message_de": "Das ist eine Testankündigung, um das System auszuprobieren. Kann gefahrlos weggeklickt werden.",
-    "message_en": "This is a test announcement to try out the system. Safe to dismiss."
-  },
-  {
     "id": "eroeffnung-reminder",
     "enabled": true,
     "begins": "2026-09-14T10:15:00",
@@ -173,7 +163,7 @@
     "id": "posterpreis-stimmzettel-reminder",
     "enabled": true,
     "begins": "2026-09-16T17:30:00",
-    "expires": "2026-09-16T18:30:00",
+    "expires": "2026-09-16T18:00:00",
     "title_de": "Jetzt für den Posterpreis abstimmen!",
     "title_en": "Vote for the Poster Award now!",
     "message_de": "Die Postersession ist vorbei – vergiss nicht, deinen Stimmzettel für den Posterpreis im Tagungsbüro abzugeben.",
