@@ -956,6 +956,19 @@
               }
             }
           }
+          if(s.posters){
+            for(var pi2 = 0; pi2 < s.posters.length; pi2++){
+              var p2 = s.posters[pi2];
+              if(planIdForPoster(dayId, p2) === id){
+                var boardText2 = p2.board ? (' · ' + t('posterBoard') + ' ' + p2.board) : '';
+                return {
+                  id: id, dayId: day.id, dayLabel: day.label, date: day.date,
+                  time: block.time, title: p2.title, subtitle: p2.authorsDisplay + ' · ' + p2.code + boardText2,
+                  room: '', authors: p2.authorsDisplay, isPoster: true
+                };
+              }
+            }
+          }
         }
       }
     }
@@ -1230,19 +1243,6 @@
       card.className = 'card' + (blockIsNow ? ' now-live' : '');
       var liveBadgeHtml = blockIsNow ? '<div class="live-badge"><span class="dot"></span>' + t('liveNow') + '</div>' : '';
 
-      // The two Speed Talks blocks share the same 13:00–14:00 slot — show one
-      // shared time header above them instead of each repeating its own,
-      // visually grouping them the way parallel session blocks are grouped.
-      var isSpeedTalksPair = block.title === 'Postersession 1 – Speed Talks' || block.title === 'Postersession 2 – Speed Talks';
-      if(block.title === 'Postersession 1 – Speed Talks'){
-        var sharedTimeHead = document.createElement('div');
-        sharedTimeHead.className = 'block-time';
-        sharedTimeHead.textContent = computeInfoBlockDisplayTime(day, block);
-        sharedTimeHead.style.marginTop = '14px';
-        list.appendChild(sharedTimeHead);
-      }
-      if(isSpeedTalksPair) card.style.marginTop = '4px';
-
       if(block.type === 'info'){
         var id = planIdForBlock(day.id, block);
         card.id = 'row-' + id;
@@ -1271,7 +1271,7 @@
         if(isClickable) headerDiv.style.cursor = 'pointer';
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
-              (isSpeedTalksPair ? '' : '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>') +
+              '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
               '<div class="block-title">' + (block.tag ? '<span class="session-tag' + (block.isWSA ? ' session-tag-wsa' : '') + '">' + esc(lang === 'en' ? (block.tag_en || block.tag) : block.tag) + '</span> ' : '') + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(block.mod) + '</div>' : '') +
@@ -1439,6 +1439,7 @@
         block.sessions.forEach(function(s){
           var sid = planIdForSession(day.id, block, s);
           var hasTalks = s.talks && s.talks.length > 0;
+          var hasPosters = s.posters && s.posters.length > 0;
           var sessionAbstractText = lang === 'en' ? s.abstract_en : s.abstract_de;
           var hasAbstract = !!sessionAbstractText;
           var sadded = hasTalks
@@ -1467,6 +1468,7 @@
               posterIconBtn(s) +
               '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add" title="' + esc(sadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(sadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (sadded ? '&#10003;' : '+') + '</button>' +
               (hasTalks ? '<div class="chevron' + (talksOpen ? ' open' : '') + '" title="' + esc(talksOpen ? t('hideTalksLabel') : t('showTalksLabel')) + '">&#9656;</div>' : '') +
+              (hasPosters ? '<div class="chevron' + (talksOpen ? ' open' : '') + '" title="' + esc(talksOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
             '</div>';
           row.appendChild(header);
 
@@ -1517,7 +1519,7 @@
             });
           }
 
-          if(hasTalks){
+          if(hasTalks || hasPosters){
             header.querySelector('.chevron').addEventListener('click', function(ev){
               ev.stopPropagation();
               var wasOpen = !!expandedSessions[sid];
@@ -1591,6 +1593,40 @@
               }
             });
             row.appendChild(talkList);
+          }
+
+          if(hasPosters && talksOpen){
+            var posterListInSession = document.createElement('div');
+            posterListInSession.className = 'talk-list';
+            s.posters.forEach(function(p){
+              var posterId = planIdForPoster(day.id, p);
+              var padded = isInPlan(posterId);
+              var prow = document.createElement('div');
+              prow.className = 'talk-row';
+              prow.innerHTML =
+                '<div class="talk-main" style="cursor:default;">' +
+                  '<div class="talk-time">' + esc(p.code) + (p.board ? ' · ' + t('posterBoard') + ' ' + esc(p.board) : '') + '</div>' +
+                  '<div class="talk-title">' + esc(p.title) + '</div>' +
+                  '<div class="talk-authors">' + renderAuthorsHtml(p.authorsDisplay) + '</div>' +
+                '</div>' +
+                '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="poster-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (padded ? '&#10003;' : '+') + '</button>';
+              posterListInSession.appendChild(prow);
+              prow.querySelectorAll('.author-link').forEach(function(el){
+                el.addEventListener('click', function(ev){
+                  ev.stopPropagation();
+                  searchForAuthor(el.getAttribute('data-author'));
+                });
+              });
+              prow.querySelector('[data-role="poster-add"]').addEventListener('click', function(ev){
+                ev.stopPropagation();
+                togglePlan({
+                  id: posterId, dayId: day.id, dayLabel: day.label, date: day.date,
+                  time: block.time, title: p.title, subtitle: p.authorsDisplay + ' · ' + p.code + (p.board ? ' · ' + t('posterBoard') + ' ' + p.board : ''), room: s.room,
+                  abstract: '', code: p.code, authors: p.authorsDisplay
+                });
+              });
+            });
+            row.appendChild(posterListInSession);
           }
 
           card.appendChild(row);
@@ -2323,6 +2359,19 @@
       day.blocks.forEach(function(block){
         if(block.type === 'parallel'){
           block.sessions.forEach(function(s){
+            if(s.posters && s.posters.length){
+              var psNumber = s.title === 'Postersession 1 – Speed Talks' ? '1' : (s.title === 'Postersession 2 – Speed Talks' ? '2' : null);
+              var psActualDay = (psNumber && postersessionDayByNumber[psNumber]) || day.label;
+              s.posters.forEach(function(p, pIdx){
+                var firstAuthor = (p.authorsDisplay || '').split(' — ')[0].split(',')[0].trim();
+                if(!firstAuthor) return;
+                var words = firstAuthor.split(/\s+/).filter(Boolean);
+                var lastName = stripLeadingInitials(words).join(' ') || words[words.length-1];
+                var orderNum = String(pIdx + 1).padStart(2, '0');
+                allEntries.push({ type: 'poster', lastName: lastName, code: p.code, orderNum: orderNum, psNumber: psNumber || '?', title: p.title, dayLabel: psActualDay });
+              });
+              return;
+            }
             if(!s.code || s.code === 'WRHC' || s.code === 'Preisvortrag') return;
             (s.talks || []).forEach(function(talk){
               var firstAuthor = (talk.authors || '').split(' — ')[0].split(',')[0].trim();
@@ -2331,17 +2380,6 @@
               var lastName = stripLeadingInitials(words).join(' ') || words[words.length-1];
               allEntries.push({ type: 'talk', lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
             });
-          });
-        } else if(block.type === 'info' && (block.title === 'Postersession 1 – Speed Talks' || block.title === 'Postersession 2 – Speed Talks')){
-          var psNumber = block.title === 'Postersession 1 – Speed Talks' ? '1' : '2';
-          var psActualDay = postersessionDayByNumber[psNumber] || day.label;
-          (block.posters || []).forEach(function(p, pIdx){
-            var firstAuthor = (p.authorsDisplay || '').split(' — ')[0].split(',')[0].trim();
-            if(!firstAuthor) return;
-            var words = firstAuthor.split(/\s+/).filter(Boolean);
-            var lastName = stripLeadingInitials(words).join(' ') || words[words.length-1];
-            var orderNum = String(pIdx + 1).padStart(2, '0');
-            allEntries.push({ type: 'poster', lastName: lastName, code: p.code, orderNum: orderNum, psNumber: psNumber, title: p.title, dayLabel: psActualDay });
           });
         } else if(block.type === 'info' && block.isPlenary && block.tag === 'Plenarvortrag'){
           var words = (block.title || '').trim().split(/\s+/).filter(Boolean);
