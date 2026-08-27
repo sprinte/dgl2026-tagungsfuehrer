@@ -1297,8 +1297,8 @@
             '</div>' +
             '<div class="session-btns">' +
               posterIconBtn(block) +
-              routeIconBtn(block) +
               practicalInfoIconBtn(block) +
+              routeIconBtn(block) +
               mapIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
