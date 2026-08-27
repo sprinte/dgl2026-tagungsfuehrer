@@ -3362,11 +3362,13 @@
       });
       if(found){
         var text = lang === 'en' ? (found.practicalInfo_en || found.practicalInfo_de) : (found.practicalInfo_de || found.practicalInfo_en);
-        var linkHtml = found.langschlendererUrl ? '<div style="margin-top:14px;"><a href="' + esc(found.langschlendererUrl) + '" target="_blank" rel="noopener" style="font-size:13px;color:var(--accent);">Langschlenderer ↗</a></div>' : '';
+        var textHtml = esc(text);
+        if(found.langschlendererUrl){
+          textHtml = textHtml.replace('Langschlenderer', '<a href="' + esc(found.langschlendererUrl) + '" target="_blank" rel="noopener" style="color:var(--accent);">Langschlenderer ↗</a>');
+        }
         document.getElementById('practicalInfoOverlayContent').innerHTML =
           '<div style="font-size:16px;font-weight:500;margin-bottom:14px;">' + esc(t('practicalInfoLabel')) + '</div>' +
-          '<div style="font-size:14px;line-height:2;white-space:pre-line;">' + esc(text) + '</div>' +
-          linkHtml;
+          '<div style="font-size:14px;line-height:2;white-space:pre-line;">' + textHtml + '</div>';
         document.getElementById('practicalInfoOverlay').style.display = 'flex';
       }
     }
