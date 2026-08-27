@@ -37,6 +37,7 @@
       qrBtnLabel: 'QR-Code anzeigen',
       posterViewLabel: 'Plakat ansehen',
       routeDetailsLabel: 'Wegbeschreibung',
+      practicalInfoLabel: 'Praktische Infos',
       remoteTalkLabel: 'Wird per Videokonferenz zugeschaltet',
       updateBannerText: 'Es gibt eine neue Version der App.',
       updateBannerReload: 'Aktualisieren',
@@ -172,6 +173,7 @@
       qrBtnLabel: 'Show QR code',
       posterViewLabel: 'View poster',
       routeDetailsLabel: 'Directions',
+      practicalInfoLabel: 'Practical info',
       remoteTalkLabel: 'Joining via video conference',
       updateBannerText: 'A new version of the app is available.',
       updateBannerReload: 'Reload',
@@ -457,6 +459,12 @@
     if(!item.routeDetails && !item.routeDetails_en) return '';
     return '<button class="poster-icon-btn" data-route-title="' + esc(item.title) + '" aria-label="' + esc(t('routeDetailsLabel')) + '" title="' + esc(t('routeDetailsLabel')) + '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="21" x2="6" y2="3"></line><path d="M6 6h12l-3 3 3 3H6z"></path></svg>' +
+    '</button>';
+  }
+  function practicalInfoIconBtn(item){
+    if(!item.practicalInfo_de && !item.practicalInfo_en) return '';
+    return '<button class="poster-icon-btn" data-practical-title="' + esc(item.title) + '" aria-label="' + esc(t('practicalInfoLabel')) + '" title="' + esc(t('practicalInfoLabel')) + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>' +
     '</button>';
   }
   var SOCIAL_VENUE_BLOCK_TITLES = { 'Vorabendtreff': 'preEvening', 'Gesellschaftsabend': 'social', 'Early Career Meetup': 'earlyCareer' };
@@ -1288,6 +1296,7 @@
             '<div class="session-btns">' +
               posterIconBtn(block) +
               routeIconBtn(block) +
+              practicalInfoIconBtn(block) +
               mapIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
@@ -3337,6 +3346,36 @@
   });
   document.getElementById('routeOverlay').addEventListener('click', function(ev){
     if(ev.target.id === 'routeOverlay') document.getElementById('routeOverlay').style.display = 'none';
+  });
+
+  // Practical info popup — same delegated-click pattern
+  document.addEventListener('click', function(ev){
+    var piBtn = ev.target.closest && ev.target.closest('[data-practical-title]');
+    if(piBtn){
+      ev.stopPropagation();
+      var piTitle = piBtn.getAttribute('data-practical-title');
+      var found = null;
+      DATA.programm.forEach(function(day){
+        day.blocks.forEach(function(b){
+          if(b.title === piTitle) found = b;
+        });
+      });
+      if(found){
+        var text = lang === 'en' ? (found.practicalInfo_en || found.practicalInfo_de) : (found.practicalInfo_de || found.practicalInfo_en);
+        var linkHtml = found.langschlendererUrl ? '<div style="margin-top:14px;"><a href="' + esc(found.langschlendererUrl) + '" target="_blank" rel="noopener" style="font-size:13px;color:var(--accent);">Langschlenderer ↗</a></div>' : '';
+        document.getElementById('practicalInfoOverlayContent').innerHTML =
+          '<div style="font-size:16px;font-weight:500;margin-bottom:14px;">' + esc(t('practicalInfoLabel')) + '</div>' +
+          '<div style="font-size:14px;line-height:2;white-space:pre-line;">' + esc(text) + '</div>' +
+          linkHtml;
+        document.getElementById('practicalInfoOverlay').style.display = 'flex';
+      }
+    }
+  });
+  document.getElementById('practicalInfoOverlayCloseBtn').addEventListener('click', function(){
+    document.getElementById('practicalInfoOverlay').style.display = 'none';
+  });
+  document.getElementById('practicalInfoOverlay').addEventListener('click', function(ev){
+    if(ev.target.id === 'practicalInfoOverlay') document.getElementById('practicalInfoOverlay').style.display = 'none';
   });
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
