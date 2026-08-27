@@ -1,5 +1,15 @@
 [
   {
+    "id": "test-reminder",
+    "enabled": true,
+    "begins": "2026-08-27T22:00:00",
+    "expires": "2026-08-31T22:00:00",
+    "title_de": "Test",
+    "title_en": "Test",
+    "message_de": "Dies ist eine Testankündigung. Einfach schließen.",
+    "message_en": "This is a test announcement. Just close the tab."
+  },
+  {
     "id": "eroeffnung-reminder",
     "enabled": true,
     "begins": "2026-09-14T10:15:00",
