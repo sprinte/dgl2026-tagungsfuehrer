@@ -1230,6 +1230,19 @@
       card.className = 'card' + (blockIsNow ? ' now-live' : '');
       var liveBadgeHtml = blockIsNow ? '<div class="live-badge"><span class="dot"></span>' + t('liveNow') + '</div>' : '';
 
+      // The two Speed Talks blocks share the same 13:00–14:00 slot — show one
+      // shared time header above them instead of each repeating its own,
+      // visually grouping them the way parallel session blocks are grouped.
+      var isSpeedTalksPair = block.title === 'Postersession 1 – Speed Talks' || block.title === 'Postersession 2 – Speed Talks';
+      if(block.title === 'Postersession 1 – Speed Talks'){
+        var sharedTimeHead = document.createElement('div');
+        sharedTimeHead.className = 'block-time';
+        sharedTimeHead.textContent = computeInfoBlockDisplayTime(day, block);
+        sharedTimeHead.style.marginTop = '14px';
+        list.appendChild(sharedTimeHead);
+      }
+      if(isSpeedTalksPair) card.style.marginTop = '4px';
+
       if(block.type === 'info'){
         var id = planIdForBlock(day.id, block);
         card.id = 'row-' + id;
@@ -1258,7 +1271,7 @@
         if(isClickable) headerDiv.style.cursor = 'pointer';
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
-              '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
+              (isSpeedTalksPair ? '' : '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>') +
               '<div class="block-title">' + (block.tag ? '<span class="session-tag' + (block.isWSA ? ' session-tag-wsa' : '') + '">' + esc(lang === 'en' ? (block.tag_en || block.tag) : block.tag) + '</span> ' : '') + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(block.mod) + '</div>' : '') +
