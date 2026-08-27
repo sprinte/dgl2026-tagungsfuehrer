@@ -62,6 +62,7 @@
       catAll: 'Alle', catSessions: 'Sessions', catPlenary: 'Plenar & Preise', catWorkshop: 'Workshops', catSocial: 'Social', catWrhc: 'WRHC',
       noItemsInCategory: 'Keine Programmpunkte in dieser Kategorie.',
       followUs: 'DGL auf Social Media',
+      hashtagLabel: 'Teile deine Eindrücke unter',
       posterListLabel: 'Poster',
       posterBoard: 'Stellwand',
       organizersLabel: 'Veranstalter',
@@ -198,6 +199,7 @@
       catAll: 'All', catSessions: 'Sessions', catPlenary: 'Plenary & Awards', catWorkshop: 'Workshops', catSocial: 'Social', catWrhc: 'WRHC',
       noItemsInCategory: 'No programme items in this category.',
       followUs: 'DGL on Social Media',
+      hashtagLabel: 'Share your moments with',
       posterListLabel: 'Posters',
       posterBoard: 'Board',
       organizersLabel: 'Organizers',
@@ -2287,6 +2289,7 @@
             '<span>BlueSky</span>' +
           '</a>' +
         '</div>' +
+        '<div style="margin-top:10px;font-size:13px;color:var(--text-muted);">' + t('hashtagLabel') + ' <strong style="color:var(--text);">#dgl2026</strong></div>' +
       '</div>' +
       '<div class="card">' +
         '<div class="card-section-heading">' + t('organizersLabel') + '</div>' +
