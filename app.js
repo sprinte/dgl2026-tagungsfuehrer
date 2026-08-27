@@ -460,7 +460,7 @@
   function routeIconBtn(item){
     if(!item.routeDetails && !item.routeDetails_en) return '';
     return '<button class="poster-icon-btn" data-route-title="' + esc(item.title) + '" aria-label="' + esc(t('routeDetailsLabel')) + '" title="' + esc(t('routeDetailsLabel')) + '">' +
-      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="21" x2="6" y2="3"></line><path d="M6 6h12l-3 3 3 3H6z"></path></svg>' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="21" x2="7" y2="3"></line><path d="M7 2.3h10l3 2.7-3 2.7h-10z"></path></svg>' +
     '</button>';
   }
   function practicalInfoIconBtn(item){
