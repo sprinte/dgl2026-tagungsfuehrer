@@ -2157,7 +2157,10 @@
           '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
           '<span class="badge-cost">' + esc(cost) + '</span>' +
         '</div>' +
-        (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '" title="' + esc(isOpen ? t('hideDetailsLabel') : t('showDetailsLabel')) + '">&#9656;</div>' : '');
+        '<div style="display:flex;align-items:flex-start;gap:4px;">' +
+          posterIconBtn(e) +
+          (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '" title="' + esc(isOpen ? t('hideDetailsLabel') : t('showDetailsLabel')) + '">&#9656;</div>' : '') +
+        '</div>';
       card.appendChild(header);
 
       if(hasDetails){
