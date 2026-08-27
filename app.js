@@ -36,6 +36,7 @@
       exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen',
       posterViewLabel: 'Plakat ansehen',
+      routeDetailsLabel: 'Wegbeschreibung',
       remoteTalkLabel: 'Wird per Videokonferenz zugeschaltet',
       updateBannerText: 'Es gibt eine neue Version der App.',
       updateBannerReload: 'Aktualisieren',
@@ -170,6 +171,7 @@
       exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code',
       posterViewLabel: 'View poster',
+      routeDetailsLabel: 'Directions',
       remoteTalkLabel: 'Joining via video conference',
       updateBannerText: 'A new version of the app is available.',
       updateBannerReload: 'Reload',
@@ -449,6 +451,12 @@
     if(!src) return '';
     return '<button class="poster-icon-btn" data-poster="' + esc(src) + '" aria-label="' + esc(t('posterViewLabel')) + '" title="' + esc(t('posterViewLabel')) + '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="12" y2="16"></line></svg>' +
+    '</button>';
+  }
+  function routeIconBtn(item){
+    if(!item.routeDetails && !item.routeDetails_en) return '';
+    return '<button class="poster-icon-btn" data-route-title="' + esc(item.title) + '" aria-label="' + esc(t('routeDetailsLabel')) + '" title="' + esc(t('routeDetailsLabel')) + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21 1 6"></polyline><line x1="8" y1="3" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="21"></line></svg>' +
     '</button>';
   }
   var SOCIAL_VENUE_BLOCK_TITLES = { 'Vorabendtreff': 'preEvening', 'Gesellschaftsabend': 'social', 'Early Career Meetup': 'earlyCareer' };
@@ -1279,6 +1287,7 @@
             '</div>' +
             '<div class="session-btns">' +
               posterIconBtn(block) +
+              routeIconBtn(block) +
               mapIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
@@ -3301,6 +3310,33 @@
       pzResetZoom();
       document.getElementById('posterLightboxOverlay').style.display = 'flex';
     }
+  });
+
+  // Route details popup — same delegated-click pattern as the poster
+  // lightbox, since route-icon buttons also get recreated on every render.
+  document.addEventListener('click', function(ev){
+    var routeBtn = ev.target.closest && ev.target.closest('[data-route-title]');
+    if(routeBtn){
+      ev.stopPropagation();
+      var routeTitle = routeBtn.getAttribute('data-route-title');
+      var found = null;
+      DATA.programm.forEach(function(day){
+        day.blocks.forEach(function(b){
+          if(b.title === routeTitle) found = b;
+        });
+      });
+      if(found){
+        var html = lang === 'en' ? (found.routeDetails_en || found.routeDetails) : (found.routeDetails || found.routeDetails_en);
+        document.getElementById('routeOverlayContent').innerHTML = html;
+        document.getElementById('routeOverlay').style.display = 'flex';
+      }
+    }
+  });
+  document.getElementById('routeOverlayCloseBtn').addEventListener('click', function(){
+    document.getElementById('routeOverlay').style.display = 'none';
+  });
+  document.getElementById('routeOverlay').addEventListener('click', function(ev){
+    if(ev.target.id === 'routeOverlay') document.getElementById('routeOverlay').style.display = 'none';
   });
 
   document.getElementById('exportPlanBtn').addEventListener('click', function(){
