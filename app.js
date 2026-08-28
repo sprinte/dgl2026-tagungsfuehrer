@@ -3541,16 +3541,31 @@
   // attached once here keeps working after re-renders without re-binding.
   function fitPosterLightboxImg(){
     var img = document.getElementById('posterLightboxImg');
-    var maxW = window.innerWidth * 0.92;
-    var maxH = window.innerHeight * 0.88;
-    img.style.maxWidth = maxW + 'px';
-    img.style.maxHeight = maxH + 'px';
+    var naturalW = img.naturalWidth;
+    var naturalH = img.naturalHeight;
+    if(!naturalW || !naturalH) return; // not loaded yet, onload handler will call this again
+    var vw = (window.visualViewport && window.visualViewport.width) || window.innerWidth;
+    var vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    var availW = vw * 0.92;
+    var availH = vh * 0.88;
+    var scale = Math.min(1, availW / naturalW, availH / naturalH);
+    img.style.width = Math.round(naturalW * scale) + 'px';
+    img.style.height = Math.round(naturalH * scale) + 'px';
+    img.style.maxWidth = 'none';
+    img.style.maxHeight = 'none';
   }
   window.addEventListener('resize', function(){
     if(document.getElementById('posterLightboxOverlay').style.display !== 'none'){
       fitPosterLightboxImg();
     }
   });
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', function(){
+      if(document.getElementById('posterLightboxOverlay').style.display !== 'none'){
+        fitPosterLightboxImg();
+      }
+    });
+  }
 
   document.addEventListener('click', function(ev){
     var btn = ev.target.closest && ev.target.closest('[data-poster]');
@@ -3558,8 +3573,11 @@
       ev.stopPropagation();
       var src = btn.getAttribute('data-poster');
       var img = document.getElementById('posterLightboxImg');
+      img.style.width = '';
+      img.style.height = '';
+      img.onload = function(){ fitPosterLightboxImg(); };
       img.src = src;
-      fitPosterLightboxImg();
+      if(img.complete) fitPosterLightboxImg();
       pzResetZoom();
       document.getElementById('posterLightboxOverlay').style.display = 'flex';
     }
