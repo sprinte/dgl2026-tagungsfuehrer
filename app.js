@@ -3539,6 +3539,19 @@
   // Poster lightbox — delegated on document since poster-icon-btn elements
   // get created fresh on every renderProgrammList() call, so a listener
   // attached once here keeps working after re-renders without re-binding.
+  function fitPosterLightboxImg(){
+    var img = document.getElementById('posterLightboxImg');
+    var maxW = window.innerWidth * 0.92;
+    var maxH = window.innerHeight * 0.88;
+    img.style.maxWidth = maxW + 'px';
+    img.style.maxHeight = maxH + 'px';
+  }
+  window.addEventListener('resize', function(){
+    if(document.getElementById('posterLightboxOverlay').style.display !== 'none'){
+      fitPosterLightboxImg();
+    }
+  });
+
   document.addEventListener('click', function(ev){
     var btn = ev.target.closest && ev.target.closest('[data-poster]');
     if(btn){
@@ -3546,6 +3559,7 @@
       var src = btn.getAttribute('data-poster');
       var img = document.getElementById('posterLightboxImg');
       img.src = src;
+      fitPosterLightboxImg();
       pzResetZoom();
       document.getElementById('posterLightboxOverlay').style.display = 'flex';
     }
