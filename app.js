@@ -1179,6 +1179,32 @@
     return '';
   }
 
+  function appendSpeakerGroups(container, s){
+    if(!s.speakerGroups || !s.speakerGroups.length) return;
+    s.speakerGroups.forEach(function(group){
+      var heading = document.createElement('div');
+      heading.className = 'speaker-group-heading';
+      heading.textContent = lang === 'en' && group.heading_en ? group.heading_en : group.heading_de;
+      container.appendChild(heading);
+      group.speakers.forEach(function(sp){
+        var entry = document.createElement('div');
+        entry.className = 'speaker-entry';
+        var nameEl = document.createElement('div');
+        nameEl.className = 'speaker-name';
+        nameEl.textContent = sp.name;
+        entry.appendChild(nameEl);
+        var bioText = lang === 'en' && sp.bio_en ? sp.bio_en : sp.bio_de;
+        if(bioText){
+          var bioEl = document.createElement('div');
+          bioEl.className = 'speaker-bio';
+          bioEl.textContent = bioText;
+          entry.appendChild(bioEl);
+        }
+        container.appendChild(entry);
+      });
+    });
+  }
+
   function appendAbstractWithKeynote(container, text){
     var m = /^(Keynote:[^\n]*)\n\n([\s\S]*)$/.exec(text);
     if(m){
@@ -1556,6 +1582,7 @@
             var abstractWrap = document.createElement('div');
             abstractWrap.className = 'talk-list';
             appendAbstractWithKeynote(abstractWrap, sessionAbstractText);
+            appendSpeakerGroups(abstractWrap, s);
             row.appendChild(abstractWrap);
           }
 
