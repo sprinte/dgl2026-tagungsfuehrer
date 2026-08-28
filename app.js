@@ -646,7 +646,7 @@
   var fpGesture = null;
   function fpApplyTransform(){
     var content = document.getElementById('floorplanZoomContent');
-    content.style.transform = 'translate(' + fpZoomState.tx + 'px,' + fpZoomState.ty + 'px) scale(' + fpZoomState.scale + ')';
+    content.style.transform = 'translate3d(' + fpZoomState.tx + 'px,' + fpZoomState.ty + 'px,0) scale(' + fpZoomState.scale + ')';
   }
   function fpResetZoom(){
     fpZoomState.scale = 1; fpZoomState.tx = 0; fpZoomState.ty = 0;
@@ -785,7 +785,7 @@
   var ppGesture = null;
   function ppApplyTransform(){
     var content = document.getElementById('posterPlanZoomContent');
-    content.style.transform = 'translate(' + ppZoomState.tx + 'px,' + ppZoomState.ty + 'px) scale(' + ppZoomState.scale + ')';
+    content.style.transform = 'translate3d(' + ppZoomState.tx + 'px,' + ppZoomState.ty + 'px,0) scale(' + ppZoomState.scale + ')';
   }
   function ppResetZoom(){
     ppZoomState.scale = 1; ppZoomState.tx = 0; ppZoomState.ty = 0;
@@ -3452,7 +3452,7 @@
   var pzGesture = null;
   function pzApplyTransform(){
     var content = document.getElementById('posterZoomContent');
-    content.style.transform = 'translate(' + pzState.tx + 'px,' + pzState.ty + 'px) scale(' + pzState.scale + ')';
+    content.style.transform = 'translate3d(' + pzState.tx + 'px,' + pzState.ty + 'px,0) scale(' + pzState.scale + ')';
   }
   function pzResetZoom(){
     pzState.scale = 1; pzState.tx = 0; pzState.ty = 0;
