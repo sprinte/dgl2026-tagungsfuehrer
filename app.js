@@ -2653,21 +2653,32 @@
               });
               return;
             }
-            if(!s.code || s.code === 'WRHC' || s.code === 'Preisvortrag') return;
+            if(!s.code || s.code === 'WRHC') return;
             (s.talks || []).forEach(function(talk){
               var firstAuthor = (talk.authors || '').split(' — ')[0].split(',')[0].trim();
               if(!firstAuthor) return;
               var words = firstAuthor.split(/\s+/).filter(Boolean);
-              var lastName = stripLeadingInitials(words).join(' ') || words[words.length-1];
-              allEntries.push({ type: 'talk', lastName: lastName, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
+              // Award-nominee entries are authored with a full "First Last" name
+              // (not the "F. Last" initial format used for regular co-authors).
+              // stripLeadingInitials only strips genuine initials, so it leaves
+              // a full first name untouched — take the last word instead for
+              // the filename surname; show the full name in the program/search.
+              // Multi-word surnames can't be told apart from a middle name by
+              // that "last word" rule, so known cases are listed explicitly.
+              var isFullNameFormat = (s.code === 'Preisvortrag');
+              var multiWordSurnames = { 'Iris Madge Pimentel': 'Madge Pimentel' };
+              var surnameOnly = isFullNameFormat ? (multiWordSurnames[firstAuthor] || words[words.length-1]) : (stripLeadingInitials(words).join(' ') || words[words.length-1]);
+              allEntries.push({ type: 'talk', lastName: isFullNameFormat ? firstAuthor : surnameOnly, filenameName: surnameOnly, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
             });
           });
         } else if(block.type === 'info' && block.isPlenary && block.tag === 'Plenarvortrag'){
           var words = (block.title || '').trim().split(/\s+/).filter(Boolean);
           if(!words.length) return;
-          var lastName = words[words.length - 1];
+          var surname = words[words.length - 1];
           var timeMatch = /(\d{1,2}:\d{2})/.exec(block.time || '');
-          allEntries.push({ type: 'plenary', lastName: lastName, title: block.title, dayLabel: day.label, time: timeMatch ? timeMatch[1] : (block.time || '') });
+          // Same idea as above: plenary blocks are titled with the speaker's
+          // full name — show that in full, file under the surname only.
+          allEntries.push({ type: 'plenary', lastName: block.title, filenameName: surname, title: block.title, dayLabel: day.label, time: timeMatch ? timeMatch[1] : (block.time || '') });
         } else if(block.type === 'info' && SPECIAL_NO_PRESENTER_BLOCKS[block.title]){
           // Events with no individual presenter to search by (ceremonies,
           // assemblies, opening/closing) — each gets its own search
@@ -2684,7 +2695,7 @@
     });
 
     function buildFilename(entry){
-      var cleanName = stripAccents(expandUmlauts(entry.lastName)).replace(/\s+/g, ' ').trim();
+      var cleanName = stripAccents(expandUmlauts(entry.filenameName || entry.lastName)).replace(/\s+/g, ' ').trim();
       if(entry.type === 'poster'){
         return entry.orderNum + '_' + cleanName + '_' + entry.dayLabel;
       }
@@ -2701,11 +2712,17 @@
       return timeSlug + '_' + cleanName + '_' + codeSlug + '_' + entry.dayLabel;
     }
 
+    // A few sessions use an upload-folder key that doesn't match their
+    // session code one-to-one (the code is an internal programme label,
+    // the folder is named for what presenters actually recognize).
+    var UPLOAD_KEY_CODE_OVERRIDE = { 'Preisvortrag': 'Nachwuchspreis' };
+
     function uploadKeyForEntry(entry){
       if(entry.type === 'poster') return 'Postersession_' + entry.psNumber;
       if(entry.type === 'plenary') return entry.dayLabel + '_Plenar';
       if(entry.type === 'special') return entry.uploadKey;
-      return entry.dayLabel + '_' + (entry.code || '').replace(/\//g, '_');
+      var codeForKey = UPLOAD_KEY_CODE_OVERRIDE[entry.code] || entry.code;
+      return entry.dayLabel + '_' + (codeForKey || '').replace(/\//g, '_');
     }
 
     function setUploadLinkEnabled(enabled){
