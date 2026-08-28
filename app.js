@@ -36,6 +36,7 @@
       exportMenuLabel: 'Exportieren',
       qrBtnLabel: 'QR-Code anzeigen',
       posterViewLabel: 'Plakat ansehen',
+      menuViewLabel: 'Menü ansehen',
       routeDetailsLabel: 'Wegbeschreibung',
       practicalInfoLabel: 'Praktische Infos',
       remoteTalkLabel: 'Wird per Videokonferenz zugeschaltet',
@@ -178,6 +179,7 @@
       exportMenuLabel: 'Export',
       qrBtnLabel: 'Show QR code',
       posterViewLabel: 'View poster',
+      menuViewLabel: 'View menu',
       routeDetailsLabel: 'Directions',
       practicalInfoLabel: 'Practical info',
       remoteTalkLabel: 'Joining via video conference',
@@ -484,6 +486,13 @@
     if(!src) return '';
     return '<button class="poster-icon-btn" data-poster="' + esc(src) + '" aria-label="' + esc(t('posterViewLabel')) + '" title="' + esc(t('posterViewLabel')) + '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="8"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="12" y2="16"></line></svg>' +
+    '</button>';
+  }
+  function menuIconBtn(item){
+    var src = lang === 'en' ? (item.menu_en || item.menu_de) : (item.menu_de || item.menu_en);
+    if(!src) return '';
+    return '<button class="poster-icon-btn" data-poster="' + esc(src) + '" aria-label="' + esc(t('menuViewLabel')) + '" title="' + esc(t('menuViewLabel')) + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>' +
     '</button>';
   }
   function routeIconBtn(item){
@@ -1508,6 +1517,7 @@
             '</div>' +
             '<div class="session-btns">' +
               posterIconBtn(block) +
+              menuIconBtn(block) +
               practicalInfoIconBtn(block) +
               routeIconBtn(block) +
               mapIconBtn(block) +
