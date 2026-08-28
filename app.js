@@ -381,6 +381,16 @@
   })();
   function applyFontScale(){
     document.body.style.zoom = fontScale + '%';
+    // document.body.style.zoom is a legacy, non-standard property that
+    // interacts inconsistently with position:fixed descendants across
+    // browsers (fixed-position overlays end up visually over-scaled and
+    // mispositioned). Counter-scale every full-screen fixed overlay so
+    // it always renders at true 100%, independent of the text-size setting.
+    var counterZoom = (10000 / fontScale) + '%';
+    ['qrPlanOverlay','posterLightboxOverlay','routeOverlay','practicalInfoOverlay','floorplanOverlay','posterPlanOverlay'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.zoom = counterZoom;
+    });
   }
   function setFontScale(delta){
     fontScale = Math.max(85, Math.min(145, fontScale + delta));
