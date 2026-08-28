@@ -70,8 +70,10 @@
   <rect x="19.942701" y="375.94269" width="584.11462" height="110.1752" fill="none" stroke="#c7cbc4" stroke-width="1.8854" rx="6.0011773" id="rect35" />
   <rect x="60" y="384" width="62" height="48" fill="#eceae4" stroke="#c7cbc4" stroke-width="1" rx="4" id="rect36" />
   <text x="91" y="408" text-anchor="middle" dominant-baseline="central" font-size="10.5px" font-weight="700" fill="#5c6570" id="text36">1'303</text>
-  <rect x="128" y="384" width="62" height="48" fill="#eceae4" stroke="#c7cbc4" stroke-width="1" rx="4" id="rect37" />
-  <text x="159" y="408" text-anchor="middle" dominant-baseline="central" font-size="10.5px" font-weight="700" fill="#5c6570" id="text37">1'304</text>
+  <g id="fp-1-304" class="fp-room"><rect x="128" y="384" width="62" height="48" fill="#e3f1ec" stroke="#1d6f5c" stroke-width="2" rx="4" id="rect37" />
+  <text x="159" y="401" text-anchor="middle" dominant-baseline="central" font-size="10.5px" font-weight="700" fill="#003d73" id="text37">1'304</text>
+  <text x="159" y="414" text-anchor="middle" dominant-baseline="central" font-size="8px" fill="#1d6f5c" id="text37b">SR 1/304</text>
+  </g>
   <g id="fp-1-305" class="fp-room"><rect x="196" y="384" width="78" height="48" fill="#e3f1ec" stroke="#1d6f5c" stroke-width="2" rx="4" id="rect38" />
   <text x="235" y="401" text-anchor="middle" dominant-baseline="central" font-size="10.5px" font-weight="700" fill="#003d73" id="text38">1'305</text>
   <text x="235" y="414" text-anchor="middle" dominant-baseline="central" font-size="8.5px" fill="#1d6f5c" id="text39">SR 1/305</text>
