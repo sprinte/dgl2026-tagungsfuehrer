@@ -69,6 +69,9 @@
       posterBoard: 'Stellwand',
       organizersLabel: 'Veranstalter',
       floorplanTitle: 'Gebäudeplan',
+      posterPlanTitle: 'Posterstellplan',
+      showOnPosterPlanLabel: 'Auf Posterstellplan anzeigen',
+      posterPlanTriggerLabel: 'Posterstellplan vergrößern',
       venueCardTitle: 'Tagungsort',
       officeCardTitle: 'Tagungsbüro',
       officeContact: 'Ansprechpartnerin:',
@@ -208,6 +211,9 @@
       posterBoard: 'Board',
       organizersLabel: 'Organizers',
       floorplanTitle: 'Building plan',
+      posterPlanTitle: 'Poster layout',
+      showOnPosterPlanLabel: 'Show on poster layout',
+      posterPlanTriggerLabel: 'Enlarge poster layout',
       venueCardTitle: 'Venue',
       officeCardTitle: 'Conference Office',
       officeContact: 'Contact:',
@@ -304,6 +310,7 @@
     document.getElementById('titleExk').textContent = t('titleExk');
     document.getElementById('titleVenue').textContent = t('titleVenue');
     document.getElementById('titleFloorplan').textContent = t('floorplanTitle');
+    document.getElementById('titlePosterPlan').textContent = t('posterPlanTitle');
     document.getElementById('titlePlan').textContent = t('titlePlan');
     document.getElementById('exportPlanBtnText').textContent = t('exportBtn');
     document.getElementById('planNote').textContent = t('planNote');
@@ -325,6 +332,14 @@
     var fpSlotEn = document.getElementById('floorplanSlotEn');
     if(fpSlotDe) fpSlotDe.style.display = lang === 'en' ? 'none' : '';
     if(fpSlotEn) fpSlotEn.style.display = lang === 'en' ? '' : 'none';
+    var ppDe = document.getElementById('posterPlanSvg');
+    var ppEn = document.getElementById('posterPlanSvgEn');
+    if(ppDe) ppDe.style.display = lang === 'en' ? 'none' : '';
+    if(ppEn) ppEn.style.display = lang === 'en' ? '' : 'none';
+    var ppSlotDe = document.getElementById('posterPlanSlotDe');
+    var ppSlotEn = document.getElementById('posterPlanSlotEn');
+    if(ppSlotDe) ppSlotDe.style.display = lang === 'en' ? 'none' : '';
+    if(ppSlotEn) ppSlotEn.style.display = lang === 'en' ? '' : 'none';
     document.querySelectorAll('.lang-btn').forEach(function(b){
       b.classList.toggle('active', b.getAttribute('data-lang') === lang);
     });
@@ -763,6 +778,160 @@
     var ids = FLOORPLAN_ROOM_MAP[roomStr];
     if(!ids) return;
     openFloorplanLightbox(ids);
+  }
+
+  // ---------- Posterstellplan (separate zoom overlay, mirrors floorplan above) ----------
+  var ppZoomState = { scale: 1, tx: 0, ty: 0, pointers: {} };
+  var ppGesture = null;
+  function ppApplyTransform(){
+    var content = document.getElementById('posterPlanZoomContent');
+    content.style.transform = 'translate(' + ppZoomState.tx + 'px,' + ppZoomState.ty + 'px) scale(' + ppZoomState.scale + ')';
+  }
+  function ppResetZoom(){
+    ppZoomState.scale = 1; ppZoomState.tx = 0; ppZoomState.ty = 0;
+    ppGesture = null;
+    ppApplyTransform();
+  }
+  function ppStartGesture(midX, midY, dist){
+    var content = document.getElementById('posterPlanZoomContent');
+    var rect = content.getBoundingClientRect();
+    ppGesture = {
+      flexLeft: rect.left - ppZoomState.tx,
+      flexTop: rect.top - ppZoomState.ty,
+      anchorLx: (midX - rect.left) / ppZoomState.scale,
+      anchorLy: (midY - rect.top) / ppZoomState.scale,
+      startScale: ppZoomState.scale,
+      startDist: dist
+    };
+  }
+  function ppUpdateGesture(midX, midY, dist){
+    if(!ppGesture) return;
+    var newScale = Math.min(6, Math.max(1, ppGesture.startScale * (dist / ppGesture.startDist)));
+    ppZoomState.scale = newScale;
+    ppZoomState.tx = midX - ppGesture.flexLeft - newScale * ppGesture.anchorLx;
+    ppZoomState.ty = midY - ppGesture.flexTop - newScale * ppGesture.anchorLy;
+    ppApplyTransform();
+  }
+  function ppZoomAt(clientX, clientY, newScale){
+    newScale = Math.min(6, Math.max(1, newScale));
+    var content = document.getElementById('posterPlanZoomContent');
+    var rect = content.getBoundingClientRect();
+    var flexLeft = rect.left - ppZoomState.tx;
+    var flexTop = rect.top - ppZoomState.ty;
+    var anchorLx = (clientX - rect.left) / ppZoomState.scale;
+    var anchorLy = (clientY - rect.top) / ppZoomState.scale;
+    ppZoomState.scale = newScale;
+    ppZoomState.tx = clientX - flexLeft - newScale * anchorLx;
+    ppZoomState.ty = clientY - flexTop - newScale * anchorLy;
+    ppApplyTransform();
+  }
+  (function initPosterPlanZoom(){
+    var container = document.getElementById('posterPlanZoomContainer');
+    container.style.touchAction = 'none';
+    container.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      container.setPointerCapture(e.pointerId);
+      ppZoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      if(Object.keys(ppZoomState.pointers).length === 2){
+        ppGesture = null;
+      }
+    });
+    container.addEventListener('pointermove', function(e){
+      if(!ppZoomState.pointers[e.pointerId]) return;
+      e.preventDefault();
+      var prev = ppZoomState.pointers[e.pointerId];
+      ppZoomState.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(ppZoomState.pointers);
+      if(ids.length === 1){
+        ppZoomState.tx += e.clientX - prev.x;
+        ppZoomState.ty += e.clientY - prev.y;
+        ppApplyTransform();
+      } else if(ids.length === 2){
+        var p1 = ppZoomState.pointers[ids[0]], p2 = ppZoomState.pointers[ids[1]];
+        var dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        var mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        if(!ppGesture){
+          ppStartGesture(mid.x, mid.y, dist);
+        } else {
+          ppUpdateGesture(mid.x, mid.y, dist);
+        }
+      }
+    });
+    function releasePointer(e){
+      delete ppZoomState.pointers[e.pointerId];
+      ppGesture = null;
+    }
+    container.addEventListener('pointerup', releasePointer);
+    container.addEventListener('pointercancel', releasePointer);
+    container.addEventListener('wheel', function(e){
+      e.preventDefault();
+      ppZoomAt(e.clientX, e.clientY, ppZoomState.scale - e.deltaY * 0.0015 * ppZoomState.scale);
+    }, { passive: false });
+  })();
+
+  function openPosterPlanLightbox(highlightIds){
+    var master = document.getElementById(lang === 'en' ? 'posterPlanSvgEn' : 'posterPlanSvg');
+    if(!master){ console.warn('Poster plan not loaded yet'); return; }
+    var clone = master.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.display = '';
+    clone.querySelectorAll('.fp-room').forEach(function(el){
+      el.classList.remove('fp-highlight');
+      var oldRing = el.querySelector('.fp-pulse-ring');
+      if(oldRing) oldRing.remove();
+    });
+    (highlightIds || []).forEach(function(id){
+      var el = clone.querySelector('#fp-' + id);
+      if(el){
+        el.classList.add('fp-highlight');
+        var baseRect = el.querySelector('rect');
+        if(baseRect){
+          var ring = baseRect.cloneNode(false);
+          ring.setAttribute('class', 'fp-pulse-ring');
+          var rx = parseFloat(baseRect.getAttribute('x')) || 0;
+          var ry = parseFloat(baseRect.getAttribute('y')) || 0;
+          var rw = parseFloat(baseRect.getAttribute('width')) || 0;
+          var rh = parseFloat(baseRect.getAttribute('height')) || 0;
+          ring.style.transformOrigin = (rx + rw/2) + 'px ' + (ry + rh/2) + 'px';
+          el.appendChild(ring);
+        }
+      }
+    });
+    var content = document.getElementById('posterPlanZoomContent');
+    content.innerHTML = '';
+    content.appendChild(clone);
+    ppResetZoom();
+    document.getElementById('posterPlanOverlay').style.display = 'block';
+    if(highlightIds && highlightIds.length){
+      setTimeout(function(){
+        var target = content.querySelector('#fp-' + highlightIds[0]);
+        if(target && target.scrollIntoView){
+          target.scrollIntoView({ block: 'center', inline: 'center' });
+        }
+      }, 50);
+    }
+  }
+  document.getElementById('posterPlanTrigger').addEventListener('click', function(){
+    openPosterPlanLightbox([]);
+  });
+  document.getElementById('posterPlanTrigger').addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); this.click(); }
+  });
+  document.getElementById('posterPlanOverlayCloseBtn').addEventListener('click', function(){
+    document.getElementById('posterPlanOverlay').style.display = 'none';
+  });
+
+  function posterBoardHighlightId(boardStr){
+    if(!boardStr) return null;
+    var m = /^(\d+)/.exec(String(boardStr).trim());
+    if(!m) return null;
+    var num = ('0' + m[1]).slice(-2);
+    return 'poster-' + num;
+  }
+  function showPosterOnPlan(boardStr){
+    var id = posterBoardHighlightId(boardStr);
+    if(!id) return;
+    openPosterPlanLightbox([id]);
   }
 
   // ---------- Programm ----------
@@ -1446,6 +1615,7 @@
           block.posters.forEach(function(p, pidx){
             var posterId = planIdForPoster(day.id, p);
             var padded = isInPlan(posterId);
+            var hasBoardLink = !!posterBoardHighlightId(p.board);
             var prow = document.createElement('div');
             prow.className = 'talk-row';
             prow.innerHTML =
@@ -1454,6 +1624,7 @@
                 '<div class="talk-title">' + esc(p.title) + '</div>' +
                 '<div class="talk-authors">' + renderAuthorsHtml(p.authorsDisplay) + '</div>' +
               '</div>' +
+              (hasBoardLink ? '<button class="poster-icon-btn" data-role="poster-locate" title="' + esc(t('showOnPosterPlanLabel')) + '" aria-label="' + esc(t('showOnPosterPlanLabel')) + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>' : '') +
               '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="poster-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (padded ? '&#10003;' : '+') + '</button>';
             posterList.appendChild(prow);
             prow.querySelectorAll('.author-link').forEach(function(el){
@@ -1462,6 +1633,12 @@
                 searchForAuthor(el.getAttribute('data-author'));
               });
             });
+            if(hasBoardLink){
+              prow.querySelector('[data-role="poster-locate"]').addEventListener('click', function(ev){
+                ev.stopPropagation();
+                showPosterOnPlan(p.board);
+              });
+            }
             prow.querySelector('[data-role="poster-add"]').addEventListener('click', function(ev){
               ev.stopPropagation();
               var boardText = p.board ? (' · ' + t('posterBoard') + ' ' + p.board) : '';
@@ -1660,6 +1837,7 @@
             s.posters.forEach(function(p){
               var posterId = planIdForPoster(day.id, p);
               var padded = isInPlan(posterId);
+              var hasBoardLink = !!posterBoardHighlightId(p.board);
               var prow = document.createElement('div');
               prow.className = 'talk-row';
               prow.innerHTML =
@@ -1668,6 +1846,7 @@
                   '<div class="talk-title">' + esc(p.title) + '</div>' +
                   '<div class="talk-authors">' + renderAuthorsHtml(p.authorsDisplay) + '</div>' +
                 '</div>' +
+                (hasBoardLink ? '<button class="poster-icon-btn" data-role="poster-locate" title="' + esc(t('showOnPosterPlanLabel')) + '" aria-label="' + esc(t('showOnPosterPlanLabel')) + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>' : '') +
                 '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="poster-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (padded ? '&#10003;' : '+') + '</button>';
               posterListInSession.appendChild(prow);
               prow.querySelectorAll('.author-link').forEach(function(el){
@@ -1676,6 +1855,12 @@
                   searchForAuthor(el.getAttribute('data-author'));
                 });
               });
+              if(hasBoardLink){
+                prow.querySelector('[data-role="poster-locate"]').addEventListener('click', function(ev){
+                  ev.stopPropagation();
+                  showPosterOnPlan(p.board);
+                });
+              }
               prow.querySelector('[data-role="poster-add"]').addEventListener('click', function(ev){
                 ev.stopPropagation();
                 togglePlan({
@@ -3671,7 +3856,25 @@
       console.error('Failed to load floor plan:', e);
     });
   }
+  function loadPosterPlanSVGs(){
+    Promise.all([
+      fetch('poster_stellplan_de.svg').then(function(r){ return r.text(); }),
+      fetch('poster_stellplan_en.svg').then(function(r){ return r.text(); })
+    ]).then(function(results){
+      document.getElementById('posterPlanSlotDe').innerHTML = results[0];
+      document.getElementById('posterPlanSlotEn').innerHTML = results[1];
+      document.getElementById('posterPlanSlotDe').style.display = lang === 'en' ? 'none' : '';
+      document.getElementById('posterPlanSlotEn').style.display = lang === 'en' ? '' : 'none';
+      var ppDe = document.getElementById('posterPlanSvg');
+      var ppEn = document.getElementById('posterPlanSvgEn');
+      if(ppDe) ppDe.style.display = lang === 'en' ? 'none' : '';
+      if(ppEn) ppEn.style.display = lang === 'en' ? '' : 'none';
+    }).catch(function(e){
+      console.error('Failed to load poster plan:', e);
+    });
+  }
   loadFloorplanSVGs();
+  loadPosterPlanSVGs();
   loadPresenterUploadLink();
 
   safeRun(applyStaticI18n, 'applyStaticI18n');
