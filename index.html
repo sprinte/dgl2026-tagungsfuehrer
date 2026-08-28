@@ -1333,6 +1333,13 @@
     0%{ transform:scale(1); opacity:.9; }
     100%{ transform:scale(1.6); opacity:0; }
   }
+  .fp-room.fp-highlight text{
+    animation:fpTextBlink 1s steps(1,end) infinite;
+  }
+  @keyframes fpTextBlink{
+    0%, 49%{ opacity:1; }
+    50%, 100%{ opacity:.15; }
+  }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
