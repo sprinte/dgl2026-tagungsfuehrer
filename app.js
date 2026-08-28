@@ -48,6 +48,8 @@
       hideTalksLabel: 'Vorträge ausblenden',
       showPostersLabel: 'Poster anzeigen',
       hidePostersLabel: 'Poster ausblenden',
+      showSpeakersLabel: 'Speaker anzeigen',
+      hideSpeakersLabel: 'Speaker ausblenden',
       showDetailsLabel: 'Details anzeigen',
       hideDetailsLabel: 'Details ausblenden',
       showMoreInfoLabel: 'Mehr Informationen',
@@ -185,6 +187,8 @@
       hideTalksLabel: 'Hide talks',
       showPostersLabel: 'Show posters',
       hidePostersLabel: 'Hide posters',
+      showSpeakersLabel: 'Show speakers',
+      hideSpeakersLabel: 'Hide speakers',
       showDetailsLabel: 'Show details',
       hideDetailsLabel: 'Hide details',
       showMoreInfoLabel: 'More information',
@@ -1486,6 +1490,7 @@
           var sid = planIdForSession(day.id, block, s);
           var hasTalks = s.talks && s.talks.length > 0;
           var hasPosters = s.posters && s.posters.length > 0;
+          var hasSpeakers = !!(s.speakerGroups && s.speakerGroups.length);
           var sessionAbstractText = lang === 'en' ? s.abstract_en : s.abstract_de;
           var hasAbstract = !!sessionAbstractText;
           var sadded = hasTalks
@@ -1515,6 +1520,7 @@
               '<button class="add-btn' + (sadded ? ' added' : '') + '" data-role="session-add" title="' + esc(sadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(sadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (sadded ? '&#10003;' : '+') + '</button>' +
               (hasTalks ? '<div class="chevron' + (talksOpen ? ' open' : '') + '" title="' + esc(talksOpen ? t('hideTalksLabel') : t('showTalksLabel')) + '">&#9656;</div>' : '') +
               (hasPosters ? '<div class="chevron' + (talksOpen ? ' open' : '') + '" title="' + esc(talksOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
+              (hasSpeakers ? '<div class="chevron' + (talksOpen ? ' open' : '') + '" title="' + esc(talksOpen ? t('hideSpeakersLabel') : t('showSpeakersLabel')) + '">&#9656;</div>' : '') +
             '</div>';
           row.appendChild(header);
 
@@ -1565,7 +1571,7 @@
             });
           }
 
-          if(hasTalks || hasPosters){
+          if(hasTalks || hasPosters || hasSpeakers){
             header.querySelector('.chevron').addEventListener('click', function(ev){
               ev.stopPropagation();
               var wasOpen = !!expandedSessions[sid];
@@ -1582,8 +1588,14 @@
             var abstractWrap = document.createElement('div');
             abstractWrap.className = 'talk-list';
             appendAbstractWithKeynote(abstractWrap, sessionAbstractText);
-            appendSpeakerGroups(abstractWrap, s);
             row.appendChild(abstractWrap);
+          }
+
+          if(hasSpeakers && talksOpen){
+            var speakerWrap = document.createElement('div');
+            speakerWrap.className = 'talk-list';
+            appendSpeakerGroups(speakerWrap, s);
+            row.appendChild(speakerWrap);
           }
 
           if(hasTalks && talksOpen){
