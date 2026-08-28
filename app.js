@@ -949,7 +949,7 @@
   var currentCategoryFilter = 'alle';
 
   var SOCIAL_TITLES = ['Gesellschaftsabend', 'Get Together', 'Early Career Meetup', 'Vorabendtreff'];
-  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung / Opening', 'Abschlussplenum, Posterpreisvergabe', 'DGL-Mitgliederversammlung', 'Postersession 1 – Speed Talks', 'Postersession 2 – Speed Talks', 'Postersession 1', 'Postersession 2', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
+  var PLENARY_TITLES = ['Plenarvortrag', 'Plenarvortrag (WSA)', 'Eröffnung', 'Abschlussplenum', 'DGL-Mitgliederversammlung', 'Postersession 1 – Speed Talks', 'Postersession 2 – Speed Talks', 'Postersession 1', 'Postersession 2', 'DGL Praxispreis', "Schwoerbel-Benndorf-Nachwuchspreis der DGL", 'Preisverleihung / WSA Mitgliederversammlung'];
   var WORKSHOP_TITLES = ['Arbeitskreise'];
   var SESSION_CATEGORY_OVERRIDE = { 'S19': 'plenary', 'S20': 'workshop', 'S21': 'workshop', 'S13': 'workshop', 'S18': 'workshop', 'Preisvortrag': 'plenary', 'WRHC-W1': 'workshop', 'WRHC-W2': 'workshop', 'WRHC-W3': 'workshop' };
 
@@ -1920,6 +1920,7 @@
               kind: 'session', dayId: day.id, jumpId: sid, sid: sid, timeLabel: block.time,
               text: [s.code, s.title, s.title_en, s.mod].filter(Boolean).join(' '),
               title: s.code + ' · ' + s.title, title_en: s.title_en ? (s.code + ' · ' + s.title_en) : null, sub: s.mod ? ('Mod.: ' + s.mod) : '',
+              rawTitle: s.title, rawTitle_en: s.title_en,
               hasTalks: !!(s.talks && s.talks.length),
               code: s.code, displayCode: s.displayCode, partIndex: s.partIndex || 1, mod: s.mod || '', isWSA: !!s.isWSA
             });
@@ -2094,6 +2095,16 @@
             room: '', authors: m.authors, isPoster: true
           });
           renderSearchResults(query, currentPersonSearchKey);
+        });
+      } else if(m.kind === 'session'){
+        var rawTitle = (lang === 'en' && m.rawTitle_en) ? m.rawTitle_en : m.rawTitle;
+        item.innerHTML =
+          '<div class="search-result-day">' + esc(dayLabel) + ' · ' + esc(m.timeLabel) + '</div>' +
+          '<div class="search-result-title">' + (m.code ? '<span class="session-tag' + (m.isWSA ? ' session-tag-wsa' : '') + '">' + esc(m.displayCode || m.code) + '</span> ' : '') + esc(rawTitle) + '</div>' +
+          (m.sub ? '<div class="search-result-sub">' + esc(m.sub) + '</div>' : '');
+        item.addEventListener('click', function(){
+          saveNavBackState('search', { query: query });
+          jumpToEntry(m);
         });
       } else {
         item.innerHTML =
