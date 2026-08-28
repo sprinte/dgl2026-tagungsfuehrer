@@ -2665,7 +2665,7 @@
               // the filename surname; show the full name in the program/search.
               // Multi-word surnames can't be told apart from a middle name by
               // that "last word" rule, so known cases are listed explicitly.
-              var isFullNameFormat = (s.code === 'Preisvortrag');
+              var isFullNameFormat = (s.code === 'Preisvortrag' || s.code === 'Plenarvortrag');
               var multiWordSurnames = { 'Iris Madge Pimentel': 'Madge Pimentel' };
               var surnameOnly = isFullNameFormat ? (multiWordSurnames[firstAuthor] || words[words.length-1]) : (stripLeadingInitials(words).join(' ') || words[words.length-1]);
               allEntries.push({ type: 'talk', lastName: isFullNameFormat ? firstAuthor : surnameOnly, filenameName: surnameOnly, code: s.code, title: talk.title, dayLabel: day.label, time: talk.time });
