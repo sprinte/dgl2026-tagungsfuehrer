@@ -1518,21 +1518,21 @@
             '<div class="session-btns">' +
               posterIconBtn(block) +
               menuIconBtn(block) +
-              practicalInfoIconBtn(block) +
-              routeIconBtn(block) +
               mapIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
               (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
-        if(block.linkUrl || block.linkMapsUrl){
+        if(block.linkUrl || block.linkMapsUrl || block.routeDetails || block.routeDetails_en || block.practicalInfo_de || block.practicalInfo_en){
           var linksDiv = document.createElement('div');
           linksDiv.className = 'lunch-links';
           linksDiv.style.marginTop = '8px';
           linksDiv.innerHTML =
             (block.linkMapsUrl ? '<a class="pill-link" href="' + esc(block.linkMapsUrl) + '" target="_blank" rel="noopener">' + t('openMaps') + '</a>' : '') +
-            (block.linkUrl ? '<a class="pill-link" href="' + esc(block.linkUrl) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '');
+            (block.linkUrl ? '<a class="pill-link" href="' + esc(block.linkUrl) + '" target="_blank" rel="noopener">' + t('website') + '</a>' : '') +
+            ((block.routeDetails || block.routeDetails_en) ? '<button type="button" class="pill-link" data-route-title="' + esc(block.title) + '">' + esc(t('routeDetailsLabel')) + '</button>' : '') +
+            ((block.practicalInfo_de || block.practicalInfo_en) ? '<button type="button" class="pill-link" data-practical-title="' + esc(block.title) + '">' + esc(t('practicalInfoLabel')) + '</button>' : '');
           card.appendChild(linksDiv);
         }
         if(block.route){
