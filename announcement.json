@@ -16,8 +16,8 @@
     "expires": "2026-09-14T10:30:00",
     "title_de": "Die Eröffnung beginnt gleich!",
     "title_en": "The opening starts soon!",
-    "message_de": "Um 10:30 Uhr startet die Eröffnung im Hörsaal 0/115.",
-    "message_en": "The opening ceremony starts at 10:30 am in Lecture Hall 0/115."
+    "message_de": "Um 10:30 Uhr startet die Eröffnung im Großen Hörsaal (HS 0/115).",
+    "message_en": "The opening ceremony starts at 10:30 am in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "abschluss-reminder",
@@ -26,8 +26,8 @@
     "expires": "2026-09-17T12:30:00",
     "title_de": "Das Abschlussplenum beginnt gleich!",
     "title_en": "The closing plenary starts soon!",
-    "message_de": "Um 12:30 Uhr startet das Abschlussplenum mit Posterpreisvergabe im Hörsaal 0/115.",
-    "message_en": "The closing plenary with the poster award ceremony starts at 12:30 pm in Lecture Hall 0/115."
+    "message_de": "Um 12:30 Uhr startet das Abschlussplenum mit Posterpreisvergabe im Großen Hörsaal (HS 0/115).",
+    "message_en": "The closing plenary with the poster award ceremony starts at 12:30 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "plenar-mo-reminder",
@@ -36,8 +36,8 @@
     "expires": "2026-09-14T15:30:00",
     "title_de": "Plenarvortrag beginnt gleich!",
     "title_en": "Plenary talk starting soon!",
-    "message_de": "Um 15:30 Uhr startet der Plenarvortrag von Masahiro Ryo & Jeannette Völker im Hörsaal 0/115.",
-    "message_en": "The plenary talk by Masahiro Ryo & Jeannette Völker starts at 3:30 pm in Lecture Hall 0/115."
+    "message_de": "Um 15:30 Uhr startet der Plenarvortrag von Masahiro Ryo & Jeannette Völker im Großen Hörsaal (HS 0/115).",
+    "message_en": "The plenary talk by Masahiro Ryo & Jeannette Völker starts at 3:30 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "plenar-di-reminder",
@@ -46,8 +46,8 @@
     "expires": "2026-09-15T09:00:00",
     "title_de": "Plenarvortrag beginnt gleich!",
     "title_en": "Plenary talk starting soon!",
-    "message_de": "Um 9 Uhr startet der Plenarvortrag von Damien Bouffard im Hörsaal 0/115.",
-    "message_en": "The plenary talk by Damien Bouffard starts at 9 am in Lecture Hall 0/115."
+    "message_de": "Um 9 Uhr startet der Plenarvortrag von Damien Bouffard im Großen Hörsaal (HS 0/115).",
+    "message_en": "The plenary talk by Damien Bouffard starts at 9 am in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "plenar-mi-reminder",
@@ -56,8 +56,8 @@
     "expires": "2026-09-16T13:45:00",
     "title_de": "Plenarvortrag beginnt gleich!",
     "title_en": "Plenary talk starting soon!",
-    "message_de": "Um 13:45 Uhr startet der Plenarvortrag von Ursula Gaedke im Hörsaal 0/115.",
-    "message_en": "The plenary talk by Ursula Gaedke starts at 1:45 pm in Lecture Hall 0/115."
+    "message_de": "Um 13:45 Uhr startet der Plenarvortrag von Ursula Gaedke im Großen Hörsaal (HS 0/115).",
+    "message_en": "The plenary talk by Ursula Gaedke starts at 1:45 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "plenar-do-reminder",
@@ -66,8 +66,8 @@
     "expires": "2026-09-17T09:00:00",
     "title_de": "Plenarvortrag beginnt gleich!",
     "title_en": "Plenary talk starting soon!",
-    "message_de": "Um 9 Uhr startet der Plenarvortrag von Gabriel Singer im Hörsaal 0/115.",
-    "message_en": "The plenary talk by Gabriel Singer starts at 9 am in Lecture Hall 0/115."
+    "message_de": "Um 9 Uhr startet der Plenarvortrag von Gabriel Singer im Großen Hörsaal (HS 0/115).",
+    "message_en": "The plenary talk by Gabriel Singer starts at 9 am in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "praxispreis-reminder",
@@ -76,8 +76,8 @@
     "expires": "2026-09-14T16:45:00",
     "title_de": "DGL-Praxispreis beginnt gleich!",
     "title_en": "DGL Practice Award starting soon!",
-    "message_de": "Um 16:45 Uhr startet die Verleihung des DGL-Praxispreises im Hörsaal 0/115.",
-    "message_en": "The DGL Practice Award ceremony starts at 4:45 pm in Lecture Hall 0/115."
+    "message_de": "Um 16:45 Uhr startet die Verleihung des DGL-Praxispreises im Großen Hörsaal (HS 0/115).",
+    "message_en": "The DGL Practice Award ceremony starts at 4:45 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "nachwuchspreis-reminder",
@@ -86,8 +86,8 @@
     "expires": "2026-09-16T09:00:00",
     "title_de": "DGL-Nachwuchspreis beginnt gleich!",
     "title_en": "DGL Early Career Award starting soon!",
-    "message_de": "Um 9 Uhr startet der Schwoerbel-Benndorf-Nachwuchspreis der DGL im Hörsaal 0/115.",
-    "message_en": "The DGL Schwoerbel-Benndorf Early Career Award starts at 9 am in Lecture Hall 0/115."
+    "message_de": "Um 9 Uhr startet der Schwoerbel-Benndorf-Nachwuchspreis der DGL im Großen Hörsaal (HS 0/115).",
+    "message_en": "The DGL Schwoerbel-Benndorf Early Career Award starts at 9 am in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "mitgliederversammlung-reminder",
@@ -96,8 +96,8 @@
     "expires": "2026-09-15T18:00:00",
     "title_de": "DGL-Mitgliederversammlung beginnt gleich!",
     "title_en": "DGL General Assembly starting soon!",
-    "message_de": "Um 18:00 Uhr startet die DGL-Mitgliederversammlung im Hörsaal 0/115.",
-    "message_en": "The DGL General Assembly starts at 6:00 pm in Lecture Hall 0/115."
+    "message_de": "Um 18:00 Uhr startet die DGL-Mitgliederversammlung im Großen Hörsaal (HS 0/115).",
+    "message_en": "The DGL General Assembly starts at 6:00 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "get-together-reminder",
@@ -166,8 +166,8 @@
     "expires": "2026-09-15T13:00:00",
     "title_de": "Poster Speed Talks beginnen gleich!",
     "title_en": "Poster speed talks starting soon!",
-    "message_de": "Um 13 Uhr starten die Poster Speed Talks.",
-    "message_en": "The poster speed talks start at 1 pm."
+    "message_de": "Um 13 Uhr starten die Poster Speed Talks im Großen Hörsaal (HS 0/115) und im Kleinen Hörsaal (HS 0/110).",
+    "message_en": "The poster speed talks start at 1 pm in the Large Lecture Hall (HS 0/115) and in the Small Lecture Hall (HS 0/110)."
   },
   {
     "id": "posterpreis-stimmzettel-reminder",
