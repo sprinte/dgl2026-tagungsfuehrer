@@ -1,13 +1,13 @@
 [
   {
-    "id": "test-reminder-vortraege3",
+    "id": "test-eroeffnung-reminder",
     "enabled": true,
-    "begins": "2026-08-29T12:05:00",
-    "expires": "2026-08-29T12:10:00",
-    "title_de": "Vortrag hochladen nicht vergessen",
-    "title_en": "Don't forget to upload your talk",
-    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
-    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
+    "begins": "2026-08-29T12:15:00",
+    "expires": "2026-08-29T12:20:00",
+    "title_de": "Die Eröffnung beginnt gleich!",
+    "title_en": "The opening starts soon!",
+    "message_de": "Um 10:30 Uhr startet die Eröffnung im Großen Hörsaal (HS 0/115).",
+    "message_en": "The opening ceremony starts at 10:30 am in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "eroeffnung-reminder",
