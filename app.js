@@ -4013,23 +4013,24 @@
   });
 
   // ---------- Update-available banner ----------
-  // Detects when app-data.js has changed on the server since this page was
-  // loaded, using its Last-Modified header as an automatic "version" — no
-  // manual version bumping needed on every deploy. Relevant mainly for
-  // people who leave a tab open for a long time (e.g. across the whole
-  // conference); a normal fresh page load already gets the latest content
-  // via the service worker's network-first strategy.
+  // Detects when index.html, app.js, or app-data.js has changed on the
+  // server since this page was loaded, using each file's Last-Modified
+  // header as an automatic "version" — no manual version bumping needed
+  // on every deploy. Relevant mainly for people who leave a tab open for
+  // a long time (e.g. across the whole conference).
   var UPDATE_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   var loadedAppDataVersion = null;
   function checkForUpdate(){
     Promise.all([
+      fetch('index.html', { method: 'HEAD', cache: 'no-store' }),
       fetch('app.js', { method: 'HEAD', cache: 'no-store' }),
       fetch('app-data.js', { method: 'HEAD', cache: 'no-store' })
     ]).then(function(results){
-      var v1 = results[0].headers.get('Last-Modified') || results[0].headers.get('ETag');
-      var v2 = results[1].headers.get('Last-Modified') || results[1].headers.get('ETag');
-      if(!v1 && !v2) return;
-      var combined = (v1 || '') + '|' + (v2 || '');
+      var v0 = results[0].headers.get('Last-Modified') || results[0].headers.get('ETag');
+      var v1 = results[1].headers.get('Last-Modified') || results[1].headers.get('ETag');
+      var v2 = results[2].headers.get('Last-Modified') || results[2].headers.get('ETag');
+      if(!v0 && !v1 && !v2) return;
+      var combined = (v0 || '') + '|' + (v1 || '') + '|' + (v2 || '');
       if(loadedAppDataVersion === null){
         loadedAppDataVersion = combined;
         return;
