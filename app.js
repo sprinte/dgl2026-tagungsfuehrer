@@ -1502,7 +1502,7 @@
         var infoBioText = lang === 'en' ? block.bio_en : block.bio_de;
         var hasAbstractOrBio = !!(infoAbstractText || infoBioText);
         var hasPosters = !!(block.posters && block.posters.length);
-        var isClickable = hasAbstractOrBio || hasPosters || !!block.linkView || !!block.linkExk || !!block.linkFloorplan;
+        var isClickable = hasAbstractOrBio || hasPosters || !!block.linkView || !!block.linkExk;
         var infoAbstractOpen = !!expandedInfoAbstract[id];
         var infoPostersOpen = !!expandedSessions[id];
         if(blockIsNow){
