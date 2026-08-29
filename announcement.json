@@ -1,13 +1,13 @@
 [
   {
-    "id": "test-eroeffnung-reminder",
+    "id": "test-mitgliederversammlung-reminder",
     "enabled": true,
-    "begins": "2026-08-29T12:15:00",
-    "expires": "2026-08-29T12:20:00",
-    "title_de": "Die Eröffnung beginnt gleich!",
-    "title_en": "The opening starts soon!",
-    "message_de": "Um 10:30 Uhr startet die Eröffnung im Großen Hörsaal (HS 0/115).",
-    "message_en": "The opening ceremony starts at 10:30 am in the Large Lecture Hall (HS 0/115)."
+    "begins": "2026-08-29T12:30:00",
+    "expires": "2026-08-30T12:30:00",
+    "title_de": "[Test] DGL-Mitgliederversammlung beginnt gleich!",
+    "title_en": "[Test] DGL General Assembly starting soon!",
+    "message_de": "Um 18:00 Uhr startet die DGL-Mitgliederversammlung im Großen Hörsaal (HS 0/115).",
+    "message_en": "The DGL General Assembly starts at 6:00 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "eroeffnung-reminder",
