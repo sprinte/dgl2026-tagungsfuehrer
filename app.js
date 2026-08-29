@@ -515,6 +515,12 @@
       '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
     '</button>';
   }
+  function floorplanPinIconBtn(block){
+    if(!block.linkFloorplan) return '';
+    return '<button class="poster-icon-btn" data-role="floorplan-pin" aria-label="' + esc(t('showOnMapLabel')) + '" title="' + esc(t('showOnMapLabel')) + '">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
+    '</button>';
+  }
 
   // ---------- Shared time helpers ----------
   var debugNowOverride = null;
@@ -1523,9 +1529,10 @@
               posterIconBtn(block) +
               menuIconBtn(block) +
               mapIconBtn(block) +
+              floorplanPinIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
-              (block.linkView || block.linkExk || block.linkFloorplan ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
+              (block.linkView || block.linkExk ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
         if(block.linkUrl || block.linkMapsUrl || block.routeDetails || block.routeDetails_en || block.practicalInfo_de || block.practicalInfo_en){
@@ -1550,6 +1557,12 @@
           headerDiv.querySelector('.room-link').addEventListener('click', function(ev){
             ev.stopPropagation();
             showFloorplanRoom(this.getAttribute('data-room'));
+          });
+        }
+        if(headerDiv.querySelector('[data-role="floorplan-pin"]')){
+          headerDiv.querySelector('[data-role="floorplan-pin"]').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            openFloorplanLightbox([block.linkFloorplan]);
           });
         }
         if(showAddBtn){
@@ -1592,11 +1605,6 @@
               var el = document.getElementById('exk-' + block.linkExk);
               if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
             }, 50);
-          });
-        } else if(block.linkFloorplan){
-          headerDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link')) return;
-            openFloorplanLightbox([block.linkFloorplan]);
           });
         }
         if(hasPosters){

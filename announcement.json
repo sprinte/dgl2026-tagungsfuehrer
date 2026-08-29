@@ -1,11 +1,11 @@
 [
   {
-    "id": "test-mitgliederversammlung-reminder",
-    "enabled": true,
+    "id": "TEST",
+    "enabled": false,
     "begins": "2026-08-29T12:30:00",
     "expires": "2026-08-30T12:30:00",
-    "title_de": "[Test] DGL-Mitgliederversammlung beginnt gleich!",
-    "title_en": "[Test] DGL General Assembly starting soon!",
+    "title_de": "DGL-Mitgliederversammlung beginnt gleich!",
+    "title_en": "DGL General Assembly starting soon!",
     "message_de": "Um 18:00 Uhr startet die DGL-Mitgliederversammlung im Großen Hörsaal (HS 0/115).",
     "message_en": "The DGL General Assembly starts at 6:00 pm in the Large Lecture Hall (HS 0/115)."
   },
@@ -96,8 +96,8 @@
     "expires": "2026-09-15T18:00:00",
     "title_de": "DGL-Mitgliederversammlung beginnt gleich!",
     "title_en": "DGL General Assembly starting soon!",
-    "message_de": "Um 18:00 Uhr startet die DGL-Mitgliederversammlung im Großen Hörsaal (HS 0/115).",
-    "message_en": "The DGL General Assembly starts at 6:00 pm in the Large Lecture Hall (HS 0/115)."
+    "message_de": "Um 18 Uhr startet die DGL-Mitgliederversammlung im Großen Hörsaal (HS 0/115).",
+    "message_en": "The DGL General Assembly starts at 6 pm in the Large Lecture Hall (HS 0/115)."
   },
   {
     "id": "get-together-reminder",
@@ -180,13 +180,33 @@
     "message_en": "The poster session is over – don't forget to hand in your ballot for the Poster Award at the conference office."
   },
   {
-    "id": "feedback-reminder",
+    "id": "feedback-reminder1",
     "enabled": true,
-    "begins": "2026-09-17T10:45:00",
-    "expires": "2026-09-17T11:15:00",
+    "begins": "2026-09-15T19:00:00",
+    "expires": "2026-09-15T23:55:00",
     "title_de": "Wie gefällt dir die App?",
     "title_en": "How do you like the app?",
-    "message_de": "Kurze Kaffeepause – falls dir etwas auf- oder eingefallen ist: Im Info-Tab kannst du uns ganz einfach Feedback zur App schicken.",
-    "message_en": "Quick coffee break – if anything's come to mind: you can easily send us feedback about the app in the Info tab."
+    "message_de": "Lass es uns gerne wissen - im Info-Tab kannst du uns schnell und unkompliziert Feedback zur App schicken.",
+    "message_en": "Let us know - you can easily send us feedback about the app in the Info tab."
+  },
+  {
+    "id": "feedback-reminder2",
+    "enabled": true,
+    "begins": "2026-09-17T10:00:00",
+    "expires": "2026-09-17T12:00:00",
+	"title_de": "Bevor du gehst...",
+	"title_en": "Before you go...",
+	"message_de": "Im Info-Tab kannst du uns in ein paar Sekunden Feedback zur App schicken – das hilft uns sehr für nächstes Jahr!",
+	"message_en": "You can send us quick feedback about the app in the Info tab – it really helps us for next year!"
+  },
+  {
+    "id": "goodbye",
+    "enabled": true,
+    "begins": "2026-09-17T13:00:00",
+    "expires": "2026-09-17T15:00:00",
+	"title_de": "Danke für eine großartige Tagung!",
+	"title_en": "Thanks for a great conference!",
+	"message_de": "Das war's - wir hoffen, es hat dir gefallen! Wir sehen uns im nächsten Jahr. Gute Heimreise!",
+	"message_en": "That's a wrap - we hope you enjoyed it! See you next your. Safe travels home!"
   }
 ]
