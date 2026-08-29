@@ -172,18 +172,18 @@
   {
     "id": "posterpreis-stimmzettel-reminder",
     "enabled": true,
-    "begins": "2026-09-16T17:30:00",
+    "begins": "2026-09-16T17:15:00",
     "expires": "2026-09-16T18:00:00",
     "title_de": "Jetzt für den Posterpreis abstimmen!",
     "title_en": "Vote for the Poster Award now!",
-    "message_de": "Die Postersession ist vorbei – vergiss nicht, deinen Stimmzettel für den Posterpreis im Tagungsbüro abzugeben.",
-    "message_en": "The poster session is over – don't forget to hand in your ballot for the Poster Award at the conference office."
+    "message_de": "Die Postersession ist gleich vorbei – vergiss nicht, deinen Stimmzettel für den Posterpreis im Tagungsbüro abzugeben.",
+    "message_en": "The poster session is over soon – don't forget to hand in your ballot for the Poster Award at the conference office."
   },
   {
     "id": "feedback-reminder1",
     "enabled": true,
-    "begins": "2026-09-15T19:00:00",
-    "expires": "2026-09-15T23:55:00",
+    "begins": "2026-09-15T14:00:00",
+    "expires": "2026-09-15T17:30:00",
     "title_de": "Wie gefällt dir die App?",
     "title_en": "How do you like the app?",
     "message_de": "Lass es uns gerne wissen - im Info-Tab kannst du uns schnell und unkompliziert Feedback zur App schicken.",
