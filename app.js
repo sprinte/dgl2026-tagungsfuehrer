@@ -1297,6 +1297,10 @@
     var input = document.getElementById('programmSearch');
     input.value = lastName;
     document.getElementById('searchClearBtn').style.display = 'block';
+    // Start every result collapsed — otherwise the talk whose abstract was
+    // open when the author name was clicked shows up pre-expanded while
+    // every other match in the list is collapsed, which reads as inconsistent.
+    expandedTalks = {};
     renderSearchResults(lastName, personKey);
     switchToView('programm');
   }
