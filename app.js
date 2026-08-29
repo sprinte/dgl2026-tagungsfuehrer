@@ -1568,7 +1568,7 @@
         }
         if(hasAbstractOrBio){
           headerDiv.addEventListener('click', function(ev){
-            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link') || ev.target.closest('.chevron')) return;
+            if(ev.target.closest('[data-role="info-add"]') || ev.target.closest('.room-link') || ev.target.closest('.chevron') || ev.target.closest('.poster-icon-btn')) return;
             var wasOpen = !!expandedInfoAbstract[id];
             expandedInfoAbstract = {};
             if(!wasOpen){ expandedInfoAbstract[id] = true; }
@@ -1766,7 +1766,7 @@
           if(hasAbstract){
             header.style.cursor = 'pointer';
             header.addEventListener('click', function(ev){
-              if(ev.target.closest('[data-role="session-add"]') || ev.target.closest('.room-link')) return;
+              if(ev.target.closest('[data-role="session-add"]') || ev.target.closest('.room-link') || ev.target.closest('.poster-icon-btn')) return;
               var wasOpen = !!expandedSessionAbstract[sid];
               expandedSessionAbstract = {};
               if(!wasOpen){ expandedSessionAbstract[sid] = true; }
@@ -2426,7 +2426,8 @@
 
       if(hasDetails){
         header.style.cursor = 'pointer';
-        header.addEventListener('click', function(){
+        header.addEventListener('click', function(ev){
+          if(ev.target.closest('.poster-icon-btn')) return;
           var wasOpen = !!expandedExk[e.id];
           expandedExk = {};
           if(!wasOpen){ expandedExk[e.id] = true; }
