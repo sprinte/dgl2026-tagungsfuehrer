@@ -2,8 +2,8 @@
   {
     "id": "test-reminder",
     "enabled": true,
-    "begins": "2026-29-14T10:40:00",
-    "expires": "2026-29-14T11:00:00",
+    "begins": "2026-08-29T10:42:00",
+    "expires": "2026-08-29T11:00:00",
     "title_de": "Vortrag hochladen nicht vergessen",
     "title_en": "Don't forget to upload your talk",
     "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
