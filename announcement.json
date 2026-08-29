@@ -1,8 +1,8 @@
 [
   {
-    "id": "test-reminder",
+    "id": "test-reminder-vortraege",
     "enabled": true,
-    "begins": "2026-08-29T10:42:00",
+    "begins": "2026-08-29T10:50:00",
     "expires": "2026-08-29T11:00:00",
     "title_de": "Vortrag hochladen nicht vergessen",
     "title_en": "Don't forget to upload your talk",
