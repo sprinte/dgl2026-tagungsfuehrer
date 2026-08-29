@@ -19,18 +19,41 @@ const CORE_ASSETS = [
   'index.html',
   'app.js',
   'app-data.js',
+  'announcement.json',
   'logo.png',
   'logo_dgl.png',
   'logo_igb.png',
   'logo_hu_berlin.png',
   'logo_sbahn.svg',
   'logo_pdf.png',
-  'poster_ecr_de.jpg',
-  'poster_ecr_en.jpg',
-  'poster_s21_de.jpg',
-  'poster_s21_en.jpg',
+  'poster_ecr_de.png',
+  'poster_ecr_en.png',
+  'poster_s21_de.png',
+  'poster_s21_en.png',
+  'poster_gettogether_de.png',
+  'poster_gettogether_en.png',
+  'poster_gesellschaftsabend_de.png',
+  'poster_gesellschaftsabend_en.png',
+  'poster_menu_de.png',
+  'poster_menu_en.png',
+  'poster_e1_de.png',
+  'poster_e1_en.png',
+  'poster_e2_de.png',
+  'poster_e2_en.png',
+  'poster_e3_de.png',
+  'poster_e3_en.png',
+  'poster_e4_de.png',
+  'poster_e4_en.png',
+  'poster_e5_de.png',
+  'poster_e5_en.png',
+  'poster_e6_de.png',
+  'poster_e6_en.png',
+  'poster_e7_de.png',
+  'poster_e7_en.png',
   'floorplan_de.svg',
   'floorplan_en.svg',
+  'poster_stellplan_de.svg',
+  'poster_stellplan_en.svg',
   'manifest.json',
   'icon-192.png',
   'icon-512.png'
@@ -44,7 +67,16 @@ const NETWORK_TIMEOUT_MS = 4000;
 self.addEventListener('install', function(event){
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache){
-      return cache.addAll(CORE_ASSETS);
+      // Cache each core asset individually instead of cache.addAll(), which
+      // aborts the ENTIRE install if even one URL 404s (e.g. a poster
+      // filename that changed but wasn't updated here yet). One missing
+      // file should degrade gracefully, not break offline support for
+      // everything else.
+      return Promise.all(CORE_ASSETS.map(function(url){
+        return cache.add(url).catch(function(err){
+          console.warn('sw: skipping uncachable asset', url, err);
+        });
+      }));
     }).then(function(){
       return self.skipWaiting();
     })

@@ -2,12 +2,12 @@
   {
     "id": "test-reminder",
     "enabled": true,
-    "begins": "2026-08-27T22:00:00",
-    "expires": "2026-08-31T22:00:00",
-    "title_de": "Test",
-    "title_en": "Test",
-    "message_de": "Dies ist eine Testankündigung. Einfach schließen.",
-    "message_en": "This is a test announcement. Just close the tab."
+    "begins": "2026-29-14T10:40:00",
+    "expires": "2026-29-14T11:00:00",
+    "title_de": "Vortrag hochladen nicht vergessen",
+    "title_en": "Don't forget to upload your talk",
+    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
+    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
   },
   {
     "id": "eroeffnung-reminder",
@@ -92,12 +92,12 @@
   {
     "id": "mitgliederversammlung-reminder",
     "enabled": true,
-    "begins": "2026-09-15T17:00:00",
-    "expires": "2026-09-15T17:15:00",
+    "begins": "2026-09-15T17:45:00",
+    "expires": "2026-09-15T18:00:00",
     "title_de": "DGL-Mitgliederversammlung beginnt gleich!",
     "title_en": "DGL General Assembly starting soon!",
-    "message_de": "Um 17:15 Uhr startet die DGL-Mitgliederversammlung im Hörsaal 0/115.",
-    "message_en": "The DGL General Assembly starts at 5:15 pm in Lecture Hall 0/115."
+    "message_de": "Um 18:00 Uhr startet die DGL-Mitgliederversammlung im Hörsaal 0/115.",
+    "message_en": "The DGL General Assembly starts at 6:00 pm in Lecture Hall 0/115."
   },
   {
     "id": "get-together-reminder",
