@@ -3975,8 +3975,22 @@
       localStorage.setItem(ANNOUNCEMENT_DISMISS_KEY, JSON.stringify(ids));
     }catch(e){}
   }
+  var currentlyShownAnnouncement = null; // {id, expires} of whatever's on screen right now
   function loadAnnouncement(onDone){
-    if(document.getElementById('announcementOverlay').style.display === 'flex'){ if(onDone) onDone(true); return; } // one at a time
+    var overlay = document.getElementById('announcementOverlay');
+    if(overlay.style.display === 'flex'){
+      // Still showing something — but if IT has since expired, auto-hide it
+      // rather than leaving it up forever just because nobody clicked the
+      // close button, then fall through to check whether a new one should
+      // take its place.
+      var stillValid = !(currentlyShownAnnouncement && currentlyShownAnnouncement.expires && new Date(currentlyShownAnnouncement.expires) < new Date());
+      if(stillValid){
+        if(onDone) onDone(true);
+        return;
+      }
+      overlay.style.display = 'none';
+      currentlyShownAnnouncement = null;
+    }
     fetch('announcement.json', { cache: 'no-store' }).then(function(res){
       if(!res.ok) throw new Error('no announcement file');
       return res.json();
@@ -3997,8 +4011,10 @@
       document.getElementById('announcementTitle').textContent = title || '';
       document.getElementById('announcementMessage').textContent = message || '';
       document.getElementById('announcementOverlay').style.display = 'flex';
+      currentlyShownAnnouncement = { id: a.id, expires: a.expires };
       document.getElementById('announcementCloseBtn').onclick = function(){
         document.getElementById('announcementOverlay').style.display = 'none';
+        currentlyShownAnnouncement = null;
         markAnnouncementDismissed(a.id);
         document.dispatchEvent(new Event('dgl:announcementDismissed'));
       };
