@@ -2408,6 +2408,7 @@
     var list = document.getElementById('exkList');
     list.innerHTML = '';
     var leitungLabel = lang === 'en' ? 'Lead:' : 'Leitung:';
+    var meetingLabel = lang === 'en' ? 'Meeting point:' : 'Treffpunkt:';
     DATA.exkursionen.forEach(function(e){
       var card = document.createElement('div');
       card.className = 'card';
@@ -2416,6 +2417,7 @@
       var day = lang === 'en' ? e.day_en : e.day;
       var time = lang === 'en' ? e.time_en : e.time;
       var cost = lang === 'en' ? e.cost_en : e.cost;
+      var meetingPoint = lang === 'en' ? (e.meetingPoint_en || e.meetingPoint) : e.meetingPoint;
       var hasDetails = !!e.details;
       var isOpen = !!expandedExk[e.id];
 
@@ -2426,6 +2428,7 @@
           '<div class="exk-title">' + esc(e.id) + ': ' + esc(title) + '</div>' +
           '<div class="exk-meta">' + esc(day) + ' · ' + esc(time) + '</div>' +
           '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
+          (meetingPoint ? '<span class="badge-meeting">' + esc(meetingLabel) + ' ' + esc(meetingPoint) + '</span>' : '') +
           '<span class="badge-cost">' + esc(cost) + '</span>' +
         '</div>' +
         '<div style="display:flex;align-items:flex-start;gap:4px;">' +
