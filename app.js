@@ -78,7 +78,7 @@
       officeContact: 'Ansprechpartnerin:',
       officeHours: 'Öffnungszeiten:',
       officeHoursMo: 'Montag: 9:00–18:00 Uhr',
-      officeHoursDi: 'Dienstag: 8:00–17:00 Uhr',
+      officeHoursDi: 'Dienstag: 8:00–18:00 Uhr',
       officeHoursMi: 'Mittwoch: 8:00–18:00 Uhr',
       officeHoursDo: 'Donnerstag: 8:00–13:00 Uhr',
       officeHoursFr: 'Freitag: geschlossen',
@@ -221,7 +221,7 @@
       officeContact: 'Contact:',
       officeHours: 'Opening hours:',
       officeHoursMo: 'Monday: 9:00 am–6:00 pm',
-      officeHoursDi: 'Tuesday: 8:00 am–5:00 pm',
+      officeHoursDi: 'Tuesday: 8:00 am–6:00 pm',
       officeHoursMi: 'Wednesday: 8:00 am–6:00 pm',
       officeHoursDo: 'Thursday: 8:00 am–1:00 pm',
       officeHoursFr: 'Friday: closed',
@@ -2476,10 +2476,12 @@
           '<span>' + t('sbahnMapLink') + '</span>' +
         '</a>' +
       '</div>' +
-      '<div class="card" id="officeCardLink" style="cursor:pointer;">' +
+      '<div class="card" id="officeCardLink">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">' +
           '<div class="card-section-heading" style="margin:0;">' + t('officeCardTitle') + '</div>' +
-          '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' +
+          '<button class="poster-icon-btn" id="officeCardPin" aria-label="' + esc(t('showOnMapLabel')) + '" title="' + esc(t('showOnMapLabel')) + '">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
+          '</button>' +
         '</div>' +
         '<div class="lunch-meta"><strong style="color:var(--text)">' + t('officeContact') + '</strong> Dr. Hildegard Feldmann (F&U confirm)</div>' +
         '<div class="lunch-meta" style="margin-top:6px;"><strong style="color:var(--text)">' + t('officeHours') + '</strong></div>' +
@@ -2590,7 +2592,8 @@
           '<div class="lunch-meta" style="white-space:pre-line;line-height:1.6;">' + t('impressumText') + '</div>' +
         '</div>' +
       '</div>';
-    document.getElementById('officeCardLink').addEventListener('click', function(){
+    document.getElementById('officeCardPin').addEventListener('click', function(ev){
+      ev.stopPropagation();
       openFloorplanLightbox(['tagungsbuero']);
     });
     document.getElementById('impressumHeader').addEventListener('click', function(){
