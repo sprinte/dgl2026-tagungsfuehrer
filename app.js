@@ -2571,7 +2571,7 @@
             '<img src="logo_dgl.png" alt="DGL">' +
           '</a>' +
           '<a class="org-link" href="https://watersciencealliance.org/wrch" target="_blank" rel="noopener">' +
-            '<div class="org-logo-placeholder">WSA</div>' +
+            '<img src="logo_wsa.jpg" alt="Water Science Alliance">' +
           '</a>' +
           '<a class="org-link" href="https://www.igb-berlin.de/" target="_blank" rel="noopener">' +
             '<img src="logo_igb.png" alt="IGB">' +
