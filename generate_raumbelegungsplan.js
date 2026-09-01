@@ -43,6 +43,16 @@ const APP_DATA_PATH = path.resolve(ARG[0] || path.join(HERE, 'app-data.js'));
 const APP_JS_PATH   = path.resolve(ARG[1] || path.join(HERE, 'app.js'));
 const LOGO_PATH      = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_kurz_transparent.png'));
 const OUTPUT_DIR     = path.resolve(ARG[3] || HERE);
+// Path(s) to the LibreOffice "soffice" executable used for the PDF
+// conversion. If you pass a 5th argument, only that path is tried. Otherwise
+// each candidate below is tried in order until one works — "soffice" covers
+// a normal system-wide install (works if it's on PATH), the second entry is
+// Anna's portable LibreOffice install, so the script works with zero
+// arguments on her machine. Add more candidates here if needed.
+const SOFFICE_CANDIDATES = ARG[4] ? [ARG[4]] : [
+  'soffice',
+  'C:\\Users\\aoprei\\LibreOfficePortable\\App\\libreoffice\\program\\soffice.exe'
+];
 
 const ROOM_ORDER = ['HS 0/115', 'HS 0/110', 'HS 0/307', 'HS 0/310', 'HS 0/311', 'HS 0/313', 'SR 1/304', 'SR 1/305', 'SR 1/306'];
 const EXCLUDED_ROOMS = new Set(['Foyer']);
@@ -283,13 +293,20 @@ function buildDocForDay(rooms, logoBuf){
 }
 
 // ------------------------------------------------------------------ pdf --
+let workingSofficePath = null; // cached once we find one that works
+
 function tryConvertToPdf(docxPath, outDir){
-  try {
-    execFileSync('soffice', ['--headless', '--convert-to', 'pdf', '--outdir', outDir, docxPath], { stdio: 'pipe' });
-    return true;
-  } catch (err) {
-    return false;
+  const candidates = workingSofficePath ? [workingSofficePath] : SOFFICE_CANDIDATES;
+  for(const candidate of candidates){
+    try {
+      execFileSync(candidate, ['--headless', '--convert-to', 'pdf', '--outdir', outDir, docxPath], { stdio: 'pipe' });
+      workingSofficePath = candidate;
+      return true;
+    } catch (err) {
+      // try next candidate
+    }
   }
+  return false;
 }
 
 // ------------------------------------------------------------------ main --
@@ -327,7 +344,7 @@ async function main(){
   }
 
   if(pdfAvailable === false){
-    console.warn('\nHinweis: LibreOffice (Kommando "soffice") wurde nicht gefunden — es wurden nur .docx-Dateien erzeugt, keine PDFs.');
+    console.warn(`\nHinweis: LibreOffice wurde unter keinem der bekannten Pfade gefunden (${SOFFICE_CANDIDATES.join(', ')}) — es wurden nur .docx-Dateien erzeugt, keine PDFs.\nFalls LibreOffice woanders liegt, gib den vollen Pfad zu soffice.exe als 5. Argument mit (siehe Kommentar im Skript-Kopf).`);
   }
   console.log('\nFertig.');
 }
