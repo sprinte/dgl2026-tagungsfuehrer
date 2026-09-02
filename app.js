@@ -1526,7 +1526,7 @@
         headerDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(computeInfoBlockDisplayTime(day, block)) + '</div>' +
-              ((block.tag || block.room) ? '<div style="margin-bottom:2px;">' + (block.tag ? '<span class="session-tag' + (block.isWSA ? ' session-tag-wsa' : '') + '">' + esc(lang === 'en' ? (block.tag_en || block.tag) : block.tag) + '</span> ' : '') + (block.room ? '<span class="block-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</span>' : '') + '</div>' : '') +
+              ((block.tag || block.room) ? '<div style="margin-bottom:2px;">' + (block.tag ? '<span class="session-tag' + (block.isWSA ? ' session-tag-wsa' : '') + '">' + esc(lang === 'en' ? (block.tag_en || block.tag) : block.tag) + '</span> ' : '') + (block.room ? '<span class="session-room' + (FLOORPLAN_ROOM_MAP[block.room] ? ' room-link' : '') + '" data-room="' + esc(block.room) + '">' + esc(block.room) + '</span>' : '') + '</div>' : '') +
               '<div class="block-title">' + esc(blockTitle) + '</div>' +
               (blockSubtitle ? '<div class="block-subtitle">' + esc(blockSubtitle) + '</div>' : '') +
               (block.mod ? '<div class="session-mod">' + t('mod') + ' ' + esc(block.mod) + '</div>' : '') +
