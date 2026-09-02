@@ -36,13 +36,45 @@ const {
   Footer, PageNumber
 } = require('docx');
 
+// Loads jszip to post-process the generated .docx (a .docx is just a zip of
+// XML files). We use this to fix a rendering quirk: PAGE-number fields
+// don't carry a formatted "cached" value, so some renderers (LibreOffice in
+// particular) display the page number in their own default font instead of
+// the one set in this document. Reuses the jszip copy that ships inside
+// docx's own dependencies, so nothing extra needs to be installed.
+function loadJSZip(){
+  try { return require('jszip'); } catch (e) { /* fall through */ }
+  let dir = path.dirname(require.resolve('docx'));
+  for(let i = 0; i < 6; i++){
+    const candidate = path.join(dir, 'node_modules', 'jszip');
+    if(fs.existsSync(candidate)) return require(candidate);
+    const parent = path.dirname(dir);
+    if(parent === dir) break;
+    dir = parent;
+  }
+  return null; // caller must handle gracefully
+}
+
 // ---------------------------------------------------------------- config --
+// Normal usage: just run the script, optionally with ONE argument — the
+// output folder for the generated .docx/.pdf files:
+//   node generate_raumbelegungsplan.js
+//   node generate_raumbelegungsplan.js "C:\anderer\Zielordner"
+//
+// app-data.js, app.js and the logo are expected right next to this script.
+// If you ever need to override those too (or the soffice path), you can
+// still pass them positionally — see ADVANCED USAGE below — but for the
+// day-to-day case only the output folder matters.
 const ARG = process.argv.slice(2);
 const HERE = __dirname;
-const APP_DATA_PATH = path.resolve(ARG[0] || path.join(HERE, 'app-data.js'));
-const APP_JS_PATH   = path.resolve(ARG[1] || path.join(HERE, 'app.js'));
-const LOGO_PATH      = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_kurz_transparent.png'));
-const OUTPUT_DIR     = path.resolve(ARG[3] || HERE);
+const APP_DATA_PATH = path.resolve(ARG[1] || path.join(HERE, 'app-data.js'));
+const APP_JS_PATH   = path.resolve(ARG[2] || path.join(HERE, 'app.js'));
+const LOGO_PATH      = path.resolve(ARG[3] || path.join(HERE, 'Tagungslogo_9x22_trans.png'));
+// Default output folder: one level ABOVE the folder this script lives in
+// (i.e. dirname() of the script's own folder) — e.g. if the script sits in
+// .../dgl2026-tagungsfuehrer/raumbelegungsplan-generator/, the .docx/.pdf
+// files land in .../dgl2026-tagungsfuehrer/ by default.
+const OUTPUT_DIR     = path.resolve(ARG[0] || path.dirname(HERE));
 // Path(s) to the LibreOffice "soffice" executable used for the PDF
 // conversion. If you pass a 5th argument, only that path is tried. Otherwise
 // each candidate below is tried in order until one works — "soffice" covers
@@ -210,7 +242,7 @@ function bodyCell(text, width, opts){
 function roomHeadingBlock(room, logoBuf){
   return new Table({
     width: { size: TABLE_WIDTH, type: WidthType.DXA },
-    columnWidths: [TABLE_WIDTH - 2400, 2400],
+    columnWidths: [TABLE_WIDTH - 5700, 5700],
     borders: {
       top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 16, color: BRAND_BLUE, space: 8 },
       left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
@@ -218,25 +250,40 @@ function roomHeadingBlock(room, logoBuf){
     },
     rows: [ new TableRow({ children: [
       new TableCell({
-        width: { size: TABLE_WIDTH - 2400, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
+        width: { size: TABLE_WIDTH - 5700, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
         children: [new Paragraph({ children: [new TextRun({ text: room, bold: true, size: 64, color: BRAND_BLUE, font: FONT })] })]
       }),
       new TableCell({
-        width: { size: 2400, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
+        width: { size: 5700, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: logoBuf ? [new ImageRun({ data: logoBuf, transformation: { width: 190, height: 63 }, type: 'png' })] : [] })]
+        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: logoBuf ? [new ImageRun({ data: logoBuf, transformation: { width: 360, height: 147 }, type: 'png' })] : [] })]
       })
     ] }) ]
   });
 }
 
-function footerFor(){
+const GERMAN_MONTHS = { 'Januar':1, 'Februar':2, 'März':3, 'April':4, 'Mai':5, 'Juni':6, 'Juli':7, 'August':8, 'September':9, 'Oktober':10, 'November':11, 'Dezember':12 };
+const CONFERENCE_YEAR = 2026;
+// Converts a German long-form date like "15. September" (as used in
+// app-data.js) into numeric "15.09.2026" for the footer.
+function toNumericDate(dateStr){
+  const m = (dateStr || '').match(/(\d{1,2})\.\s*(\S+)/);
+  if(!m) return dateStr || '';
+  const month = GERMAN_MONTHS[m[2]];
+  if(!month) return dateStr;
+  return `${m[1].padStart(2, '0')}.${String(month).padStart(2, '0')}.${CONFERENCE_YEAR}`;
+}
+
+function footerFor(dayLabel, dateStr, room){
+  const numericDate = toNumericDate(dateStr);
+  const infoBits = [dayLabel, numericDate].filter(Boolean).join(', ');
   return new Footer({ children: [new Paragraph({
     alignment: AlignmentType.CENTER,
     children: [
-      new TextRun({ text: '41. DGL-Jahrestagung und 16. WRHC   ·   Seite ', size: 16, color: MUTED, font: FONT }),
-      new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT })
+      new TextRun({ text: 'Seite ', size: 16, color: MUTED, font: FONT }),
+      new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT }),
+      new TextRun({ text: '   ·   ' + infoBits + '   ·   ' + room, size: 16, color: MUTED, font: FONT })
     ]
   })] });
 }
@@ -255,9 +302,16 @@ function buildRoomSection(room, sessions, logoBuf){
     }
     let sessLabel = sess.sessionLabel;
     if(sess.sharedRoom) sessLabel += '  (geteilter Raum)';
-    const labelRuns = [new TextRun({ text: sessLabel, bold: true, size: 22, font: FONT, color: '1C2530' })];
-    if(sess.mod) labelRuns.push(new TextRun({ text: '   ·   Chair: ' + sess.mod, italics: true, size: 19, font: FONT, color: MUTED }));
-    children.push(new Paragraph({ children: labelRuns, spacing: { before: 180, after: 70 } }));
+    children.push(new Paragraph({
+      children: [new TextRun({ text: sessLabel, bold: true, size: 22, font: FONT, color: '1C2530' })],
+      spacing: { before: 180, after: sess.mod ? 20 : 70 }
+    }));
+    if(sess.mod){
+      children.push(new Paragraph({
+        children: [new TextRun({ text: 'Moderation: ' + sess.mod, italics: true, size: 19, font: FONT, color: MUTED })],
+        spacing: { after: 70 }
+      }));
+    }
 
     const headerColor = sess.isRed ? WSA_RED : BRAND_BLUE;
     const rows = [ new TableRow({ tableHeader: true, children: [
@@ -277,9 +331,11 @@ function buildRoomSection(room, sessions, logoBuf){
       }
     }));
   }
+  const dayLabel = sessions.length ? sessions[0].day : '';
+  const dateStr = sessions.length ? sessions[0].date : '';
   return {
     properties: { page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: 900, bottom: 900, left: MARGIN, right: MARGIN }, pageNumbers: { start: 1 } } },
-    footers: { default: footerFor() },
+    footers: { default: footerFor(dayLabel, dateStr, room) },
     children
   };
 }
@@ -289,17 +345,56 @@ function buildDocForDay(rooms, logoBuf){
     const ia = ROOM_ORDER.indexOf(a), ib = ROOM_ORDER.indexOf(b);
     return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
   });
-  return new Document({ sections: roomNames.map(room => buildRoomSection(room, rooms[room], logoBuf)) });
+  return new Document({
+    styles: { default: { document: { run: { font: FONT, size: 20 } } } },
+    sections: roomNames.map(room => buildRoomSection(room, rooms[room], logoBuf))
+  });
 }
 
 // ------------------------------------------------------------------ pdf --
 let workingSofficePath = null; // cached once we find one that works
 
+// Fixes the PAGE-number field's font in every footer of the given .docx
+// buffer by inserting a properly-formatted cached result run between the
+// field's "separate" and "end" markers. Without this, LibreOffice (and
+// possibly other renderers) falls back to its own default font for the
+// number itself, even though the surrounding text uses Poppins. Returns the
+// original buffer unchanged if jszip isn't available or nothing needed fixing.
+async function fixPageNumberFont(docxBuffer){
+  const JSZip = loadJSZip();
+  if(!JSZip) return docxBuffer;
+  const zip = await JSZip.loadAsync(docxBuffer);
+  const footerFiles = Object.keys(zip.files).filter(name => /^word\/footer\d+\.xml$/.test(name));
+  let changed = false;
+  for(const name of footerFiles){
+    let xml = await zip.file(name).async('string');
+    const fixed = xml.replace(
+      /(<w:r>(?:(?!<\/w:r>).)*?<w:rPr>((?:(?!<\/w:rPr>).)*?)<\/w:rPr>(?:(?!<\/w:r>).)*?<w:fldChar w:fldCharType="separate"\/>)(<w:fldChar w:fldCharType="end"\/>)/g,
+      (match, before, rPrInner, endPart) => `${before}<w:t>1</w:t></w:r><w:r><w:rPr>${rPrInner}</w:rPr>${endPart}`
+    );
+    if(fixed !== xml){
+      zip.file(name, fixed);
+      changed = true;
+    }
+  }
+  if(!changed) return docxBuffer;
+  return zip.generateAsync({ type: 'nodebuffer' });
+}
+
 function tryConvertToPdf(docxPath, outDir){
   const candidates = workingSofficePath ? [workingSofficePath] : SOFFICE_CANDIDATES;
   for(const candidate of candidates){
     try {
-      execFileSync(candidate, ['--headless', '--convert-to', 'pdf', '--outdir', outDir, docxPath], { stdio: 'pipe' });
+      // --convert-to pdf:writer_pdf_Export bypasses LibreOffice's printer-driver
+      // based export path (the usual cause of it hanging with "waiting for
+      // printer connection" on Windows machines with no default printer set),
+      // and the extra flags suppress any first-run/restore dialogs that could
+      // otherwise block headless mode. The timeout guarantees the script
+      // moves on (and reports failure) instead of hanging forever.
+      execFileSync(candidate, [
+        '--headless', '--norestore', '--nologo', '--nofirststartwizard',
+        '--convert-to', 'pdf:writer_pdf_Export', '--outdir', outDir, docxPath
+      ], { stdio: 'pipe', timeout: 60000 });
       workingSofficePath = candidate;
       return true;
     } catch (err) {
@@ -312,6 +407,7 @@ function tryConvertToPdf(docxPath, outDir){
 // ------------------------------------------------------------------ main --
 async function main(){
   console.log('Lese Programmdaten aus', APP_DATA_PATH);
+  console.log('Zielordner:', OUTPUT_DIR);
   const DATA = loadAppData(APP_DATA_PATH);
   const workshopCodes = loadWorkshopCodes(APP_JS_PATH);
   console.log('Workshop-Codes (rot markiert):', [...workshopCodes].join(', ') || '(keine gefunden)');
@@ -332,7 +428,7 @@ async function main(){
     const roomCount = Object.keys(rooms).length;
     const sessionCount = Object.values(rooms).reduce((sum, arr) => sum + arr.length, 0);
     const doc = buildDocForDay(rooms, logoBuf);
-    const buf = await Packer.toBuffer(doc);
+    const buf = await fixPageNumberFont(await Packer.toBuffer(doc));
     const suffix = DAY_FILE_SUFFIX[dayLabel] || dayLabel.toLowerCase();
     const docxPath = path.join(OUTPUT_DIR, `Raumbelegungsplan_${suffix}.docx`);
     fs.writeFileSync(docxPath, buf);
