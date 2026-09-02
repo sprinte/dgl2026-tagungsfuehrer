@@ -49,6 +49,8 @@
       hideTalksLabel: 'Vorträge ausblenden',
       showPostersLabel: 'Poster anzeigen',
       hidePostersLabel: 'Poster ausblenden',
+      showGreetingsLabel: 'Grußworte anzeigen',
+      hideGreetingsLabel: 'Grußworte ausblenden',
       showSpeakersLabel: 'Speaker anzeigen',
       hideSpeakersLabel: 'Speaker ausblenden',
       showDetailsLabel: 'Details anzeigen',
@@ -194,6 +196,8 @@
       hideTalksLabel: 'Hide talks',
       showPostersLabel: 'Show posters',
       hidePostersLabel: 'Hide posters',
+      showGreetingsLabel: 'Show welcome remarks',
+      hideGreetingsLabel: 'Hide welcome remarks',
       showSpeakersLabel: 'Show speakers',
       hideSpeakersLabel: 'Hide speakers',
       showDetailsLabel: 'Show details',
@@ -1508,9 +1512,11 @@
         var infoBioText = lang === 'en' ? block.bio_en : block.bio_de;
         var hasAbstractOrBio = !!(infoAbstractText || infoBioText);
         var hasPosters = !!(block.posters && block.posters.length);
-        var isClickable = hasAbstractOrBio || hasPosters || !!block.linkView || !!block.linkExk;
+        var hasGreetings = !!(block.greetings && block.greetings.length);
+        var isClickable = hasAbstractOrBio || hasPosters || hasGreetings || !!block.linkView || !!block.linkExk;
         var infoAbstractOpen = !!expandedInfoAbstract[id];
         var infoPostersOpen = !!expandedSessions[id];
+        var infoGreetingsOpen = !!expandedSessions[id + '_greet'];
         if(blockIsNow){
           var liveBadgeInfoEl = document.createElement('div');
           liveBadgeInfoEl.className = 'live-badge';
@@ -1538,6 +1544,7 @@
               floorplanPinIconBtn(block) +
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
+              (hasGreetings ? '<div class="chevron greet-chevron' + (infoGreetingsOpen ? ' open' : '') + '" title="' + esc(infoGreetingsOpen ? t('hideGreetingsLabel') : t('showGreetingsLabel')) + '">&#9656;</div>' : '') +
               (block.linkView || block.linkExk ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
@@ -1614,12 +1621,25 @@
           });
         }
         if(hasPosters){
-          headerDiv.querySelector('.chevron:not(.link-arrow)').addEventListener('click', function(ev){
+          headerDiv.querySelector('.chevron:not(.link-arrow):not(.greet-chevron)').addEventListener('click', function(ev){
             ev.stopPropagation();
             var wasOpen = !!expandedSessions[id];
             expandedSessions = {};
             if(!wasOpen){
               expandedSessions[id] = true;
+              delete expandedInfoAbstract[id];
+            }
+            rerenderPreservingScroll('row-' + id);
+          });
+        }
+        if(hasGreetings){
+          headerDiv.querySelector('.greet-chevron').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            var key = id + '_greet';
+            var wasOpen = !!expandedSessions[key];
+            expandedSessions = {};
+            if(!wasOpen){
+              expandedSessions[key] = true;
               delete expandedInfoAbstract[id];
             }
             rerenderPreservingScroll('row-' + id);
@@ -1691,6 +1711,23 @@
             });
           });
           card.appendChild(posterList);
+        }
+        if(hasGreetings && infoGreetingsOpen){
+          var greetList = document.createElement('div');
+          greetList.className = 'talk-list';
+          block.greetings.forEach(function(g){
+            var grow = document.createElement('div');
+            grow.className = 'talk-row';
+            var gName = (lang === 'en' && g.name_en) ? g.name_en : g.name;
+            var gOrg = (lang === 'en' && g.org_en) ? g.org_en : g.org;
+            grow.innerHTML =
+              '<div class="talk-main" style="cursor:default;">' +
+                '<div class="talk-time">' + esc(gOrg) + '</div>' +
+                '<div class="talk-title">' + esc(gName) + '</div>' +
+              '</div>';
+            greetList.appendChild(grow);
+          });
+          card.appendChild(greetList);
         }
       } else {
         if(blockIsNow){
