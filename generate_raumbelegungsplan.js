@@ -317,7 +317,7 @@ function buildRoomSection(room, sessions, logoBuf){
 
     const headerColor = sess.isRed ? WSA_RED : BRAND_BLUE;
     const rows = [ new TableRow({ tableHeader: true, cantSplit: true, children: [
-      headerCell('Zeit', COL_WIDTHS[0], headerColor), headerCell('Erstautor', COL_WIDTHS[1], headerColor), headerCell('Titel', COL_WIDTHS[2], headerColor)
+      headerCell('Zeit', COL_WIDTHS[0], headerColor), headerCell('Erstautor:in', COL_WIDTHS[1], headerColor), headerCell('Titel', COL_WIDTHS[2], headerColor)
     ] }) ];
     sess.rows.forEach(([time, author, title], idx) => {
       const isLastRow = idx === sess.rows.length - 1;
