@@ -183,6 +183,7 @@ function extractRoomsByDay(DATA, workshopCodes){
           const code = s.code || '';
           const title = s.title || '';
           let sessionLabel = code ? (code + ' – ' + title) : title;
+          if(s.partTotal) sessionLabel += ' (Teil ' + s.partIndex + '/' + s.partTotal + ')';
           const isFullName = (code === 'Preisvortrag' || code === 'Plenarvortrag');
           const isWrhcNoTimes = (code === 'WRHC');
           const isRed = !!s.isWSA || workshopCodes.has(code);
@@ -226,7 +227,7 @@ function headerCell(text, width, color){
     shading: { type: ShadingType.CLEAR, fill: color || BRAND_BLUE },
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: 90, bottom: 90, left: 120, right: 120 },
-    children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 20, color: 'FFFFFF', font: FONT })] })]
+    children: [new Paragraph({ keepNext: true, keepLines: true, children: [new TextRun({ text, bold: true, size: 20, color: 'FFFFFF', font: FONT })] })]
   });
 }
 function bodyCell(text, width, opts){
@@ -235,7 +236,7 @@ function bodyCell(text, width, opts){
     width: { size: width, type: WidthType.DXA },
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: 70, bottom: 70, left: 120, right: 120 },
-    children: [new Paragraph({ children: [new TextRun({ text: text || '', size: 20, italics: !!opts.italics, font: FONT })] })]
+    children: [new Paragraph({ keepNext: !opts.isLastRow, keepLines: true, children: [new TextRun({ text: text || '', size: 20, italics: !!opts.italics, font: FONT })] })]
   });
 }
 
@@ -281,9 +282,8 @@ function footerFor(dayLabel, dateStr, room){
   return new Footer({ children: [new Paragraph({
     alignment: AlignmentType.CENTER,
     children: [
-      new TextRun({ text: 'Seite ', size: 16, color: MUTED, font: FONT }),
-      new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT }),
-      new TextRun({ text: '   ·   ' + infoBits + '   ·   ' + room, size: 16, color: MUTED, font: FONT })
+      new TextRun({ text: infoBits + '   ·   ' + room + '   ·   Seite ', size: 16, color: MUTED, font: FONT }),
+      new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT })
     ]
   })] });
 }
@@ -303,25 +303,28 @@ function buildRoomSection(room, sessions, logoBuf){
     let sessLabel = sess.sessionLabel;
     if(sess.sharedRoom) sessLabel += '  (geteilter Raum)';
     children.push(new Paragraph({
+      keepNext: true,
       children: [new TextRun({ text: sessLabel, bold: true, size: 22, font: FONT, color: '1C2530' })],
       spacing: { before: 180, after: sess.mod ? 20 : 70 }
     }));
     if(sess.mod){
       children.push(new Paragraph({
+        keepNext: true,
         children: [new TextRun({ text: 'Moderation: ' + sess.mod, italics: true, size: 19, font: FONT, color: MUTED })],
         spacing: { after: 70 }
       }));
     }
 
     const headerColor = sess.isRed ? WSA_RED : BRAND_BLUE;
-    const rows = [ new TableRow({ tableHeader: true, children: [
+    const rows = [ new TableRow({ tableHeader: true, cantSplit: true, children: [
       headerCell('Zeit', COL_WIDTHS[0], headerColor), headerCell('Erstautor', COL_WIDTHS[1], headerColor), headerCell('Titel', COL_WIDTHS[2], headerColor)
     ] }) ];
-    for(const [time, author, title] of sess.rows){
-      rows.push(new TableRow({ children: [
-        bodyCell(time, COL_WIDTHS[0]), bodyCell(author, COL_WIDTHS[1], { italics: !author }), bodyCell(title, COL_WIDTHS[2])
+    sess.rows.forEach(([time, author, title], idx) => {
+      const isLastRow = idx === sess.rows.length - 1;
+      rows.push(new TableRow({ cantSplit: true, children: [
+        bodyCell(time, COL_WIDTHS[0], { isLastRow }), bodyCell(author, COL_WIDTHS[1], { italics: !author, isLastRow }), bodyCell(title, COL_WIDTHS[2], { isLastRow })
       ] }));
-    }
+    });
     children.push(new Table({
       width: { size: TABLE_WIDTH, type: WidthType.DXA }, columnWidths: COL_WIDTHS, rows,
       borders: {
@@ -367,13 +370,21 @@ async function fixPageNumberFont(docxBuffer){
   const footerFiles = Object.keys(zip.files).filter(name => /^word\/footer\d+\.xml$/.test(name));
   let changed = false;
   for(const name of footerFiles){
-    let xml = await zip.file(name).async('string');
-    const fixed = xml.replace(
+    const original = await zip.file(name).async('string');
+    // \* MERGEFORMAT tells Word to keep the cached run's formatting when it
+    // recalculates the field (e.g. on open/print) instead of resetting to
+    // its own default font — without this, the fix below only survives
+    // until Word's next recalculation.
+    let xml = original.replace(
+      /<w:instrText xml:space="preserve">PAGE<\/w:instrText>/g,
+      '<w:instrText xml:space="preserve">PAGE \\* MERGEFORMAT</w:instrText>'
+    );
+    xml = xml.replace(
       /(<w:r>(?:(?!<\/w:r>).)*?<w:rPr>((?:(?!<\/w:rPr>).)*?)<\/w:rPr>(?:(?!<\/w:r>).)*?<w:fldChar w:fldCharType="separate"\/>)(<w:fldChar w:fldCharType="end"\/>)/g,
       (match, before, rPrInner, endPart) => `${before}<w:t>1</w:t></w:r><w:r><w:rPr>${rPrInner}</w:rPr>${endPart}`
     );
-    if(fixed !== xml){
-      zip.file(name, fixed);
+    if(xml !== original){
+      zip.file(name, xml);
       changed = true;
     }
   }
