@@ -51,6 +51,8 @@
       showPostersLabel: 'Poster anzeigen',
       hidePostersLabel: 'Poster ausblenden',
       showGreetingsLabel: 'Grußworte anzeigen',
+      liveNowHeading: 'Jetzt live',
+      nextUpLabel: 'Als Nächstes in deinem Plan:',
       hideGreetingsLabel: 'Grußworte ausblenden',
       showSpeakersLabel: 'Speaker anzeigen',
       hideSpeakersLabel: 'Speaker ausblenden',
@@ -199,6 +201,8 @@
       showPostersLabel: 'Show posters',
       hidePostersLabel: 'Hide posters',
       showGreetingsLabel: 'Show welcome remarks',
+      liveNowHeading: 'Live now',
+      nextUpLabel: 'Up next in your plan:',
       hideGreetingsLabel: 'Hide welcome remarks',
       showSpeakersLabel: 'Show speakers',
       hideSpeakersLabel: 'Hide speakers',
@@ -1960,7 +1964,107 @@
       }
       list.appendChild(card);
     });
+    safeRun(renderLiveNowBanner, 'renderLiveNowBanner');
+    safeRun(renderNextUpBar, 'renderNextUpBar');
   }
+
+  // ---------- "Jetzt live" overview ----------
+  var liveNowOpen = false;
+  function computeLiveNowItems(){
+    var today = DATA.programm.find(function(d){ return isToday(d.id); });
+    if(!today) return [];
+    var items = [];
+    today.blocks.forEach(function(block){
+      if(block.type === 'parallel'){
+        (block.sessions || []).forEach(function(s){
+          if(s.room && isBlockNow(today.id, block.time)){
+            items.push({ room: s.room, code: s.code || '', title: s.title, title_en: s.title_en });
+          }
+        });
+      } else if(block.type === 'info'){
+        if(block.room && isBlockNow(today.id, block.time)){
+          items.push({ room: block.room, code: block.tag || '', title: block.title, title_en: block.title_en });
+        }
+      }
+    });
+    items.sort(function(a, b){ return (a.room || '').localeCompare(b.room || ''); });
+    return items;
+  }
+  function renderLiveNowBanner(){
+    var container = document.getElementById('liveNowBanner');
+    if(!container) return;
+    var items = computeLiveNowItems();
+    if(!items.length){ container.innerHTML = ''; return; }
+    var itemsHtml = items.map(function(it){
+      var title = (lang === 'en' && it.title_en) ? it.title_en : it.title;
+      return '<div class="live-now-item">' +
+        '<span class="live-now-room">' + esc(it.room) + '</span>' +
+        '<span>' + (it.code ? '<span class="session-tag">' + esc(it.code) + '</span> ' : '') + esc(title) + '</span>' +
+      '</div>';
+    }).join('');
+    container.innerHTML =
+      '<div class="live-now-banner">' +
+        '<div class="live-now-header" id="liveNowToggle">' +
+          '<span class="live-dot-blink"></span>' +
+          '<span class="live-now-header-text">' + esc(t('liveNowHeading')) + ' (' + items.length + ')</span>' +
+          '<span class="chevron' + (liveNowOpen ? ' open' : '') + '">&#9656;</span>' +
+        '</div>' +
+        (liveNowOpen ? '<div class="live-now-list">' + itemsHtml + '</div>' : '') +
+      '</div>';
+    document.getElementById('liveNowToggle').addEventListener('click', function(){
+      liveNowOpen = !liveNowOpen;
+      renderLiveNowBanner();
+    });
+  }
+
+  // ---------- "Als Nächstes" bar (next item in the personal plan) ----------
+  function computeNextUpItem(){
+    if(!plan || !plan.length) return null;
+    var now = nowDate();
+    var TEN_MIN_MS = 10 * 60 * 1000;
+    var candidates = [];
+    plan.forEach(function(p){
+      var r = blockDateRange(p.dayId, p.time);
+      if(!r) return;
+      if(r.start > now && (r.start - now) <= TEN_MIN_MS){
+        candidates.push({ item: p, start: r.start });
+      }
+    });
+    if(!candidates.length) return null;
+    candidates.sort(function(a, b){ return a.start - b.start; });
+    return candidates[0].item;
+  }
+  function renderNextUpBar(){
+    var container = document.getElementById('nextUpBar');
+    if(!container) return;
+    var nav = document.querySelector('nav.bottom-nav');
+    var item = computeNextUpItem();
+    if(!item){ container.innerHTML = ''; return; }
+    var navHeight = nav ? nav.offsetHeight : 56;
+    var timeMatch = (item.time || '').match(/\d{1,2}:\d{2}/);
+    var timeLabel = timeMatch ? timeMatch[0] : (item.time || '');
+    var roomBtn = (item.room && FLOORPLAN_ROOM_MAP[item.room]) ?
+      '<button type="button" class="next-up-room-btn" id="nextUpRoomBtn" aria-label="' + esc(t('showOnMapLabel')) + '" title="' + esc(t('showOnMapLabel')) + '">' +
+        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
+      '</button>' : '';
+    container.innerHTML =
+      '<div class="next-up-bar" id="nextUpBarInner" style="bottom:' + navHeight + 'px;">' +
+        '<span class="next-up-label">' + esc(t('nextUpLabel')) + '</span>' +
+        '<span class="next-up-detail">' + esc(timeLabel) + ' \u00b7 ' + esc(item.title) + (item.room ? ' \u00b7 ' + esc(item.room) : '') + '</span>' +
+        roomBtn +
+        '<span class="next-up-arrow">&#8594;</span>' +
+      '</div>';
+    document.getElementById('nextUpBarInner').addEventListener('click', function(){
+      switchToView('plan');
+    });
+    if(roomBtn){
+      document.getElementById('nextUpRoomBtn').addEventListener('click', function(ev){
+        ev.stopPropagation();
+        showFloorplanRoom(item.room);
+      });
+    }
+  }
+
 
   // ---------- Search ----------
   var searchIndex = [];

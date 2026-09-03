@@ -646,6 +646,45 @@
     padding:0 10px;
     z-index:10;
   }
+  #liveNowBanner:empty{ display:none; }
+  .live-now-banner{
+    background:#eaf3ee;
+    border:1px solid #c8e0d3;
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:14px;
+  }
+  body.dark .live-now-banner{ background:#16261f; border-color:#254536; }
+  .live-now-header{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+  }
+  .live-now-header-text{ font-weight:700; font-size:14px; color:var(--accent); }
+  .live-now-header .chevron{ margin-left:auto; }
+  .live-now-list{ margin-top:10px; }
+  .live-now-item{
+    display:flex; flex-direction:column; gap:1px;
+    padding:7px 0; border-top:1px solid #d7e8de; font-size:12.5px;
+  }
+  body.dark .live-now-item{ border-color:#254536; }
+  .live-now-item:first-child{ border-top:none; padding-top:0; }
+  .live-now-room{ font-weight:700; color:var(--navy); font-size:11.5px; }
+  #nextUpBar:empty{ display:none; }
+  .next-up-bar{
+    position:fixed; left:0; right:0; z-index:9;
+    background:var(--navy); color:#fff;
+    display:flex; align-items:center; gap:10px;
+    padding:9px 16px;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .next-up-bar .next-up-label{ opacity:.75; font-size:11px; flex-shrink:0; }
+  .next-up-bar .next-up-detail{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .next-up-bar .next-up-room-btn{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    background:rgba(255,255,255,.15); border:none; color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .next-up-bar .next-up-arrow{ margin-left:auto; flex-shrink:0; opacity:.8; }
   nav.bottom-nav button{
     flex:0 1 auto;
     min-width:0;
@@ -1415,6 +1454,7 @@
     </select>
     <div class="day-tabs" id="dayTabs"></div>
     <div class="category-filter-row" id="categoryFilter"></div>
+    <div id="liveNowBanner"></div>
     <div id="programmList"></div>
   </section>
 
@@ -1520,6 +1560,7 @@
   <button data-view="venue"><span class="ic"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/></svg></span><span class="nav-label-wrap"><span class="nav-label-ghost" aria-hidden="true">Tagungsort</span><span class="nav-label" id="navVenue">Tagungsort</span></span></button>
   <button data-view="plan"><span class="ic">&#11088;</span><span class="nav-label-wrap"><span class="nav-label-ghost" aria-hidden="true">Mein Plan</span><span class="nav-label" id="navPlan">Mein Plan</span></span></button>
 </nav>
+<div id="nextUpBar"></div>
 
 <div id="announcementOverlay" class="announcement-overlay" style="display:none;">
   <div class="announcement-card">
