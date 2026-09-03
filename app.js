@@ -2054,7 +2054,7 @@
     if(!container) return;
     var nav = document.querySelector('nav.bottom-nav');
     var item = computeNextUpItem();
-    if(!item){ container.innerHTML = ''; return; }
+    if(!item){ container.innerHTML = ''; adjustBackToTopForNextUpBar(); return; }
     var navHeight = nav ? nav.offsetHeight : 56;
     var timeMatch = (item.time || '').match(/\d{1,2}:\d{2}/);
     var timeLabel = timeMatch ? timeMatch[0] : (item.time || '');
@@ -2077,6 +2077,21 @@
         ev.stopPropagation();
         showFloorplanRoom(item.room);
       });
+    }
+    adjustBackToTopForNextUpBar();
+  }
+
+  // Keeps the "back to top" button above the "next up" bar when it's showing,
+  // instead of overlapping it — otherwise the arrow button would sit right
+  // on top of the bar's clickable area.
+  function adjustBackToTopForNextUpBar(){
+    var btn = document.getElementById('backToTopBtn');
+    var barInner = document.getElementById('nextUpBarInner');
+    if(!btn) return;
+    if(barInner){
+      btn.style.bottom = (barInner.offsetHeight + parseFloat(getComputedStyle(barInner).bottom || 0) + 12) + 'px';
+    } else {
+      btn.style.bottom = '';
     }
   }
 
