@@ -1970,6 +1970,7 @@
 
   // ---------- "Jetzt live" overview ----------
   var liveNowOpen = false;
+  var LIVE_NOW_ROOM_ORDER = ['HS 0/115', 'HS 0/110', 'HS 0/307', 'HS 0/310', 'HS 0/311', 'HS 0/313', 'SR 1/304', 'SR 1/305', 'SR 1/306'];
   function computeLiveNowItems(){
     var today = DATA.programm.find(function(d){ return isToday(d.id); });
     if(!today) return [];
@@ -1987,7 +1988,13 @@
         }
       }
     });
-    items.sort(function(a, b){ return (a.room || '').localeCompare(b.room || ''); });
+    items.sort(function(a, b){
+      var ia = LIVE_NOW_ROOM_ORDER.indexOf(a.room), ib = LIVE_NOW_ROOM_ORDER.indexOf(b.room);
+      if(ia === -1) ia = 999;
+      if(ib === -1) ib = 999;
+      if(ia !== ib) return ia - ib;
+      return (a.room || '').localeCompare(b.room || '');
+    });
     return items;
   }
   function renderLiveNowBanner(){
@@ -1995,10 +2002,11 @@
     if(!container) return;
     var items = computeLiveNowItems();
     if(!items.length){ container.innerHTML = ''; return; }
-    var itemsHtml = items.map(function(it){
+    var itemsHtml = items.map(function(it, idx){
       var title = (lang === 'en' && it.title_en) ? it.title_en : it.title;
+      var roomClickable = !!FLOORPLAN_ROOM_MAP[it.room];
       return '<div class="live-now-item">' +
-        '<span class="live-now-room">' + esc(it.room) + '</span>' +
+        '<span class="live-now-room' + (roomClickable ? ' room-link' : '') + '" data-live-room-idx="' + idx + '">' + esc(it.room) + '</span>' +
         '<span>' + (it.code ? '<span class="session-tag">' + esc(it.code) + '</span> ' : '') + esc(title) + '</span>' +
       '</div>';
     }).join('');
@@ -2014,6 +2022,13 @@
     document.getElementById('liveNowToggle').addEventListener('click', function(){
       liveNowOpen = !liveNowOpen;
       renderLiveNowBanner();
+    });
+    container.querySelectorAll('.live-now-room.room-link').forEach(function(el){
+      el.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        var idx = parseInt(el.getAttribute('data-live-room-idx'), 10);
+        showFloorplanRoom(items[idx].room);
+      });
     });
   }
 
