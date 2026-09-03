@@ -40,6 +40,7 @@
       routeDetailsLabel: 'Wegbeschreibung',
       practicalInfoLabel: 'Praktische Infos',
       remoteTalkLabel: 'Wird per Videokonferenz zugeschaltet',
+      presenterLabel: 'Vortragende:r:',
       updateBannerText: 'Es gibt eine neue Version der App.',
       updateBannerReload: 'Aktualisieren',
       showOnMapLabel: 'Auf Karte anzeigen',
@@ -187,6 +188,7 @@
       routeDetailsLabel: 'Directions',
       practicalInfoLabel: 'Practical info',
       remoteTalkLabel: 'Joining via video conference',
+      presenterLabel: 'Presenter:',
       updateBannerText: 'A new version of the app is available.',
       updateBannerReload: 'Reload',
       showOnMapLabel: 'Show on map',
@@ -1862,6 +1864,8 @@
               var talkRange = computeTalkTimeRange(s.talks, idx, block.time);
               var talkIsNow = isToday(day.id) && isBlockNow(day.id, talkRange);
               var trow = document.createElement('div');
+              var talkFirstAuthor = (talk.authors || '').split(' \u2014 ')[0].split(',')[0].trim();
+              var showsPresenter = talk.presenter && talk.presenter.trim() !== talkFirstAuthor;
               trow.className = 'talk-row';
               trow.id = 'row-' + tid;
               trow.innerHTML =
@@ -1869,6 +1873,7 @@
                   (s.code === 'WRHC' ? '' : '<div class="talk-time" style="display:flex;align-items:center;gap:6px;">' + esc(talk.time) + (talkIsNow ? '<span class="live-dot-blink" aria-label="' + esc(t('liveNow')) + '" title="' + esc(t('liveNow')) + '"></span>' : '') + '</div>') +
                   '<div class="talk-title">' + (talk.remote ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;flex-shrink:0;" aria-label="' + esc(t('remoteTalkLabel')) + '"><title>' + esc(t('remoteTalkLabel')) + '</title><rect x="2" y="6" width="14" height="12" rx="2"></rect><polygon points="23 7 16 12 23 17 23 7"></polygon></svg>' : '') + esc(talk.title) + '</div>' +
                   '<div class="talk-authors">' + renderAuthorsHtml(talk.authors) + '</div>' +
+                  (showsPresenter ? '<div class="session-mod">' + esc(t('presenterLabel')) + ' ' + esc(talk.presenter) + '</div>' : '') +
                 '</div>' +
                 '<button class="add-btn small' + (tadded ? ' added' : '') + '" data-id="' + tid + '" title="' + esc(tadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(tadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (tadded ? '&#10003;' : '+') + '</button>';
               trow.querySelector('.talk-main').addEventListener('click', function(ev){
@@ -1999,7 +2004,7 @@
                 title: talk.title, sub: talk.authors,
                 authors: talk.authors, abstract: talk.abstract || '', room: s.room, code: s.code, displayCode: s.displayCode,
                 dayLabel: day.label, date: day.date,
-                planTime: computeTalkTimeRange(s.talks, idx, block.time), isWSA: !!s.isWSA
+                planTime: computeTalkTimeRange(s.talks, idx, block.time), isWSA: !!s.isWSA, presenter: talk.presenter || ''
               });
             });
           });
@@ -2094,10 +2099,13 @@
 
       if(m.kind === 'talk'){
         var padded = isInPlan(m.jumpId);
+        var mFirstAuthor = (m.authors || '').split(' \u2014 ')[0].split(',')[0].trim();
+        var mShowsPresenter = m.presenter && m.presenter.trim() !== mFirstAuthor;
         item.innerHTML =
           '<div class="search-result-day">' + (m.code ? '<span class="session-tag' + (m.isWSA ? ' session-tag-wsa' : '') + '">' + esc(m.displayCode || m.code) + '</span> ' : '') + esc(dayLabel) + (m.isWSA ? '' : ' · ' + esc(m.timeLabel)) + (m.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(m.room) + '">' + esc(m.room) + '</span>' : '') + '</div>' +
           '<div class="search-result-title">' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
+          (mShowsPresenter ? '<div class="session-mod">' + esc(t('presenterLabel')) + ' ' + esc(m.presenter) + '</div>' : '') +
           '<button class="add-btn small' + (padded ? ' added' : '') + '" data-role="search-add" title="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(padded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" style="position:absolute;top:12px;right:12px;">' + (padded ? '&#10003;' : '+') + '</button>';
         item.style.cursor = 'pointer';
         item.style.position = 'relative';
