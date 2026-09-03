@@ -1983,7 +1983,7 @@
           }
         });
       } else if(block.type === 'info'){
-        if(block.room && isBlockNow(today.id, block.time)){
+        if(block.room && block.room !== 'Foyer' && block.title !== 'Anmeldung' && isBlockNow(today.id, block.time)){
           items.push({ room: block.room, code: block.tag || '', title: block.title, title_en: block.title_en });
         }
       }
@@ -2014,7 +2014,7 @@
       '<div class="live-now-banner">' +
         '<div class="live-now-header" id="liveNowToggle">' +
           '<span class="live-dot-blink"></span>' +
-          '<span class="live-now-header-text">' + esc(t('liveNowHeading')) + ' (' + items.length + ')</span>' +
+          '<span class="live-now-header-text">' + esc(t('liveNowHeading')) + '</span>' +
           '<span class="chevron' + (liveNowOpen ? ' open' : '') + '">&#9656;</span>' +
         '</div>' +
         (liveNowOpen ? '<div class="live-now-list">' + itemsHtml + '</div>' : '') +
