@@ -1999,7 +1999,7 @@
       renderProgrammList();
       setTimeout(function(){
         var el = document.querySelector('#programmList .now-live');
-        if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 60);
     });
   }
