@@ -1754,7 +1754,7 @@
             var wgRoomClickable = wg.room && !!FLOORPLAN_ROOM_MAP[wg.room];
             wgRow.innerHTML =
               '<div class="talk-main" style="cursor:default;">' +
-                '<div class="talk-time">' + esc(wg.date) + ', ' + esc(wg.time) + '</div>' +
+                '<div class="talk-time">' + esc(wg.time) + '</div>' +
                 '<div class="talk-title">' + esc(wgName) + '</div>' +
                 '<div class="talk-authors">' +
                   (wg.room ? '<span class="' + (wgRoomClickable ? 'room-link' : '') + '" data-wg-room="' + esc(wg.room) + '">' + esc(wg.room) + '</span>' + (wg.contact ? '  \u00b7  ' : '') : '') +
