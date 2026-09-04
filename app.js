@@ -52,7 +52,8 @@
       hidePostersLabel: 'Poster ausblenden',
       showGreetingsLabel: 'Grußworte anzeigen',
       liveNowHeading: 'Was läuft gerade?',
-      nextUpLabel: 'Als Nächstes in deinem Plan:',
+      nextUpLabel: 'Nächster Termin:',
+      backToProgramLabel: '\u2190 Zurück zu deinem Plan',
       hideGreetingsLabel: 'Grußworte ausblenden',
       showSpeakersLabel: 'Speaker anzeigen',
       hideSpeakersLabel: 'Speaker ausblenden',
@@ -202,7 +203,8 @@
       hidePostersLabel: 'Hide posters',
       showGreetingsLabel: 'Show welcome remarks',
       liveNowHeading: "What's happening now?",
-      nextUpLabel: 'Up next in your plan:',
+      nextUpLabel: 'Next up:',
+      backToProgramLabel: '\u2190 Back to your plan',
       hideGreetingsLabel: 'Hide welcome remarks',
       showSpeakersLabel: 'Show speakers',
       hideSpeakersLabel: 'Hide speakers',
@@ -628,6 +630,7 @@
     });
     if(target === 'plan') renderPlan();
     window.scrollTo(0,0);
+    safeRun(adjustBackToTopForNextUpBar, 'adjustBackToTopForNextUpBar');
   }
   function getDefaultProgrammDay(){
     var todayMatch = DATA.programm.find(function(d){ return isToday(d.id); });
@@ -2027,6 +2030,12 @@
     candidates.sort(function(a, b){ return a.start - b.start; });
     return candidates[0].item;
   }
+  var showBackToPlanBtn = false;
+  function findJumpTargetForPlanItem(item){
+    return searchIndex.find(function(entry){
+      return entry.dayId === item.dayId && (entry.jumpId === item.id || entry.sid === item.id);
+    }) || null;
+  }
   function renderNextUpBar(){
     var container = document.getElementById('nextUpBar');
     if(!container) return;
@@ -2048,7 +2057,14 @@
         '<span class="next-up-arrow">&#8594;</span>' +
       '</div>';
     document.getElementById('nextUpBarInner').addEventListener('click', function(){
-      switchToView('plan');
+      var target = findJumpTargetForPlanItem(item);
+      if(target){
+        showBackToPlanBtn = true;
+        jumpToEntry(target);
+        renderBackToPlanButton();
+      } else {
+        switchToView('plan');
+      }
     });
     if(roomBtn){
       document.getElementById('nextUpRoomBtn').addEventListener('click', function(ev){
@@ -2058,6 +2074,27 @@
     }
     adjustBackToTopForNextUpBar();
   }
+
+  // Small pill shown after jumping from the "next up" bar into the Programme
+  // tab, so the person can easily find their way back to "Mein Plan"
+  // afterwards instead of having to navigate there manually.
+  function renderBackToPlanButton(){
+    var existing = document.getElementById('backToPlanBtn');
+    if(existing) existing.remove();
+    if(!showBackToPlanBtn) return;
+    var btn = document.createElement('button');
+    btn.id = 'backToPlanBtn';
+    btn.type = 'button';
+    btn.className = 'back-to-plan-btn';
+    btn.textContent = t('backToProgramLabel');
+    btn.addEventListener('click', function(){
+      showBackToPlanBtn = false;
+      btn.remove();
+      switchToView('plan');
+    });
+    document.body.appendChild(btn);
+  }
+
 
   // Keeps the "back to top" button above the "next up" bar when it's showing,
   // instead of overlapping it — otherwise the arrow button would sit right
