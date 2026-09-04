@@ -2005,18 +2005,34 @@
 
   // ---------- "Jetzt live" jump banner ----------
   function isSomethingLiveNow(){
+    return !!computeTopPriorityLiveTarget();
+  }
+  // Finds the currently-live item to jump to, in priority order: plenary
+  // talks first, then regular A0X/S0X sessions, then everything else
+  // (workshops, working groups, WRHC, etc.) — so that when several things
+  // are happening at once, the jump always lands on the most prominent one.
+  function computeTopPriorityLiveTarget(){
     var today = DATA.programm.find(function(d){ return isToday(d.id); });
-    if(!today) return false;
-    return today.blocks.some(function(block){
+    if(!today) return null;
+    var candidates = [];
+    today.blocks.forEach(function(block){
       if(block.type === 'parallel'){
-        return (block.sessions || []).some(function(s){
-          return s.room && isBlockNow(today.id, block.time);
+        (block.sessions || []).forEach(function(s){
+          if(s.room && isBlockNow(today.id, block.time)){
+            var priority = s.code === 'Plenarvortrag' ? 0 : (/^(A|S)\d+(\/\d+)?$/.test(s.code || '') ? 1 : 2);
+            candidates.push({ priority: priority, rowId: 'row-' + planIdForSession(today.id, block, s) });
+          }
         });
       } else if(block.type === 'info'){
-        return block.room && block.room !== 'Foyer' && block.title !== 'Anmeldung' && isBlockNow(today.id, block.time);
+        if(block.room && block.room !== 'Foyer' && block.title !== 'Anmeldung' && !block.linkExk && isBlockNow(today.id, block.time)){
+          var infoPriority = block.tag === 'Plenarvortrag' ? 0 : 2;
+          candidates.push({ priority: infoPriority, rowId: 'row-' + planIdForBlock(today.id, block) });
+        }
       }
-      return false;
     });
+    if(!candidates.length) return null;
+    candidates.sort(function(a, b){ return a.priority - b.priority; });
+    return candidates[0].rowId;
   }
   function renderLiveNowBanner(){
     var container = document.getElementById('liveNowBanner');
@@ -2031,6 +2047,7 @@
     document.getElementById('liveNowJump').addEventListener('click', function(){
       var today = DATA.programm.find(function(d){ return isToday(d.id); });
       if(!today) return;
+      var targetRowId = computeTopPriorityLiveTarget();
       currentDay = today.id;
       currentCategoryFilter = 'alle';
       expandedSessions = {};
@@ -2039,7 +2056,7 @@
       renderCategoryFilter();
       renderProgrammList();
       setTimeout(function(){
-        var el = document.querySelector('#programmList .now-live');
+        var el = targetRowId ? document.getElementById(targetRowId) : document.querySelector('#programmList .now-live');
         if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 60);
     });
