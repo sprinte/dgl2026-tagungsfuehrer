@@ -54,6 +54,8 @@
       greetedByPrefix: 'Begrüßung durch',
       showGreetingsLabel: 'Grußworte anzeigen',
       hideGreetingsLabel: 'Grußworte ausblenden',
+      showWorkingGroupsLabel: 'Arbeitskreise anzeigen',
+      hideWorkingGroupsLabel: 'Arbeitskreise ausblenden',
       showSpeakersLabel: 'Speaker anzeigen',
       hideSpeakersLabel: 'Speaker ausblenden',
       showDetailsLabel: 'Details anzeigen',
@@ -204,6 +206,8 @@
       greetedByPrefix: 'Welcome remarks by',
       showGreetingsLabel: 'Show welcome remarks',
       hideGreetingsLabel: 'Hide welcome remarks',
+      showWorkingGroupsLabel: 'Show working groups',
+      hideWorkingGroupsLabel: 'Hide working groups',
       showSpeakersLabel: 'Show speakers',
       hideSpeakersLabel: 'Hide speakers',
       showDetailsLabel: 'Show details',
@@ -1524,10 +1528,12 @@
           return gName + ' (' + gOrg + ')';
         }).join(', ') : '';
         var hasGreetings = !!greetingsLine;
-        var isClickable = hasAbstractOrBio || hasPosters || hasGreetings || !!block.linkView || !!block.linkExk;
+        var hasWorkingGroups = !!(block.workingGroups && block.workingGroups.length);
+        var isClickable = hasAbstractOrBio || hasPosters || hasGreetings || hasWorkingGroups || !!block.linkView || !!block.linkExk;
         var infoAbstractOpen = !!expandedInfoAbstract[id];
         var infoPostersOpen = !!expandedSessions[id];
         var infoGreetingsOpen = !!expandedSessions[id + '_greet'];
+        var infoWorkingGroupsOpen = !!expandedSessions[id + '_wg'];
         if(blockIsNow){
           var liveBadgeInfoEl = document.createElement('div');
           liveBadgeInfoEl.className = 'live-badge';
@@ -1557,6 +1563,7 @@
               (showAddBtn ? '<button class="add-btn' + (added ? ' added' : '') + '" data-role="info-add" title="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(added ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (added ? '&#10003;' : '+') + '</button>' :  '') +
               (hasPosters ? '<div class="chevron' + (infoPostersOpen ? ' open' : '') + '" title="' + esc(infoPostersOpen ? t('hidePostersLabel') : t('showPostersLabel')) + '">&#9656;</div>' : '') +
               (hasGreetings ? '<div class="chevron greet-chevron' + (infoGreetingsOpen ? ' open' : '') + '" title="' + esc(infoGreetingsOpen ? t('hideGreetingsLabel') : t('showGreetingsLabel')) + '">&#9656;</div>' : '') +
+              (hasWorkingGroups ? '<div class="chevron wg-chevron' + (infoWorkingGroupsOpen ? ' open' : '') + '" title="' + esc(infoWorkingGroupsOpen ? t('hideWorkingGroupsLabel') : t('showWorkingGroupsLabel')) + '">&#9656;</div>' : '') +
               (block.linkView || block.linkExk ? '<div class="chevron link-arrow" title="' + esc(t('showMoreInfoLabel')) + '">&#8594;</div>' : '') +
             '</div>';
         card.appendChild(headerDiv);
@@ -1633,7 +1640,7 @@
           });
         }
         if(hasPosters){
-          headerDiv.querySelector('.chevron:not(.link-arrow):not(.greet-chevron)').addEventListener('click', function(ev){
+          headerDiv.querySelector('.chevron:not(.link-arrow):not(.greet-chevron):not(.wg-chevron)').addEventListener('click', function(ev){
             ev.stopPropagation();
             var wasOpen = !!expandedSessions[id];
             expandedSessions = {};
@@ -1648,6 +1655,19 @@
           headerDiv.querySelector('.greet-chevron').addEventListener('click', function(ev){
             ev.stopPropagation();
             var key = id + '_greet';
+            var wasOpen = !!expandedSessions[key];
+            expandedSessions = {};
+            if(!wasOpen){
+              expandedSessions[key] = true;
+              delete expandedInfoAbstract[id];
+            }
+            rerenderPreservingScroll('row-' + id);
+          });
+        }
+        if(hasWorkingGroups){
+          headerDiv.querySelector('.wg-chevron').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            var key = id + '_wg';
             var wasOpen = !!expandedSessions[key];
             expandedSessions = {};
             if(!wasOpen){
@@ -1723,6 +1743,33 @@
             });
           });
           card.appendChild(posterList);
+        }
+        if(hasWorkingGroups && infoWorkingGroupsOpen){
+          var wgList = document.createElement('div');
+          wgList.className = 'talk-list';
+          block.workingGroups.forEach(function(wg){
+            var wgRow = document.createElement('div');
+            wgRow.className = 'talk-row';
+            var wgName = (lang === 'en' && wg.name_en) ? wg.name_en : wg.name;
+            var wgRoomClickable = wg.room && !!FLOORPLAN_ROOM_MAP[wg.room];
+            wgRow.innerHTML =
+              '<div class="talk-main" style="cursor:default;">' +
+                '<div class="talk-time">' + esc(wg.date) + ', ' + esc(wg.time) + '</div>' +
+                '<div class="talk-title">' + esc(wgName) + '</div>' +
+                '<div class="talk-authors">' +
+                  (wg.room ? '<span class="' + (wgRoomClickable ? 'room-link' : '') + '" data-wg-room="' + esc(wg.room) + '">' + esc(wg.room) + '</span>' + (wg.contact ? '  \u00b7  ' : '') : '') +
+                  esc(wg.contact || '') +
+                '</div>' +
+              '</div>';
+            wgList.appendChild(wgRow);
+          });
+          card.appendChild(wgList);
+          wgList.querySelectorAll('[data-wg-room].room-link').forEach(function(el){
+            el.addEventListener('click', function(ev){
+              ev.stopPropagation();
+              showFloorplanRoom(el.getAttribute('data-wg-room'));
+            });
+          });
         }
       } else {
         if(blockIsNow){
