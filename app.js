@@ -51,8 +51,6 @@
       showPostersLabel: 'Poster anzeigen',
       hidePostersLabel: 'Poster ausblenden',
       liveNowHeading: 'Was läuft gerade?',
-      nextUpLabel: 'Nächster Termin:',
-      backToProgramLabel: '\u2190 Zurück zu deinem Plan',
       greetedByPrefix: 'Begrüßung durch',
       showGreetingsLabel: 'Grußworte anzeigen',
       hideGreetingsLabel: 'Grußworte ausblenden',
@@ -203,8 +201,6 @@
       showPostersLabel: 'Show posters',
       hidePostersLabel: 'Hide posters',
       liveNowHeading: "What's happening now?",
-      nextUpLabel: 'Next up:',
-      backToProgramLabel: '\u2190 Back to your plan',
       greetedByPrefix: 'Welcome remarks by',
       showGreetingsLabel: 'Show welcome remarks',
       hideGreetingsLabel: 'Hide welcome remarks',
@@ -632,7 +628,6 @@
     });
     if(target === 'plan') renderPlan();
     window.scrollTo(0,0);
-    safeRun(adjustBackToTopForNextUpBar, 'adjustBackToTopForNextUpBar');
   }
   function getDefaultProgrammDay(){
     var todayMatch = DATA.programm.find(function(d){ return isToday(d.id); });
@@ -1959,7 +1954,6 @@
       list.appendChild(card);
     });
     safeRun(renderLiveNowBanner, 'renderLiveNowBanner');
-    safeRun(renderNextUpBar, 'renderNextUpBar');
   }
 
   // ---------- "Jetzt live" jump banner ----------
@@ -2003,104 +1997,6 @@
       }, 60);
     });
   }
-
-  // ---------- "Als Nächstes" bar (next item in the personal plan) ----------
-  function computeNextUpItem(){
-    if(!plan || !plan.length) return null;
-    var now = nowDate();
-    var TEN_MIN_MS = 10 * 60 * 1000;
-    var candidates = [];
-    plan.forEach(function(p){
-      var r = blockDateRange(p.dayId, p.time);
-      if(!r) return;
-      if(r.start > now && (r.start - now) <= TEN_MIN_MS){
-        candidates.push({ item: p, start: r.start });
-      }
-    });
-    if(!candidates.length) return null;
-    candidates.sort(function(a, b){ return a.start - b.start; });
-    return candidates[0].item;
-  }
-  var showBackToPlanBtn = false;
-  function findJumpTargetForPlanItem(item){
-    return searchIndex.find(function(entry){
-      return entry.dayId === item.dayId && (entry.jumpId === item.id || entry.sid === item.id);
-    }) || null;
-  }
-  function renderNextUpBar(){
-    var container = document.getElementById('nextUpBar');
-    if(!container) return;
-    var nav = document.querySelector('nav.bottom-nav');
-    var item = computeNextUpItem();
-    if(!item){ container.innerHTML = ''; adjustBackToTopForNextUpBar(); return; }
-    var navHeight = nav ? nav.offsetHeight : 56;
-    var timeMatch = (item.time || '').match(/\d{1,2}:\d{2}/);
-    var timeLabel = timeMatch ? timeMatch[0] : (item.time || '');
-    var roomBtn = (item.room && FLOORPLAN_ROOM_MAP[item.room]) ?
-      '<button type="button" class="next-up-room-btn" id="nextUpRoomBtn" aria-label="' + esc(t('showOnMapLabel')) + '" title="' + esc(t('showOnMapLabel')) + '">' +
-        '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>' +
-      '</button>' : '';
-    container.innerHTML =
-      '<div class="next-up-bar" id="nextUpBarInner" style="bottom:' + navHeight + 'px;">' +
-        '<span class="next-up-label">' + esc(t('nextUpLabel')) + '</span>' +
-        '<span class="next-up-detail">' + esc(timeLabel) + ' \u00b7 ' + esc(item.title) + (item.room ? ' \u00b7 ' + esc(item.room) : '') + '</span>' +
-        roomBtn +
-        '<span class="next-up-arrow">&#8594;</span>' +
-      '</div>';
-    document.getElementById('nextUpBarInner').addEventListener('click', function(){
-      var target = findJumpTargetForPlanItem(item);
-      if(target){
-        showBackToPlanBtn = true;
-        jumpToEntry(target);
-        renderBackToPlanButton();
-      } else {
-        switchToView('plan');
-      }
-    });
-    if(roomBtn){
-      document.getElementById('nextUpRoomBtn').addEventListener('click', function(ev){
-        ev.stopPropagation();
-        showFloorplanRoom(item.room);
-      });
-    }
-    adjustBackToTopForNextUpBar();
-  }
-
-  // Small pill shown after jumping from the "next up" bar into the Programme
-  // tab, so the person can easily find their way back to "Mein Plan"
-  // afterwards instead of having to navigate there manually.
-  function renderBackToPlanButton(){
-    var existing = document.getElementById('backToPlanBtn');
-    if(existing) existing.remove();
-    if(!showBackToPlanBtn) return;
-    var btn = document.createElement('button');
-    btn.id = 'backToPlanBtn';
-    btn.type = 'button';
-    btn.className = 'back-to-plan-btn';
-    btn.textContent = t('backToProgramLabel');
-    btn.addEventListener('click', function(){
-      showBackToPlanBtn = false;
-      btn.remove();
-      switchToView('plan');
-    });
-    document.body.appendChild(btn);
-  }
-
-
-  // Keeps the "back to top" button above the "next up" bar when it's showing,
-  // instead of overlapping it — otherwise the arrow button would sit right
-  // on top of the bar's clickable area.
-  function adjustBackToTopForNextUpBar(){
-    var btn = document.getElementById('backToTopBtn');
-    var barInner = document.getElementById('nextUpBarInner');
-    if(!btn) return;
-    if(barInner){
-      btn.style.bottom = (barInner.offsetHeight + parseFloat(getComputedStyle(barInner).bottom || 0) + 12) + 'px';
-    } else {
-      btn.style.bottom = '';
-    }
-  }
-
 
   // ---------- Search ----------
   var searchIndex = [];
@@ -3062,6 +2958,11 @@
     return candidates[0];
   }
 
+  function findJumpTargetForPlanItem(item){
+    return searchIndex.find(function(entry){
+      return entry.dayId === item.dayId && (entry.jumpId === item.id || entry.sid === item.id);
+    }) || null;
+  }
   function renderNextUp(){
     var box = document.getElementById('nextUpBox');
     var next = computeNextUp();
@@ -3070,12 +2971,28 @@
     var diffMin = Math.round((next.start - now) / 60000);
     if(diffMin > 15){ box.innerHTML = ''; return; }
     var whenText = lang === 'en' ? ('in ' + diffMin + ' min') : ('in ' + diffMin + ' Min');
+    var roomClickable = next.item.room && !!FLOORPLAN_ROOM_MAP[next.item.room];
     box.innerHTML =
-      '<div class="next-up-card">' +
+      '<div class="next-up-card" id="nextUpCard">' +
         '<div class="next-up-label">' + t('nextUp') + '</div>' +
         '<div class="next-up-title">' + esc(next.item.title) + '</div>' +
-        '<div class="next-up-meta">' + esc(whenText) + (next.item.room ? ' · ' + esc(next.item.room) : '') + '</div>' +
+        '<div class="next-up-meta">' + esc(whenText) + (next.item.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" id="nextUpCardRoom">' + esc(next.item.room) + '</span>' : '') + '</div>' +
       '</div>';
+    var cardEl = document.getElementById('nextUpCard');
+    cardEl.style.cursor = 'pointer';
+    cardEl.addEventListener('click', function(){
+      var target = findJumpTargetForPlanItem(next.item);
+      if(target){
+        switchToView('programm');
+        jumpToEntry(target);
+      }
+    });
+    if(roomClickable){
+      document.getElementById('nextUpCardRoom').addEventListener('click', function(ev){
+        ev.stopPropagation();
+        showFloorplanRoom(next.item.room);
+      });
+    }
   }
 
   function conflictLabel(item){
