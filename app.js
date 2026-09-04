@@ -2056,7 +2056,11 @@
       renderCategoryFilter();
       renderProgrammList();
       setTimeout(function(){
-        var el = targetRowId ? document.getElementById(targetRowId) : document.querySelector('#programmList .now-live');
+        var rowEl = targetRowId ? document.getElementById(targetRowId) : null;
+        // Scroll the enclosing .now-live card into view (not just the specific
+        // session row) — that's where the "Läuft gerade" badge sits, at the
+        // top of the shared card, above the individual session rows.
+        var el = (rowEl && rowEl.closest('.card')) || document.querySelector('#programmList .now-live');
         if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 60);
     });
