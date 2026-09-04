@@ -51,7 +51,7 @@
       showPostersLabel: 'Poster anzeigen',
       hidePostersLabel: 'Poster ausblenden',
       showGreetingsLabel: 'Grußworte anzeigen',
-      liveNowHeading: 'Jetzt live',
+      liveNowHeading: 'Was läuft gerade?',
       nextUpLabel: 'Als Nächstes in deinem Plan:',
       hideGreetingsLabel: 'Grußworte ausblenden',
       showSpeakersLabel: 'Speaker anzeigen',
@@ -201,7 +201,7 @@
       showPostersLabel: 'Show posters',
       hidePostersLabel: 'Hide posters',
       showGreetingsLabel: 'Show welcome remarks',
-      liveNowHeading: 'Live now',
+      liveNowHeading: "What's happening now?",
       nextUpLabel: 'Up next in your plan:',
       hideGreetingsLabel: 'Hide welcome remarks',
       showSpeakersLabel: 'Show speakers',
@@ -1968,67 +1968,45 @@
     safeRun(renderNextUpBar, 'renderNextUpBar');
   }
 
-  // ---------- "Jetzt live" overview ----------
-  var liveNowOpen = false;
-  var LIVE_NOW_ROOM_ORDER = ['HS 0/115', 'HS 0/110', 'HS 0/307', 'HS 0/310', 'HS 0/311', 'HS 0/313', 'SR 1/304', 'SR 1/305', 'SR 1/306'];
-  function computeLiveNowItems(){
+  // ---------- "Jetzt live" jump banner ----------
+  function isSomethingLiveNow(){
     var today = DATA.programm.find(function(d){ return isToday(d.id); });
-    if(!today) return [];
-    var items = [];
-    today.blocks.forEach(function(block){
+    if(!today) return false;
+    return today.blocks.some(function(block){
       if(block.type === 'parallel'){
-        (block.sessions || []).forEach(function(s){
-          if(s.room && isBlockNow(today.id, block.time)){
-            items.push({ room: s.room, code: s.code || '', title: s.title, title_en: s.title_en });
-          }
+        return (block.sessions || []).some(function(s){
+          return s.room && isBlockNow(today.id, block.time);
         });
       } else if(block.type === 'info'){
-        if(block.room && block.room !== 'Foyer' && block.title !== 'Anmeldung' && isBlockNow(today.id, block.time)){
-          items.push({ room: block.room, code: block.tag || '', title: block.title, title_en: block.title_en });
-        }
+        return block.room && block.room !== 'Foyer' && block.title !== 'Anmeldung' && isBlockNow(today.id, block.time);
       }
+      return false;
     });
-    items.sort(function(a, b){
-      var ia = LIVE_NOW_ROOM_ORDER.indexOf(a.room), ib = LIVE_NOW_ROOM_ORDER.indexOf(b.room);
-      if(ia === -1) ia = 999;
-      if(ib === -1) ib = 999;
-      if(ia !== ib) return ia - ib;
-      return (a.room || '').localeCompare(b.room || '');
-    });
-    return items;
   }
   function renderLiveNowBanner(){
     var container = document.getElementById('liveNowBanner');
     if(!container) return;
-    var items = computeLiveNowItems();
-    if(!items.length){ container.innerHTML = ''; return; }
-    var itemsHtml = items.map(function(it, idx){
-      var title = (lang === 'en' && it.title_en) ? it.title_en : it.title;
-      var roomClickable = !!FLOORPLAN_ROOM_MAP[it.room];
-      return '<div class="live-now-item">' +
-        '<span class="live-now-room' + (roomClickable ? ' room-link' : '') + '" data-live-room-idx="' + idx + '">' + esc(it.room) + '</span>' +
-        '<span>' + (it.code ? '<span class="session-tag">' + esc(it.code) + '</span> ' : '') + esc(title) + '</span>' +
-      '</div>';
-    }).join('');
+    if(!isSomethingLiveNow()){ container.innerHTML = ''; return; }
     container.innerHTML =
-      '<div class="live-now-banner">' +
-        '<div class="live-now-header" id="liveNowToggle">' +
-          '<span class="live-dot-blink"></span>' +
-          '<span class="live-now-header-text">' + esc(t('liveNowHeading')) + '</span>' +
-          '<span class="chevron' + (liveNowOpen ? ' open' : '') + '">&#9656;</span>' +
-        '</div>' +
-        (liveNowOpen ? '<div class="live-now-list">' + itemsHtml + '</div>' : '') +
+      '<div class="live-now-banner" id="liveNowJump">' +
+        '<span class="live-dot-blink"></span>' +
+        '<span class="live-now-header-text">' + esc(t('liveNowHeading')) + '</span>' +
+        '<span class="live-now-arrow">&#8594;</span>' +
       '</div>';
-    document.getElementById('liveNowToggle').addEventListener('click', function(){
-      liveNowOpen = !liveNowOpen;
-      renderLiveNowBanner();
-    });
-    container.querySelectorAll('.live-now-room.room-link').forEach(function(el){
-      el.addEventListener('click', function(ev){
-        ev.stopPropagation();
-        var idx = parseInt(el.getAttribute('data-live-room-idx'), 10);
-        showFloorplanRoom(items[idx].room);
-      });
+    document.getElementById('liveNowJump').addEventListener('click', function(){
+      var today = DATA.programm.find(function(d){ return isToday(d.id); });
+      if(!today) return;
+      currentDay = today.id;
+      currentCategoryFilter = 'alle';
+      expandedSessions = {};
+      expandedTalks = {};
+      renderDayTabs();
+      renderCategoryFilter();
+      renderProgrammList();
+      setTimeout(function(){
+        var el = document.querySelector('#programmList .now-live');
+        if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 60);
     });
   }
 
