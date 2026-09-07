@@ -2588,6 +2588,7 @@
         '</div>' +
         '<div style="display:flex;align-items:flex-start;gap:4px;">' +
           posterIconBtn(e) +
+          routeIconBtn(e) +
           (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '" title="' + esc(isOpen ? t('hideDetailsLabel') : t('showDetailsLabel')) + '">&#9656;</div>' : '') +
         '</div>';
       card.appendChild(header);
@@ -2596,6 +2597,7 @@
         header.style.cursor = 'pointer';
         header.addEventListener('click', function(ev){
           if(ev.target.closest('.poster-icon-btn')) return;
+          if(ev.target.closest('[data-route-title]')) return;
           var wasOpen = !!expandedExk[e.id];
           expandedExk = {};
           if(!wasOpen){ expandedExk[e.id] = true; }
@@ -3841,6 +3843,11 @@
           if(b.title === routeTitle) found = b;
         });
       });
+      if(!found && DATA.exkursionen){
+        DATA.exkursionen.forEach(function(e){
+          if(e.title === routeTitle) found = e;
+        });
+      }
       if(found){
         var html = lang === 'en' ? (found.routeDetails_en || found.routeDetails) : (found.routeDetails || found.routeDetails_en);
         document.getElementById('routeOverlayContent').innerHTML = html;
