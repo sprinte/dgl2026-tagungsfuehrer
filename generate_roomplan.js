@@ -17,7 +17,7 @@
  * Optional lassen sich die Pfade überschreiben:
  *   node generate_raumbelegungsplan.js [app-data.js] [app.js] [logo.png] [outputDir]
  *
- * Ausgabe: Raumbelegungsplan_<tag>.docx (+ .pdf, falls LibreOffice
+ * Ausgabe: DGL2026_Raumbelegungsplan_<Tag>.docx (+ .pdf, falls LibreOffice
  * installiert ist) im gewählten Ausgabeordner.
  *
  * Voraussetzung: `npm install docx` im selben Ordner (einmalig).
@@ -88,7 +88,7 @@ const SOFFICE_CANDIDATES = ARG[4] ? [ARG[4]] : [
 
 const ROOM_ORDER = ['HS 0/115', 'HS 0/110', 'HS 0/307', 'HS 0/310', 'HS 0/311', 'HS 0/313', 'SR 1/304', 'SR 1/305', 'SR 1/306'];
 const EXCLUDED_ROOMS = new Set(['Foyer']);
-const DAY_FILE_SUFFIX = { 'Montag': 'montag', 'Dienstag': 'dienstag', 'Mittwoch': 'mittwoch', 'Donnerstag': 'donnerstag' };
+const DAY_FILE_SUFFIX = { 'Montag': 'Montag', 'Dienstag': 'Dienstag', 'Mittwoch': 'Mittwoch', 'Donnerstag': 'Donnerstag' };
 
 const FONT = 'Poppins';
 const BRAND_BLUE = '003F75';
@@ -440,14 +440,14 @@ async function main(){
     const sessionCount = Object.values(rooms).reduce((sum, arr) => sum + arr.length, 0);
     const doc = buildDocForDay(rooms, logoBuf);
     const buf = await fixPageNumberFont(await Packer.toBuffer(doc));
-    const suffix = DAY_FILE_SUFFIX[dayLabel] || dayLabel.toLowerCase();
-    const docxPath = path.join(OUTPUT_DIR, `Raumbelegungsplan_${suffix}.docx`);
+    const suffix = DAY_FILE_SUFFIX[dayLabel] || dayLabel;
+    const docxPath = path.join(OUTPUT_DIR, `DGL2026_Raumbelegungsplan_${suffix}.docx`);
     fs.writeFileSync(docxPath, buf);
     console.log(`${dayLabel}: ${roomCount} Räume, ${sessionCount} Sessions -> ${path.basename(docxPath)} (${buf.length} Bytes)`);
 
     const ok = tryConvertToPdf(docxPath, OUTPUT_DIR);
     if(pdfAvailable === null) pdfAvailable = ok;
-    if(ok) console.log(`  -> PDF erzeugt: Raumbelegungsplan_${suffix}.pdf`);
+    if(ok) console.log(`  -> PDF erzeugt: DGL2026_Raumbelegungsplan_${suffix}.pdf`);
   }
 
   if(pdfAvailable === false){
