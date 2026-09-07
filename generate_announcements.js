@@ -280,6 +280,7 @@ async function main(){
   const ok = tryConvertToPdf(docxPath, OUTPUT_DIR);
   if(ok){
     console.log(`-> PDF erzeugt: ${OUTPUT_BASENAME}.pdf`);
+    fs.unlinkSync(docxPath);
   } else {
     console.warn(`\nHinweis: LibreOffice wurde unter keinem der bekannten Pfade gefunden (${SOFFICE_CANDIDATES.join(', ')}) — es wurde nur die .docx-Datei erzeugt, kein PDF.\nFalls LibreOffice woanders liegt, gib den vollen Pfad zu soffice.exe als 4. Argument mit (siehe Kommentar im Skript-Kopf).`);
   }

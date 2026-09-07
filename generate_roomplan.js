@@ -455,7 +455,10 @@ async function main(){
 
     const ok = tryConvertToPdf(docxPath, OUTPUT_DIR);
     if(pdfAvailable === null) pdfAvailable = ok;
-    if(ok) console.log(`  -> PDF erzeugt: DGL2026_Raumbelegungsplan_${suffix}.pdf`);
+    if(ok){
+      console.log(`  -> PDF erzeugt: DGL2026_Raumbelegungsplan_${suffix}.pdf`);
+      fs.unlinkSync(docxPath);
+    }
   }
 
   if(pdfAvailable === false){
