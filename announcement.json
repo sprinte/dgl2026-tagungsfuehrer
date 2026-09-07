@@ -120,6 +120,16 @@
     "message_en": "The conference dinner starts at 7 pm. See you there!"
   },
   {
+    "id": "gepaeck-hinweis",
+    "enabled": true,
+    "begins": "2026-09-16T20:00:00",
+    "expires": "2026-09-17T08:40:00",
+    "title_de": "Gepäckaufbewahrung",
+    "title_en": "Luggage storage",
+    "message_de": "Du kannst dein Gepäck am Donnerstag bis zum Ende der Tagung im Raum SR 1/308 zwischenlagern.",
+    "message_en": "On thursday, you can store your luggage in room SR 1/308 until the end of the conference."
+  },
+  {
     "id": "upload-reminder-mo",
     "enabled": true,
     "begins": "2026-09-14T08:00:00",
@@ -144,16 +154,6 @@
     "enabled": true,
     "begins": "2026-09-16T08:00:00",
     "expires": "2026-09-16T08:40:00",
-    "title_de": "Vortrag hochladen nicht vergessen",
-    "title_en": "Don't forget to upload your talk",
-    "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
-    "message_en": "If you're giving a talk today and haven't uploaded your presentation yet: you can do that easily in the Info tab under \"Upload your presentation\"."
-  },
-  {
-    "id": "upload-reminder-do",
-    "enabled": true,
-    "begins": "2026-09-17T08:00:00",
-    "expires": "2026-09-17T08:40:00",
     "title_de": "Vortrag hochladen nicht vergessen",
     "title_en": "Don't forget to upload your talk",
     "message_de": "Falls du heute einen Vortrag hältst und deine Präsentation noch nicht hochgeladen hast: Das geht ganz einfach im Info-Tab unter „Upload deiner Präsentation\".",
