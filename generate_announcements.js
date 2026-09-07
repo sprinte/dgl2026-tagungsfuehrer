@@ -20,7 +20,7 @@
  * entstehen die Dateien in .../dgl2026-tagungsfuehrer/.
  *
  * Optional lassen sich die Pfade überschreiben:
- *   node generate_announcements_pdf.js [outputDir] [announcement.json] [logo.png]
+ *   node generate_announcements_pdf.js [outputDir] [announcement.json] [logo.png] [soffice.exe]
  *
  * Ausgabe: DGL2026_Ankündigungen_App.docx (+ .pdf, falls LibreOffice
  * installiert ist) im Ausgabeordner.
@@ -64,7 +64,7 @@ const OUTPUT_DIR   = path.resolve(ARG[0] || path.dirname(HERE));
 const DATA_PATH    = path.resolve(ARG[1] || path.join(HERE, 'announcement.json'));
 const LOGO_PATH     = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_9x22_trans.png'));
 
-const SOFFICE_CANDIDATES = [
+const SOFFICE_CANDIDATES = ARG[3] ? [ARG[3]] : [
   'soffice',
   'C:\\Users\\aoprei\\LibreOfficePortable\\App\\libreoffice\\program\\soffice.exe'
 ];
@@ -120,9 +120,11 @@ function formatTimeRange(a){
 
 // ------------------------------------------------------------ document --
 function titleBlock(logoBuf){
+  const now = new Date();
+  const stand = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + now.getFullYear();
   return new Table({
     width: { size: TABLE_WIDTH, type: WidthType.DXA },
-    columnWidths: [TABLE_WIDTH - 5700, 5700],
+    columnWidths: [TABLE_WIDTH - 5000, 5000],
     borders: {
       top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 16, color: BRAND_BLUE, space: 8 },
       left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
@@ -130,17 +132,17 @@ function titleBlock(logoBuf){
     },
     rows: [ new TableRow({ children: [
       new TableCell({
-        width: { size: TABLE_WIDTH - 5700, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
+        width: { size: TABLE_WIDTH - 5000, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
         children: [
           new Paragraph({ children: [new TextRun({ text: 'In-App-Ankündigungen', bold: true, size: 56, color: BRAND_BLUE, font: FONT })] }),
-          new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: '41. DGL-Jahrestagung & 16. WRHC · Übersicht nach Tag', size: 22, color: MUTED, font: FONT })] })
+          new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: 'Stand: ' + stand, size: 20, color: MUTED, font: FONT })] })
         ]
       }),
       new TableCell({
-        width: { size: 5700, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
+        width: { size: 5000, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: logoBuf ? [new ImageRun({ data: logoBuf, transformation: { width: 360, height: 147 }, type: 'png' })] : [] })]
+        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: logoBuf ? [new ImageRun({ data: logoBuf, transformation: { width: 306, height: 125 }, type: 'png' })] : [] })]
       })
     ] }) ]
   });
@@ -279,7 +281,7 @@ async function main(){
   if(ok){
     console.log(`-> PDF erzeugt: ${OUTPUT_BASENAME}.pdf`);
   } else {
-    console.warn(`\nHinweis: LibreOffice wurde unter keinem der bekannten Pfade gefunden (${SOFFICE_CANDIDATES.join(', ')}) — es wurde nur die .docx-Datei erzeugt, kein PDF.\nFalls LibreOffice woanders liegt, gib den vollen Pfad zu soffice.exe als 3. Argument mit (siehe Kommentar im Skript-Kopf).`);
+    console.warn(`\nHinweis: LibreOffice wurde unter keinem der bekannten Pfade gefunden (${SOFFICE_CANDIDATES.join(', ')}) — es wurde nur die .docx-Datei erzeugt, kein PDF.\nFalls LibreOffice woanders liegt, gib den vollen Pfad zu soffice.exe als 4. Argument mit (siehe Kommentar im Skript-Kopf).`);
   }
   console.log('\nFertig.');
 }

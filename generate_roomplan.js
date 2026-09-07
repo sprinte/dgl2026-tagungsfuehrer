@@ -240,6 +240,11 @@ function bodyCell(text, width, opts){
   });
 }
 
+const STAND_DATE = (() => {
+  const now = new Date();
+  return String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + now.getFullYear();
+})();
+
 function roomHeadingBlock(room, logoBuf){
   return new Table({
     width: { size: TABLE_WIDTH, type: WidthType.DXA },
@@ -253,7 +258,10 @@ function roomHeadingBlock(room, logoBuf){
       new TableCell({
         width: { size: TABLE_WIDTH - 5700, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-        children: [new Paragraph({ children: [new TextRun({ text: room, bold: true, size: 64, color: BRAND_BLUE, font: FONT })] })]
+        children: [
+          new Paragraph({ children: [new TextRun({ text: room, bold: true, size: 64, color: BRAND_BLUE, font: FONT })] }),
+          new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: 'Stand: ' + STAND_DATE, size: 20, color: MUTED, font: FONT })] })
+        ]
       }),
       new TableCell({
         width: { size: 5700, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
