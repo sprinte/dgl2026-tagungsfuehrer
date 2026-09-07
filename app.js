@@ -2584,8 +2584,10 @@
           '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
           (meetingPoint ? '<span class="badge-meeting">' + esc(meetingLabel) + ' ' + esc(meetingPoint) + '</span>' : '') +
           '<span class="badge-cost">' + esc(cost) + '</span>' +
-          (meetingMapsUrl ? '<div style="margin-top:8px;"><a class="pill-link" href="' + esc(meetingMapsUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + t('openMaps') + '</a></div>' : '') +
-          ((e.routeDetails || e.routeDetails_en) ? '<div style="margin-top:8px;"><button type="button" class="pill-link" data-route-title="' + esc(e.title) + '" onclick="event.stopPropagation()">' + esc(t('routeDetailsLabel')) + '</button></div>' : '') +
+          ((meetingMapsUrl || e.routeDetails || e.routeDetails_en) ? '<div class="lunch-links">' +
+            (meetingMapsUrl ? '<a class="pill-link" href="' + esc(meetingMapsUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + t('openMaps') + '</a>' : '') +
+            ((e.routeDetails || e.routeDetails_en) ? '<button type="button" class="pill-link" data-route-title="' + esc(e.title) + '">' + esc(t('routeDetailsLabel')) + '</button>' : '') +
+          '</div>' : '') +
         '</div>' +
         '<div style="display:flex;align-items:flex-start;gap:4px;">' +
           posterIconBtn(e) +
