@@ -2585,10 +2585,10 @@
           (meetingPoint ? '<span class="badge-meeting">' + esc(meetingLabel) + ' ' + esc(meetingPoint) + '</span>' : '') +
           '<span class="badge-cost">' + esc(cost) + '</span>' +
           (meetingMapsUrl ? '<div style="margin-top:8px;"><a class="pill-link" href="' + esc(meetingMapsUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + t('openMaps') + '</a></div>' : '') +
+          ((e.routeDetails || e.routeDetails_en) ? '<div style="margin-top:8px;"><button type="button" class="pill-link" data-route-title="' + esc(e.title) + '" onclick="event.stopPropagation()">' + esc(t('routeDetailsLabel')) + '</button></div>' : '') +
         '</div>' +
         '<div style="display:flex;align-items:flex-start;gap:4px;">' +
           posterIconBtn(e) +
-          routeIconBtn(e) +
           (hasDetails ? '<div class="chevron' + (isOpen ? ' open' : '') + '" title="' + esc(isOpen ? t('hideDetailsLabel') : t('showDetailsLabel')) + '">&#9656;</div>' : '') +
         '</div>';
       card.appendChild(header);
