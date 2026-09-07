@@ -2584,7 +2584,7 @@
           '<div class="exk-meta">' + leitungLabel + ' ' + esc(e.leader) + '</div>' +
           (meetingPoint ? '<span class="badge-meeting">' + esc(meetingLabel) + ' ' + esc(meetingPoint) + '</span>' : '') +
           '<span class="badge-cost">' + esc(cost) + '</span>' +
-          (meetingMapsUrl ? '<div><a class="pill-link" href="' + esc(meetingMapsUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + t('openMaps') + '</a></div>' : '') +
+          (meetingMapsUrl ? '<div style="margin-top:8px;"><a class="pill-link" href="' + esc(meetingMapsUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + t('openMaps') + '</a></div>' : '') +
         '</div>' +
         '<div style="display:flex;align-items:flex-start;gap:4px;">' +
           posterIconBtn(e) +
