@@ -64,7 +64,7 @@ const BORDER_LIGHT = 'E4E4E4';
 const PAGE_W = 11907, PAGE_H = 16840; // A4, portrait, DXA
 const MARGIN = 900;
 const TABLE_WIDTH = PAGE_W - MARGIN * 2;
-const OUTPUT_BASENAME = 'DGL2026_Session-Register';
+const OUTPUT_BASENAME = 'DGL2026_Sessionliste';
 
 const DAY_ORDER = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
 
