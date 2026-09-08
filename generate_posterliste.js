@@ -2,7 +2,7 @@
 /**
  * generate_posterboards.js
  * ------------------------------------------------------------------
- * Erzeugt eine Poster-Board-Übersicht (Word + PDF) aus app-data.js:
+ * Erzeugt eine Posterliste (Word + PDF) aus app-data.js:
  * pro Postersession (1 und 2) eine Liste aller Poster, sortiert nach
  * Boardnummer (nicht alphabetisch) — gedacht als Aufbau-/Aushänge-
  * Hilfe fürs Team.
@@ -63,7 +63,7 @@ const BORDER_LIGHT = 'E4E4E4';
 const PAGE_W = 11907, PAGE_H = 16840; // A4, portrait, DXA
 const MARGIN = 900;
 const TABLE_WIDTH = PAGE_W - MARGIN * 2;
-const OUTPUT_BASENAME = 'DGL2026_Posterboards';
+const OUTPUT_BASENAME = 'DGL2026_Posterliste';
 
 const STAND_DATE = (() => {
   const now = new Date();
@@ -119,7 +119,7 @@ function titleBlock(logoBuf){
         width: { size: TABLE_WIDTH - 5000, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
         children: [
-          new Paragraph({ children: [new TextRun({ text: 'Poster-Board-Übersicht', bold: true, size: 52, color: BRAND_BLUE, font: FONT })] }),
+          new Paragraph({ children: [new TextRun({ text: 'Posterliste', bold: true, size: 52, color: BRAND_BLUE, font: FONT })] }),
           new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: 'Stand: ' + STAND_DATE, size: 20, color: MUTED, font: FONT })] })
         ]
       }),
@@ -140,31 +140,63 @@ function sessionHeading(sess){
   });
 }
 
+function parseBoard(board){
+  const b = (board || '').trim();
+  const m = b.match(/^(\d+)\s*(?:\(([^)]+)\))?$/);
+  if(!m) return { num: b || '—', loc: '' };
+  return { num: m[1], loc: m[2] || '' };
+}
+
+const COL_NUM = 900, COL_LOC = 2000;
+
 function posterRow(poster){
-  const boardCell = new TableCell({
-    width: { size: 1400, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160, right: 160 },
+  const { num, loc } = parseBoard(poster.board);
+  const numCell = new TableCell({
+    width: { size: COL_NUM, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160, right: 120 },
     borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-    children: [new Paragraph({ children: [new TextRun({ text: poster.board || '—', bold: true, size: 20, color: BRAND_BLUE, font: FONT })] })]
+    children: [new Paragraph({ children: [new TextRun({ text: num, bold: true, size: 20, color: BRAND_BLUE, font: FONT })] })]
+  });
+  const locCell = new TableCell({
+    width: { size: COL_LOC, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160, right: 160 },
+    borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+    children: [new Paragraph({ children: [new TextRun({ text: loc, size: 18, color: MUTED, font: FONT })] })]
   });
   const contentCell = new TableCell({
-    width: { size: TABLE_WIDTH - 1400, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160 },
+    width: { size: TABLE_WIDTH - COL_NUM - COL_LOC, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160 },
     borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
     children: [
       new Paragraph({ children: [new TextRun({ text: poster.title || '', bold: true, size: 20, color: '1A1A18', font: FONT })] }),
       new Paragraph({ spacing: { before: 40 }, children: [new TextRun({ text: poster.authorsDisplay || poster.authors || '', size: 18, color: MUTED, font: FONT })] })
     ]
   });
-  return new TableRow({ children: [boardCell, contentCell] });
+  return new TableRow({ children: [numCell, locCell, contentCell] });
 }
 
 function footerBlock(){
   return new Footer({ children: [new Paragraph({
     alignment: AlignmentType.CENTER,
     children: [
-      new TextRun({ text: 'DGL 2026 · Poster-Board-Übersicht · Seite ', size: 16, color: MUTED, font: FONT }),
+      new TextRun({ text: 'DGL 2026 · Posterliste · Seite ', size: 16, color: MUTED, font: FONT }),
       new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT })
     ]
   })] });
+}
+
+function tableHeaderRow(){
+  const cellStyle = (text, width) => new TableCell({
+    width: { size: width, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER,
+    margins: { top: 60, bottom: 60, right: 120 },
+    borders: { bottom: { style: BorderStyle.SINGLE, size: 8, color: BRAND_BLUE } },
+    children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 16, color: MUTED, font: FONT })] })]
+  });
+  return new TableRow({
+    tableHeader: true,
+    children: [
+      cellStyle('Nr.', COL_NUM),
+      cellStyle('Ort', COL_LOC),
+      cellStyle('Titel', TABLE_WIDTH - COL_NUM - COL_LOC)
+    ]
+  });
 }
 
 function buildDoc(posterSessions, logoBuf){
@@ -174,13 +206,13 @@ function buildDoc(posterSessions, logoBuf){
     children.push(sessionHeading(sess));
     children.push(new Table({
       width: { size: TABLE_WIDTH, type: WidthType.DXA },
-      columnWidths: [1400, TABLE_WIDTH - 1400],
+      columnWidths: [COL_NUM, COL_LOC, TABLE_WIDTH - COL_NUM - COL_LOC],
       borders: {
         top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
         left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
         insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE }
       },
-      rows: sess.posters.map(posterRow)
+      rows: [ tableHeaderRow(), ...sess.posters.map(posterRow) ]
     }));
   });
 
