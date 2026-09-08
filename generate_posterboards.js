@@ -1,33 +1,32 @@
 #!/usr/bin/env node
 /**
- * generate_announcements_pdf.js
+ * generate_posterboards.js
  * ------------------------------------------------------------------
- * Erzeugt eine übersichtliche, nach Tag gruppierte Übersicht (Word +
- * PDF) aller aktiven In-App-Ankündigungen direkt aus announcement.json
- * der DGL-2026-Tagungsführer-App.
+ * Erzeugt eine Poster-Board-Übersicht (Word + PDF) aus app-data.js:
+ * pro Postersession (1 und 2) eine Liste aller Poster, sortiert nach
+ * Boardnummer (nicht alphabetisch) — gedacht als Aufbau-/Aushänge-
+ * Hilfe fürs Team.
+ *
+ * Quelle: die "Postersession 1"/"Postersession 2"-Infoblöcke in
+ * app-data.js (Tag/Zeit der eigentlichen Postersession, nicht der
+ * Speed Talks), jeweils mit deren posters[]-Array (board, title,
+ * authorsDisplay, institutions).
  *
  * WIRD NIE AUTOMATISCH AUSGEFÜHRT — nur wenn du es manuell startest:
  *
- *   node generate_announcements_pdf.js
+ *   node generate_posterboards.js
  *
- * Erwartet standardmäßig, dass diese Dateien im selben Ordner liegen:
- *   - announcement.json
- *   - Tagungslogo_9x22_trans.png
- *
+ * Erwartet im selben Ordner: app-data.js, Tagungslogo_9x22_trans.png
  * Standardmäßig landet die Ausgabe in einem Unterordner "output" direkt im
  * selben Ordner wie dieses Skript (wird automatisch angelegt, falls nicht
  * vorhanden).
  *
- * Optional lassen sich die Pfade überschreiben:
- *   node generate_announcements_pdf.js [outputDir] [announcement.json] [logo.png] [soffice.exe]
+ * Optional überschreibbar:
+ *   node generate_posterboards.js [outputDir] [app-data.js] [logo.png] [soffice.exe]
  *
- * Ausgabe: DGL2026_Ankündigungen_App.docx (+ .pdf, falls LibreOffice
- * installiert ist) im Ausgabeordner.
- *
- * Voraussetzung: `npm install docx` im selben Ordner (einmalig).
- * Für die PDF-Erzeugung zusätzlich LibreOffice (Kommando `soffice`)
- * installiert — falls nicht vorhanden, wird nur die .docx-Datei
- * erzeugt, das Skript bricht deswegen nicht ab.
+ * Ausgabe: DGL2026_Posterboards.docx (+ .pdf, falls LibreOffice
+ * installiert ist). Die .docx wird nach erfolgreicher PDF-Erzeugung
+ * automatisch gelöscht.
  * ------------------------------------------------------------------
  */
 
@@ -37,31 +36,19 @@ const { execFileSync } = require('child_process');
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
   WidthType, BorderStyle, ShadingType, AlignmentType, VerticalAlign, ImageRun,
-  Footer, PageNumber
+  Footer, PageNumber, PageBreak
 } = require('docx');
 
 function loadJSZip(){
-  try { return require('jszip'); } catch (e) { /* fall through */ }
-  const candidates = [
-    path.join(require.resolve('docx'), '..', '..', '..', 'jszip'),
-  ];
-  for(const candidate of candidates){
-    try { if(fs.existsSync(candidate)) return require(candidate); } catch (e) { /* ignore */ }
-  }
-  return null;
+  try { return require('jszip'); } catch (e) { return null; }
 }
 
 // -------------------------------------------------------------- paths --
 const ARG = process.argv.slice(2);
 const HERE = __dirname;
-// Default output folder: one level ABOVE the folder this script lives in
-// (i.e. dirname() of the script's own folder) — same convention as
-// generate_raumbelegungsplan.js, e.g. if the script sits in
-// .../dgl2026-tagungsfuehrer/announcements-pdf-generator/, the .docx/.pdf
-// files land in .../dgl2026-tagungsfuehrer/ by default.
-const OUTPUT_DIR   = path.resolve(ARG[0] || path.join(HERE, 'output'));
-const DATA_PATH    = path.resolve(ARG[1] || path.join(HERE, 'announcement.json'));
-const LOGO_PATH     = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_9x22_trans.png'));
+const OUTPUT_DIR    = path.resolve(ARG[0] || path.join(HERE, 'output'));
+const APP_DATA_PATH = path.resolve(ARG[1] || path.join(HERE, 'app-data.js'));
+const LOGO_PATH      = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_9x22_trans.png'));
 
 const SOFFICE_CANDIDATES = ARG[3] ? [ARG[3]] : [
   'soffice',
@@ -76,51 +63,49 @@ const BORDER_LIGHT = 'E4E4E4';
 const PAGE_W = 11907, PAGE_H = 16840; // A4, portrait, DXA
 const MARGIN = 900;
 const TABLE_WIDTH = PAGE_W - MARGIN * 2;
-const OUTPUT_BASENAME = 'DGL2026_Ankündigungen_App';
+const OUTPUT_BASENAME = 'DGL2026_Posterboards';
 
-const WEEKDAY_DE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const STAND_DATE = (() => {
+  const now = new Date();
+  return String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + now.getFullYear();
+})();
 
 // ------------------------------------------------------------- load data --
-function loadAnnouncements(filePath){
+function loadAppData(filePath){
   const raw = fs.readFileSync(filePath, 'utf8');
-  const data = JSON.parse(raw);
-  return data.filter(a => a.enabled);
+  const jsonStr = raw.replace(/^\s*const\s+DATA\s*=\s*/, '').replace(/;\s*$/, '');
+  return JSON.parse(jsonStr);
 }
 
-function groupByDay(items){
-  const byDay = new Map();
-  for(const a of items){
-    const begins = new Date(a.begins);
-    const dayKey = begins.toISOString().slice(0, 10); // YYYY-MM-DD
-    if(!byDay.has(dayKey)) byDay.set(dayKey, []);
-    byDay.get(dayKey).push(a);
+function boardSortKey(board){
+  const m = (board || '').match(/(\d+)/);
+  const num = m ? parseInt(m[1], 10) : 999999;
+  return { num, raw: board || '' };
+}
+
+function extractPosterSessions(DATA){
+  const sessions = []; // { title, dayLabel, time, posters: [...] }
+  for(const day of (DATA.programm || [])){
+    for(const block of (day.blocks || [])){
+      if(block.type === 'info' && Array.isArray(block.posters) && block.posters.length){
+        sessions.push({
+          title: block.title,
+          dayLabel: day.label,
+          time: block.time,
+          posters: [...block.posters].sort((a, b) => {
+            const ka = boardSortKey(a.board), kb = boardSortKey(b.board);
+            if(ka.num !== kb.num) return ka.num - kb.num;
+            return ka.raw.localeCompare(kb.raw, 'de');
+          })
+        });
+      }
+    }
   }
-  for(const [, arr] of byDay){
-    arr.sort((x, y) => new Date(x.begins) - new Date(y.begins));
-  }
-  return new Map([...byDay.entries()].sort());
-}
-
-function formatDayHeading(dayKey){
-  const d = new Date(dayKey + 'T00:00:00');
-  const weekday = WEEKDAY_DE[d.getDay()];
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  return `${weekday}, ${dd}.${mm}.${yyyy}`;
-}
-
-function formatTimeRange(a){
-  const b = new Date(a.begins);
-  const e = new Date(a.expires);
-  const fmt = (dt) => String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
-  return `${fmt(b)}–${fmt(e)}`;
+  return sessions;
 }
 
 // ------------------------------------------------------------ document --
 function titleBlock(logoBuf){
-  const now = new Date();
-  const stand = String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0') + '.' + now.getFullYear();
   return new Table({
     width: { size: TABLE_WIDTH, type: WidthType.DXA },
     columnWidths: [TABLE_WIDTH - 5000, 5000],
@@ -134,8 +119,8 @@ function titleBlock(logoBuf){
         width: { size: TABLE_WIDTH - 5000, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
         children: [
-          new Paragraph({ children: [new TextRun({ text: 'In-App-Ankündigungen', bold: true, size: 56, color: BRAND_BLUE, font: FONT })] }),
-          new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: 'Stand: ' + stand, size: 20, color: MUTED, font: FONT })] })
+          new Paragraph({ children: [new TextRun({ text: 'Poster-Board-Übersicht', bold: true, size: 52, color: BRAND_BLUE, font: FONT })] }),
+          new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: 'Stand: ' + STAND_DATE, size: 20, color: MUTED, font: FONT })] })
         ]
       }),
       new TableCell({
@@ -147,56 +132,58 @@ function titleBlock(logoBuf){
   });
 }
 
-function dayHeading(dayKey){
+function sessionHeading(sess){
   return new Paragraph({
     shading: { type: ShadingType.CLEAR, fill: BRAND_BLUE },
     spacing: { before: 320, after: 160 },
-    children: [new TextRun({ text: '  ' + formatDayHeading(dayKey), bold: true, size: 26, color: 'FFFFFF', font: FONT })]
+    children: [new TextRun({ text: `  ${sess.title} — ${sess.dayLabel}, ${sess.time}`, bold: true, size: 24, color: 'FFFFFF', font: FONT })]
   });
 }
 
-function announcementRow(a){
-  const timeCell = new TableCell({
-    width: { size: 1600, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160, right: 160 },
+function posterRow(poster){
+  const boardCell = new TableCell({
+    width: { size: 1400, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160, right: 160 },
     borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
-    children: [new Paragraph({ children: [new TextRun({ text: formatTimeRange(a), bold: true, size: 20, color: BRAND_BLUE, font: FONT })] })]
+    children: [new Paragraph({ children: [new TextRun({ text: poster.board || '—', bold: true, size: 20, color: BRAND_BLUE, font: FONT })] })]
   });
   const contentCell = new TableCell({
-    width: { size: TABLE_WIDTH - 1600, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160 },
+    width: { size: TABLE_WIDTH - 1400, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP, margins: { top: 120, bottom: 160 },
     borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
     children: [
-      new Paragraph({ children: [new TextRun({ text: a.title_de, bold: true, size: 22, color: '1A1A18', font: FONT })] }),
-      new Paragraph({ spacing: { before: 40 }, children: [new TextRun({ text: a.message_de, size: 20, color: '333331', font: FONT })] })
+      new Paragraph({ children: [new TextRun({ text: poster.title || '', bold: true, size: 20, color: '1A1A18', font: FONT })] }),
+      new Paragraph({ spacing: { before: 40 }, children: [new TextRun({ text: poster.authorsDisplay || poster.authors || '', size: 18, color: MUTED, font: FONT })] })
     ]
   });
-  return new TableRow({ children: [timeCell, contentCell] });
+  return new TableRow({ children: [boardCell, contentCell] });
 }
 
 function footerBlock(){
   return new Footer({ children: [new Paragraph({
     alignment: AlignmentType.CENTER,
     children: [
-      new TextRun({ text: 'DGL 2026 · In-App-Ankündigungen · Seite ', size: 16, color: MUTED, font: FONT }),
+      new TextRun({ text: 'DGL 2026 · Poster-Board-Übersicht · Seite ', size: 16, color: MUTED, font: FONT }),
       new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT })
     ]
   })] });
 }
 
-function buildDoc(byDay, logoBuf){
+function buildDoc(posterSessions, logoBuf){
   const children = [ titleBlock(logoBuf) ];
-  for(const [dayKey, items] of byDay){
-    children.push(dayHeading(dayKey));
+  posterSessions.forEach((sess, idx) => {
+    if(idx > 0) children.push(new Paragraph({ children: [new PageBreak()] }));
+    children.push(sessionHeading(sess));
     children.push(new Table({
       width: { size: TABLE_WIDTH, type: WidthType.DXA },
-      columnWidths: [1600, TABLE_WIDTH - 1600],
+      columnWidths: [1400, TABLE_WIDTH - 1400],
       borders: {
         top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
         left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
         insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE }
       },
-      rows: items.map(announcementRow)
+      rows: sess.posters.map(posterRow)
     }));
-  }
+  });
+
   return new Document({
     styles: { default: { document: { run: { font: FONT, size: 20 } } } },
     sections: [ {
@@ -226,10 +213,7 @@ async function fixPageNumberFont(docxBuffer){
       /(<w:r>(?:(?!<\/w:r>).)*?<w:rPr>((?:(?!<\/w:rPr>).)*?)<\/w:rPr>(?:(?!<\/w:r>).)*?<w:fldChar w:fldCharType="separate"\/>)(<w:fldChar w:fldCharType="end"\/>)/g,
       (match, before, rPrInner, endPart) => `${before}<w:t>1</w:t></w:r><w:r><w:rPr>${rPrInner}</w:rPr>${endPart}`
     );
-    if(xml !== original){
-      zip.file(name, xml);
-      changed = true;
-    }
+    if(xml !== original){ zip.file(name, xml); changed = true; }
   }
   if(!changed) return docxBuffer;
   return zip.generateAsync({ type: 'nodebuffer' });
@@ -245,21 +229,20 @@ function tryConvertToPdf(docxPath, outDir){
       ], { stdio: 'pipe', timeout: 60000 });
       workingSofficePath = candidate;
       return true;
-    } catch (err) {
-      // try next candidate
-    }
+    } catch (err) { /* try next */ }
   }
   return false;
 }
 
 // ------------------------------------------------------------------ main --
 async function main(){
-  console.log('Lese Ankündigungen aus', DATA_PATH);
+  console.log('Lese Programmdaten aus', APP_DATA_PATH);
   console.log('Zielordner:', OUTPUT_DIR);
 
-  const items = loadAnnouncements(DATA_PATH);
-  const byDay = groupByDay(items);
-  console.log(`${items.length} aktive Ankündigungen an ${byDay.size} Tagen gefunden.`);
+  const DATA = loadAppData(APP_DATA_PATH);
+  const posterSessions = extractPosterSessions(DATA);
+  const totalPosters = posterSessions.reduce((sum, s) => sum + s.posters.length, 0);
+  console.log(`${posterSessions.length} Postersession(en), ${totalPosters} Poster gefunden.`);
 
   let logoBuf = null;
   if(fs.existsSync(LOGO_PATH)){
@@ -270,7 +253,7 @@ async function main(){
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  const doc = buildDoc(byDay, logoBuf);
+  const doc = buildDoc(posterSessions, logoBuf);
   const buf = await fixPageNumberFont(await Packer.toBuffer(doc));
   const docxPath = path.join(OUTPUT_DIR, `${OUTPUT_BASENAME}.docx`);
   fs.writeFileSync(docxPath, buf);

@@ -15,7 +15,11 @@
  *   - Tagungslogo_kurz_transparent.png
  *
  * Optional lassen sich die Pfade überschreiben:
- *   node generate_raumbelegungsplan.js [app-data.js] [app.js] [logo.png] [outputDir]
+ *   node generate_raumbelegungsplan.js [outputDir] [app-data.js] [app.js] [logo.png] [soffice.exe]
+ *
+ * Standardmäßig landet die Ausgabe in einem Unterordner "output" direkt im
+ * selben Ordner wie dieses Skript (wird automatisch angelegt, falls nicht
+ * vorhanden).
  *
  * Ausgabe: DGL2026_Raumbelegungsplan_<Tag>.docx (+ .pdf, falls LibreOffice
  * installiert ist) im gewählten Ausgabeordner.
@@ -74,7 +78,7 @@ const LOGO_PATH      = path.resolve(ARG[3] || path.join(HERE, 'Tagungslogo_9x22_
 // (i.e. dirname() of the script's own folder) — e.g. if the script sits in
 // .../dgl2026-tagungsfuehrer/raumbelegungsplan-generator/, the .docx/.pdf
 // files land in .../dgl2026-tagungsfuehrer/ by default.
-const OUTPUT_DIR     = path.resolve(ARG[0] || path.dirname(HERE));
+const OUTPUT_DIR     = path.resolve(ARG[0] || path.join(HERE, 'output'));
 // Path(s) to the LibreOffice "soffice" executable used for the PDF
 // conversion. If you pass a 5th argument, only that path is tried. Otherwise
 // each candidate below is tried in order until one works — "soffice" covers
