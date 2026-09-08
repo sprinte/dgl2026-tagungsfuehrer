@@ -101,9 +101,8 @@
       tourDone: 'Fertig',
       tourSkip: 'Überspringen',
       tourBack: 'Zurück',
-      tourIntroText: '👋 Neu hier? Dann lass mich dir kurz zeigen, wie du diese App nutzt.',
-      tourStart: 'Tour starten',
       tourHelpBtn: '👋 Neu hier?',
+      tourStart: 'Tour starten',
       presentersCardTitle: 'Upload deiner Präsentation',
       posterPreisTitle: 'Posterpreis',
       feedbackTitle: 'Feedback',
@@ -253,7 +252,6 @@
       tourDone: 'Done',
       tourSkip: 'Skip',
       tourBack: 'Back',
-      tourIntroText: '👋 New here? Let us quickly show you how to use this app.',
       tourStart: 'Start tour',
       tourHelpBtn: '👋 New here?',
       presentersCardTitle: 'Upload your presentation',
@@ -4333,7 +4331,7 @@
   var TOUR_STEPS = [
     {
       text: '👋 Herzlich willkommen bei der 41. DGL-Jahrestagung & 16. WRHC! Lass mich dir kurz zeigen, wie du diese App nutzt.',
-      text_en: '👋 Welcome to the 41st DGL Annual Conference & 16th WRHC! Let us quickly show you how to use this app.'
+      text_en: '👋 Welcome to the 41st DGL Annual Conference & 16th WRHC! Let me quickly show you how to use this app.'
     },
     {
       selector: '#langSwitch',
