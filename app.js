@@ -2253,10 +2253,12 @@
         });
       } else if(m.kind === 'poster'){
         var posterPadded = isInPlan(m.jumpId);
+        var hasBoardLinkSearch = !!posterBoardHighlightId(m.board);
         item.innerHTML =
           '<div class="search-result-day">' + (m.code ? '<span class="session-tag">' + esc(m.code) + '</span> ' : '') + esc(dayLabel) + ' · ' + esc(m.timeLabel) + (m.board ? ' · ' + t('posterBoard') + ' ' + esc(m.board) : '') + '</div>' +
           '<div class="search-result-title"><span class="session-tag">' + t('posterListLabel') + '</span> ' + esc(title) + '</div>' +
           '<div class="search-result-sub">' + renderAuthorsHtml(m.authors) + '</div>' +
+          (hasBoardLinkSearch ? '<button class="poster-icon-btn" data-role="search-poster-locate" title="' + esc(t('showOnPosterPlanLabel')) + '" aria-label="' + esc(t('showOnPosterPlanLabel')) + '" style="position:absolute;top:9px;right:50px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>' : '') +
           '<button class="add-btn small' + (posterPadded ? ' added' : '') + '" data-role="search-add" title="' + esc(posterPadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(posterPadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" style="position:absolute;top:12px;right:12px;">' + (posterPadded ? '&#10003;' : '+') + '</button>';
         item.style.position = 'relative';
         item.querySelectorAll('.author-link').forEach(function(el){
@@ -2265,6 +2267,12 @@
             searchForAuthor(el.getAttribute('data-author'), 'search');
           });
         });
+        if(hasBoardLinkSearch){
+          item.querySelector('[data-role="search-poster-locate"]').addEventListener('click', function(ev){
+            ev.stopPropagation();
+            showPosterOnPlan(m.board);
+          });
+        }
         item.querySelector('[data-role="search-add"]').addEventListener('click', function(ev){
           ev.stopPropagation();
           var boardText = m.board ? (' · ' + t('posterBoard') + ' ' + m.board) : '';
