@@ -97,6 +97,7 @@ function extractRegister(DATA){
         rows.push({
           code: session.code || '—',
           title: session.title || '',
+          mod: session.mod || '',
           room: session.room || '',
           dayLabel: day.label,
           dayIdx,
@@ -113,6 +114,19 @@ function extractRegister(DATA){
     if(a.dayIdx !== b.dayIdx) return a.dayIdx - b.dayIdx;
     return (a.time || '').localeCompare(b.time || '');
   });
+
+  // Mark the first/last row of each consecutive code+title group — Code,
+  // Titel and Moderation are only printed once per session, not repeated
+  // for every time slot; the row border below only appears on the last
+  // row of a group, so continuation rows of the same session aren't
+  // visually separated from each other, only different sessions are.
+  for(let i = 0; i < rows.length; i++){
+    const key = rows[i].code + '|' + rows[i].title;
+    const prevKey = i > 0 ? (rows[i-1].code + '|' + rows[i-1].title) : null;
+    const nextKey = i < rows.length - 1 ? (rows[i+1].code + '|' + rows[i+1].title) : null;
+    rows[i].isFirstOfGroup = (key !== prevKey);
+    rows[i].isLastOfGroup = (key !== nextKey);
+  }
 
   return rows;
 }
@@ -132,7 +146,7 @@ function titleBlock(logoBuf){
         width: { size: TABLE_WIDTH - 5000, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER, margins: { bottom: 200 },
         borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
         children: [
-          new Paragraph({ children: [new TextRun({ text: 'Session-Code-Register', bold: true, size: 48, color: BRAND_BLUE, font: FONT })] }),
+          new Paragraph({ children: [new TextRun({ text: 'Sessionliste', bold: true, size: 48, color: BRAND_BLUE, font: FONT })] }),
           new Paragraph({ spacing: { before: 60 }, children: [new TextRun({ text: 'Stand: ' + STAND_DATE, size: 20, color: MUTED, font: FONT })] })
         ]
       }),
@@ -145,6 +159,9 @@ function titleBlock(logoBuf){
   });
 }
 
+const COL_CODE = 1300, COL_MOD = 2200, COL_RAUM = 1700, COL_TAGZEIT = 2400;
+const COL_TITEL = TABLE_WIDTH - COL_CODE - COL_MOD - COL_RAUM - COL_TAGZEIT;
+
 function headerRow(){
   const cellStyle = (text, width) => new TableCell({
     width: { size: width, type: WidthType.DXA }, verticalAlign: VerticalAlign.CENTER,
@@ -155,27 +172,32 @@ function headerRow(){
   return new TableRow({
     tableHeader: true,
     children: [
-      cellStyle('Code', 1300),
-      cellStyle('Titel', TABLE_WIDTH - 1300 - 2600 - 2600),
-      cellStyle('Raum', 2600),
-      cellStyle('Tag, Zeit', 2600)
+      cellStyle('Code', COL_CODE),
+      cellStyle('Titel', COL_TITEL),
+      cellStyle('Moderation', COL_MOD),
+      cellStyle('Raum', COL_RAUM),
+      cellStyle('Tag, Zeit', COL_TAGZEIT)
     ]
   });
 }
 
 function dataRow(r){
+  const bottomBorder = r.isLastOfGroup
+    ? { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT }
+    : { style: BorderStyle.NONE };
   const cellStyle = (text, width, bold) => new TableCell({
     width: { size: width, type: WidthType.DXA }, verticalAlign: VerticalAlign.TOP,
     margins: { top: 90, bottom: 90, left: 120, right: 120 },
-    borders: { bottom: { style: BorderStyle.SINGLE, size: 4, color: BORDER_LIGHT } },
+    borders: { bottom: bottomBorder },
     children: [new Paragraph({ children: [new TextRun({ text, bold: !!bold, size: 18, color: bold ? BRAND_BLUE : '1A1A18', font: FONT })] })]
   });
   return new TableRow({
     children: [
-      cellStyle(r.code, 1300, true),
-      cellStyle(r.title, TABLE_WIDTH - 1300 - 2600 - 2600, false),
-      cellStyle(r.room, 2600, false),
-      cellStyle(`${r.dayLabel}, ${r.time}`, 2600, false)
+      cellStyle(r.isFirstOfGroup ? r.code : '', COL_CODE, true),
+      cellStyle(r.isFirstOfGroup ? r.title : '', COL_TITEL, false),
+      cellStyle(r.isFirstOfGroup ? r.mod : '', COL_MOD, false),
+      cellStyle(r.room, COL_RAUM, false),
+      cellStyle(`${r.dayLabel}, ${r.time}`, COL_TAGZEIT, false)
     ]
   });
 }
@@ -184,7 +206,7 @@ function footerBlock(){
   return new Footer({ children: [new Paragraph({
     alignment: AlignmentType.CENTER,
     children: [
-      new TextRun({ text: 'DGL 2026 · Session-Code-Register · Seite ', size: 16, color: MUTED, font: FONT }),
+      new TextRun({ text: 'DGL 2026 · Sessionliste · Seite ', size: 16, color: MUTED, font: FONT }),
       new TextRun({ children: [PageNumber.CURRENT], size: 16, color: MUTED, font: FONT })
     ]
   })] });
@@ -193,7 +215,7 @@ function footerBlock(){
 function buildDoc(rows, logoBuf){
   const table = new Table({
     width: { size: TABLE_WIDTH, type: WidthType.DXA },
-    columnWidths: [1300, TABLE_WIDTH - 1300 - 2600 - 2600, 2600, 2600],
+    columnWidths: [COL_CODE, COL_TITEL, COL_MOD, COL_RAUM, COL_TAGZEIT],
     borders: {
       top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE },
       left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
