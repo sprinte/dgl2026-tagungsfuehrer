@@ -5,11 +5,19 @@
  * Erzeugt eine alphabetisch sortierte Rednerliste (Word + PDF) aus
  * dem aktuellen app-data.js der DGL-2026-Tagungsführer-App.
  *
- * Erfasst werden: Vortragende in parallelen Sessions (talks[], anhand
- * von talk.presenter bzw. dem/der erstgenannten Autor:in), Podiums-
- * teilnehmer:innen aus speakerGroups[] (z.B. Karriere-Session) sowie
- * Plenarvortragende (Blöcke mit Kurzbiografie). Poster-Beitragende
- * sind NICHT enthalten (nur mündliche Vorträge).
+ * Erzeugt zwei alphabetisch sortierte Listen (Word + PDF) aus dem
+ * aktuellen app-data.js der DGL-2026-Tagungsführer-App: eine
+ * Rednerliste und eine Posterliste, im selben PDF hintereinander.
+ *
+ * Rednerliste: Vortragende in parallelen Sessions (talks[], anhand
+ * von talk.presenter bzw. dem/der erstgenannten Autor:in), sowie
+ * Plenarvortragende (Blöcke mit Kurzbiografie). Podiumsteilnehmer:innen
+ * aus speakerGroups[] (z.B. Karriere-Session, Podiumsdiskussionen)
+ * sind NICHT enthalten, da sie keinen eigenen Vortragsslot haben.
+ *
+ * Posterliste: nur die/der Erstautor:in pro Poster (wie bei
+ * Vortragenden — die übrigen Ko-Autor:innen werden nicht separat
+ * aufgeführt, auch wenn sie am Poster mitgewirkt haben).
  *
  * Hinweis zur Sortierung: Der Nachname wird vereinfachend als letztes
  * Wort des Namens (nach Entfernen von Titeln wie "Dr."/"Prof.")
@@ -24,9 +32,8 @@
  *   - app-data.js
  *   - Tagungslogo_9x22_trans.png
  *
- * Standardmäßig landet die Ausgabe in einem Unterordner "output" direkt im
- * selben Ordner wie dieses Skript (wird automatisch angelegt, falls nicht
- * vorhanden).
+ * Standardmäßig landet die Ausgabe eine Ordnerebene ÜBER dem Ordner,
+ * in dem dieses Skript liegt (wie bei den anderen Generatoren).
  *
  * Optional lassen sich die Pfade überschreiben:
  *   node generate_speakerlist.js [outputDir] [app-data.js] [logo.png] [soffice.exe]
@@ -56,7 +63,7 @@ function loadJSZip(){
 // -------------------------------------------------------------- paths --
 const ARG = process.argv.slice(2);
 const HERE = __dirname;
-const OUTPUT_DIR   = path.resolve(ARG[0] || path.join(HERE, 'output'));
+const OUTPUT_DIR   = path.resolve(ARG[0] || path.dirname(HERE));
 const APP_DATA_PATH = path.resolve(ARG[1] || path.join(HERE, 'app-data.js'));
 const LOGO_PATH      = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_9x22_trans.png'));
 
@@ -204,11 +211,9 @@ function extractPosterPeople(DATA){
         const sessionLabel = session.code || session.title || '';
         for(const poster of session.posters){
           const displayStr = poster.authorsDisplay || poster.authors || '';
-          const namesPart = displayStr.split(' — ')[0];
-          const names = namesPart.split(',').map(s => s.trim()).filter(Boolean);
-          for(const name of names){
-            addPerson(name, sessionLabel);
-          }
+          const boardMatch = (poster.board || '').match(/\d+/);
+          const label = boardMatch ? `${sessionLabel} (Nr. ${boardMatch[0]})` : sessionLabel;
+          addPerson(firstAuthor(displayStr), label);
         }
       }
     }
@@ -360,7 +365,7 @@ async function main(){
   const speakerList = extractSpeakers(DATA);
   const posterList = extractPosterPeople(DATA);
   console.log(`${speakerList.length} Rednerinnen und Redner gefunden.`);
-  console.log(`${posterList.length} Postervortragende gefunden.`);
+  console.log(`${posterList.length} Poster-Erstautor:innen gefunden.`);
 
   let logoBuf = null;
   if(fs.existsSync(LOGO_PATH)){
