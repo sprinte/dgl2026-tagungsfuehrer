@@ -91,14 +91,28 @@ function extractRegister(DATA){
   const rows = [];
   DATA.programm.forEach((day, dayIdx) => {
     for(const block of (day.blocks || [])){
-      if(block.type !== 'parallel') continue;
-      for(const session of (block.sessions || [])){
-        if(!session.code && !session.title) continue;
+      if(block.type === 'parallel'){
+        for(const session of (block.sessions || [])){
+          if(!session.code && !session.title) continue;
+          rows.push({
+            code: session.code || '—',
+            title: session.title || '',
+            mod: session.mod || '',
+            room: session.room || '',
+            dayLabel: day.label,
+            dayIdx,
+            time: block.time || ''
+          });
+        }
+      } else if(block.type === 'info' && block.bio_de){
+        // Standalone plenary talks (e.g. Bouffard, Gaedke, Singer): single-
+        // speaker blocks with their own short biography, outside the
+        // parallel session grid.
         rows.push({
-          code: session.code || '—',
-          title: session.title || '',
-          mod: session.mod || '',
-          room: session.room || '',
+          code: block.tag || 'Plenarvortrag',
+          title: block.title || '',
+          mod: block.mod || '',
+          room: block.room || '',
           dayLabel: day.label,
           dayIdx,
           time: block.time || ''
