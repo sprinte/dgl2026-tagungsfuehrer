@@ -32,8 +32,9 @@
  *   - app-data.js
  *   - Tagungslogo_9x22_trans.png
  *
- * Standardmäßig landet die Ausgabe eine Ordnerebene ÜBER dem Ordner,
- * in dem dieses Skript liegt (wie bei den anderen Generatoren).
+ * Standardmäßig landet die Ausgabe in einem Unterordner "output" direkt im
+ * selben Ordner wie dieses Skript (wird automatisch angelegt, falls nicht
+ * vorhanden).
  *
  * Optional lassen sich die Pfade überschreiben:
  *   node generate_speakerlist.js [outputDir] [app-data.js] [logo.png] [soffice.exe]
@@ -63,7 +64,7 @@ function loadJSZip(){
 // -------------------------------------------------------------- paths --
 const ARG = process.argv.slice(2);
 const HERE = __dirname;
-const OUTPUT_DIR   = path.resolve(ARG[0] || path.dirname(HERE));
+const OUTPUT_DIR   = path.resolve(ARG[0] || path.join(HERE, 'output'));
 const APP_DATA_PATH = path.resolve(ARG[1] || path.join(HERE, 'app-data.js'));
 const LOGO_PATH      = path.resolve(ARG[2] || path.join(HERE, 'Tagungslogo_9x22_trans.png'));
 
