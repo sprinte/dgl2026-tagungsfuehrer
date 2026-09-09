@@ -164,17 +164,23 @@ function makePeopleCollector(){
   return { addPerson, finish };
 }
 
+const DAY_ABBR = { 'Sonntag': 'So', 'Montag': 'Mo', 'Dienstag': 'Di', 'Mittwoch': 'Mi', 'Donnerstag': 'Do', 'Freitag': 'Fr' };
+
 function extractSpeakers(DATA){
   const { addPerson, finish } = makePeopleCollector();
 
   for(const day of (DATA.programm || [])){
+    const dayAbbr = DAY_ABBR[day.label] || day.label;
     for(const block of (day.blocks || [])){
       if(block.type === 'parallel'){
         for(const session of (block.sessions || [])){
-          const sessionLabel = session.code || session.title || '';
+          const code = session.code || session.title || '';
+          const room = session.room || '';
           for(const talk of (session.talks || [])){
             const speaker = talk.presenter || firstAuthor(talk.authors);
-            addPerson(speaker, sessionLabel);
+            const time = talk.time || '';
+            const detail = `${code} (${dayAbbr} ${time} Uhr ${room})`.replace(/\s+/g, ' ').trim();
+            addPerson(speaker, detail);
           }
           // Note: session.speakerGroups (panel/discussion participants, e.g.
           // S19 "(K)ein Wunschkonzert" or S21 "Karriere in der Limnologie")
@@ -186,7 +192,11 @@ function extractSpeakers(DATA){
         // Standalone plenary/keynote blocks: identified by having a short
         // biography (bio_de), which only single-person keynote blocks carry.
         if(block.bio_de && block.title){
-          addPerson(block.title, block.tag || 'Plenarvortrag');
+          const code = block.tag || 'Plenarvortrag';
+          const room = block.room || '';
+          const time = (block.time || '').split(/[–-]/)[0].trim();
+          const detail = `${code} (${dayAbbr} ${time} Uhr ${room})`.replace(/\s+/g, ' ').trim();
+          addPerson(block.title, detail);
         }
       }
     }
@@ -195,26 +205,33 @@ function extractSpeakers(DATA){
   return finish();
 }
 
-// Poster presenters: every co-author listed on a poster, taken from the
-// "posters" arrays inside parallel-block sessions (Poster Speed Talks
-// PS1/PS2). Standalone "Postersession 1/2" info blocks are skipped since
-// they list the exact same posters again and would only create duplicate
-// session labels for the same people.
+// Poster presenters: only the first author per poster (matching how oral
+// talks only show the presenter/first author), taken from the "posters"
+// arrays inside parallel-block sessions (Poster Speed Talks PS1/PS2).
+// Standalone "Postersession 1/2" info blocks are skipped since they list
+// the exact same posters again and would only create duplicate labels.
+// Poster presenters: only the first author per poster (matching how oral
+// talks only show the presenter/first author), sourced from the actual
+// "Postersession 1"/"Postersession 2" info blocks (not the PS1/PS2 speed-
+// talk slots), so the day shown is when/where the poster is actually
+// displayed, not the earlier speed-talk time slot.
 function extractPosterPeople(DATA){
   const { addPerson, finish } = makePeopleCollector();
 
   for(const day of (DATA.programm || [])){
+    const dayAbbr = DAY_ABBR[day.label] || day.label;
     for(const block of (day.blocks || [])){
-      if(block.type !== 'parallel') continue;
-      for(const session of (block.sessions || [])){
-        if(!session.posters || !session.posters.length) continue;
-        const sessionLabel = session.code || session.title || '';
-        for(const poster of session.posters){
-          const displayStr = poster.authorsDisplay || poster.authors || '';
-          const boardMatch = (poster.board || '').match(/\d+/);
-          const label = boardMatch ? `${sessionLabel} (Nr. ${boardMatch[0]})` : sessionLabel;
-          addPerson(firstAuthor(displayStr), label);
-        }
+      if(block.type !== 'info' || !Array.isArray(block.posters) || !block.posters.length) continue;
+      for(const poster of block.posters){
+        const displayStr = poster.authorsDisplay || poster.authors || '';
+        const codeCombined = (poster.code || '').split(',').map(s => s.trim()).filter(Boolean).join('/');
+        const boardMatch = (poster.board || '').match(/^(\d+)\s*(?:\(([^)]+)\))?/);
+        const boardNum = boardMatch ? boardMatch[1] : '';
+        const boardRoom = boardMatch && boardMatch[2] ? boardMatch[2] : '';
+        const detail = boardNum
+          ? `${codeCombined} (${dayAbbr} Nr. ${boardNum}${boardRoom ? ' ' + boardRoom : ''})`
+          : codeCombined;
+        addPerson(firstAuthor(displayStr), detail);
       }
     }
   }
