@@ -1085,6 +1085,29 @@
     return 't_' + dayId + '_' + block.time + '_' + s.room + '_' + s.code + '_' + slug(s.title) + '_' + idx;
   }
 
+  // "Mein Plan" stores a snapshot of each added item (title, authors, time)
+  // at the moment it was added, not a live reference — so if a talk gets
+  // cancelled after someone already added it, their saved snapshot alone
+  // wouldn't reflect that. This builds the current set of plan-IDs for
+  // talks presently marked cancelled, so renderPlan() can cross-check
+  // saved items against it and flag them accordingly.
+  function getCancelledPlanIds(){
+    var ids = {};
+    DATA.programm.forEach(function(day){
+      (day.blocks || []).forEach(function(block){
+        if(block.type !== 'parallel') return;
+        (block.sessions || []).forEach(function(s){
+          (s.talks || []).forEach(function(talk, idx){
+            if(talk.cancelled){
+              ids[planIdForTalk(day.id, block, s, talk, idx)] = true;
+            }
+          });
+        });
+      });
+    });
+    return ids;
+  }
+
   // Every plannable item carries a permanent, explicit "pid" directly in the
   // programme data (assigned once, reused on future data edits) — far
   // simpler and safer than deriving a reference from position or a hash:
@@ -3146,6 +3169,7 @@
       byDay[p.dayId].items.push(p);
     });
     var order = DATA.programm.map(function(d){ return d.id; });
+    var cancelledPlanIds = getCancelledPlanIds();
     order.forEach(function(dayId){
       if(!byDay[dayId]) return;
       var group = byDay[dayId];
@@ -3170,8 +3194,9 @@
       group.items.forEach(function(item, idx){
        try {
         var card = document.createElement('div');
-        card.className = 'card' + (item.authors ? '' : ' plan-card-block');
-        var hasDetails = !!(item.abstract || item.bio);
+        var isCancelled = !!cancelledPlanIds[item.id];
+        card.className = 'card' + (item.authors ? '' : ' plan-card-block') + (isCancelled ? ' talk-cancelled' : '');
+        var hasDetails = !isCancelled && !!(item.abstract || item.bio);
         var isOpen = !!expandedPlanItems[item.id];
         var roomClickable = item.room && FLOORPLAN_ROOM_MAP[item.room];
         var mainDiv = document.createElement('div');
@@ -3183,8 +3208,10 @@
         mainDiv.innerHTML =
             '<div style="flex:1;min-width:0;">' +
               '<div class="block-time">' + esc(item.time) + (item.room ? ' · <span class="' + (roomClickable ? 'room-link' : '') + '" data-room="' + esc(item.room) + '">' + esc(item.room) + '</span>' : '') + '</div>' +
-              '<div class="block-title">' + (item.isPoster ? '<span class="session-tag">' + t('posterListLabel') + '</span> ' : '') + esc(item.title) + '</div>' +
-              (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '') +
+              (isCancelled
+                ? '<div class="block-title" style="color:#c0392b;font-style:italic;">' + esc(t('talkCancelledLabel')) + '</div>'
+                : '<div class="block-title">' + (item.isPoster ? '<span class="session-tag">' + t('posterListLabel') + '</span> ' : '') + esc(item.title) + '</div>' +
+              (item.subtitle ? '<div class="block-subtitle">' + (item.authors ? renderAuthorsHtml(item.authors) + esc(item.subtitle.slice(item.authors.length)) : esc(item.subtitle)) + '</div>' : '')) +
             '</div>' +
             '<div class="session-btns">' +
               '<button class="remove-btn" data-id="' + item.id + '" title="' + esc(t('removeFromPlanLabel')) + '" aria-label="' + esc(t('removeFromPlanLabel')) + '">&times;</button>' +
@@ -3382,6 +3409,7 @@
     }
 
     if(!currentPlanDay) return;
+    var cancelledPlanIds = getCancelledPlanIds();
     var dayItemsRaw = plan.filter(function(p){ return p.dayId === currentPlanDay; });
     var posterGroups = {};
     var dayItems = [];
@@ -3490,14 +3518,17 @@
       }
 
       var height = Math.max(38, (entry._end - entry._start) * PT_PX_PER_MIN - 2);
-      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '') + (p._fixed ? ' pt-fixed' : (!p.authors ? ' pt-item-block' : ''));
+      var isCancelledTl = !!cancelledPlanIds[p.id];
+      el.className = 'pt-item' + (conflictIds[p.id] ? ' pt-conflict' : '') + (isCancelledTl ? ' talk-cancelled' : '') + (p._fixed ? ' pt-fixed' : (!p.authors ? ' pt-item-block' : ''));
       el.style.top = top + 'px';
       el.style.height = height + 'px';
       el.style.left = 'calc(44px + (100% - 44px) * ' + colFrac + ')';
       el.style.width = 'calc((100% - 44px) * ' + widthFrac + ' - 4px)';
       var displayPtTime = (p.authors && !p._fixed) ? p.time.split(' – ')[0] : p.time;
       var secondLine;
-      if(p._fixed){
+      if(isCancelledTl){
+        secondLine = '<span style="color:#c0392b;font-style:italic;">' + esc(t('talkCancelledLabel')) + '</span>';
+      } else if(p._fixed){
         secondLine = esc(p.title);
       } else if(p.authors){
         secondLine = esc(formatAuthorsCompact(p.authors));
@@ -3507,7 +3538,9 @@
       el.innerHTML =
         '<div class="pt-item-time">' + esc(displayPtTime) + (p.room ? ' <span class="pt-item-room">· ' + esc(p.room) + '</span>' : '') + '</div>' +
         '<div class="pt-item-title">' + secondLine + '</div>';
-      if(!p._fixed){
+      if(isCancelledTl){
+        // no click-through for cancelled items
+      } else if(!p._fixed){
         el.addEventListener('click', function(){
           openPlanItemDetail(p);
         });
