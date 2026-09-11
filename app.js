@@ -40,6 +40,7 @@
       routeDetailsLabel: 'Wegbeschreibung',
       practicalInfoLabel: 'Praktische Infos',
       remoteTalkLabel: 'Wird per Videokonferenz zugeschaltet',
+      talkCancelledLabel: 'Vortrag kurzfristig abgesagt',
       presenterLabel: 'Vortragende:r:',
       updateBannerText: 'Es gibt eine neue Version der App.',
       updateBannerReload: 'Aktualisieren',
@@ -191,6 +192,7 @@
       routeDetailsLabel: 'Directions',
       practicalInfoLabel: 'Practical info',
       remoteTalkLabel: 'Joining via video conference',
+      talkCancelledLabel: 'Talk cancelled at short notice',
       presenterLabel: 'Presenter:',
       updateBannerText: 'A new version of the app is available.',
       updateBannerReload: 'Reload',
@@ -1904,8 +1906,15 @@
               var trow = document.createElement('div');
               var talkFirstAuthor = (talk.authors || '').split(' \u2014 ')[0].split(',')[0].trim();
               var showsPresenter = talk.presenter && talk.presenter.trim() !== talkFirstAuthor;
-              trow.className = 'talk-row';
+              trow.className = 'talk-row' + (talk.cancelled ? ' talk-cancelled' : '');
               trow.id = 'row-' + tid;
+              if(talk.cancelled){
+                trow.innerHTML =
+                  '<div class="talk-main">' +
+                    (s.code === 'WRHC' ? '' : '<div class="talk-time">' + esc(talk.time) + '</div>') +
+                    '<div class="talk-title" style="color:#c0392b;font-style:italic;">' + esc(t('talkCancelledLabel')) + '</div>' +
+                  '</div>';
+              } else {
               trow.innerHTML =
                 '<div class="talk-main">' +
                   (s.code === 'WRHC' ? '' : '<div class="talk-time" style="display:flex;align-items:center;gap:6px;">' + esc(talk.time) + (talkIsNow ? '<span class="live-dot-blink" aria-label="' + esc(t('liveNow')) + '" title="' + esc(t('liveNow')) + '"></span>' : '') + '</div>') +
@@ -1914,6 +1923,11 @@
                   (showsPresenter ? '<div class="talk-authors presenter-note">' + esc(t('presenterLabel')) + ' ' + esc(talk.presenter) + '</div>' : '') +
                 '</div>' +
                 '<button class="add-btn small' + (tadded ? ' added' : '') + '" data-id="' + tid + '" title="' + esc(tadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '" aria-label="' + esc(tadded ? t('removeFromPlanLabel') : t('addToPlanLabel')) + '">' + (tadded ? '&#10003;' : '+') + '</button>';
+              }
+              if(talk.cancelled){
+                talkList.appendChild(trow);
+                return;
+              }
               trow.querySelector('.talk-main').addEventListener('click', function(ev){
                 if(ev.target.closest('.author-link')) return;
                 var wasOpen = !!expandedTalks[tid];
@@ -2099,6 +2113,7 @@
               code: s.code, displayCode: s.displayCode, partIndex: s.partIndex || 1, mod: s.mod || '', isWSA: !!s.isWSA
             });
             (s.talks || []).forEach(function(talk, idx){
+              if(talk.cancelled) return;
               var tid = planIdForTalk(day.id, block, s, talk, idx);
               searchIndex.push({
                 kind: 'talk', dayId: day.id, jumpId: tid, sid: sid, timeLabel: talk.time,
@@ -2857,6 +2872,7 @@
             }
             if(!s.code || s.code === 'WRHC') return;
             (s.talks || []).forEach(function(talk){
+              if(talk.cancelled) return;
               var firstAuthor = (talk.authors || '').split(' — ')[0].split(',')[0].trim();
               if(!firstAuthor) return;
               var words = firstAuthor.split(/\s+/).filter(Boolean);
