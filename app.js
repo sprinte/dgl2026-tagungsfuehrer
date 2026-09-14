@@ -568,6 +568,24 @@
     }
     return { start: start, end: end };
   }
+  // For single-timestamp info blocks (e.g. "Eröffnung" at "10:30", no
+  // explicit end) — derive the real end time from when the next block on
+  // that day starts, instead of guessing a fixed duration. Returns the
+  // original string unchanged if it's already a range or has no next block.
+  function computeInfoBlockTimeRange(day, block){
+    if(!block.time || block.time.indexOf('–') !== -1) return block.time;
+    var ownStart = parseTimeRangeMinutes(block.time);
+    if(!ownStart || !day || !day.blocks) return block.time;
+    var blockIdx = day.blocks.indexOf(block);
+    if(blockIdx === -1) return block.time;
+    for(var nj = blockIdx+1; nj < day.blocks.length; nj++){
+      var nextRange = parseTimeRangeMinutes(day.blocks[nj].time);
+      if(nextRange && nextRange.start > ownStart.start){
+        return block.time + ' – ' + minutesToHHMM(nextRange.start);
+      }
+    }
+    return block.time;
+  }
   function minutesToHHMM(min){
     var h = Math.floor(min/60), m = min%60;
     return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
@@ -586,7 +604,8 @@
       var nextRange = parseTimeRangeMinutes(sTalks[idx+1].time);
       end = nextRange ? nextRange.start : start+15;
     } else {
-      end = start + 15;
+      var blockRange = parseTimeRangeMinutes(blockTimeStr);
+      end = (blockRange && blockRange.end > start) ? blockRange.end : start + 15;
     }
     return sTalks[idx].time + ' – ' + minutesToHHMM(end);
   }
@@ -1174,7 +1193,7 @@
           var planSubtitle = [blockSubtitle, modSuffix].filter(Boolean).join(' · ');
           return {
             id: id, dayId: day.id, dayLabel: day.label, date: day.date,
-            time: block.time, title: blockTitle, subtitle: planSubtitle, room: block.room || '',
+            time: computeInfoBlockTimeRange(day, block), title: blockTitle, subtitle: planSubtitle, room: block.room || '',
             abstract: planAbstractText || '', bio: bioText || ''
           };
         }
@@ -1629,7 +1648,7 @@
             var planSubtitle = [blockSubtitle, modSuffix].filter(Boolean).join(' · ');
             togglePlan({
               id: id, dayId: day.id, dayLabel: day.label, date: day.date,
-              time: block.time, title: blockTitle, subtitle: planSubtitle, room: block.room || '',
+              time: computeInfoBlockTimeRange(day, block), title: blockTitle, subtitle: planSubtitle, room: block.room || '',
               abstract: planAbstractText || '', bio: bioText || ''
             });
           });
