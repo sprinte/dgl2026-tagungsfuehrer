@@ -97,6 +97,7 @@ const DAY_FILE_SUFFIX = { 'Montag': 'Montag', 'Dienstag': 'Dienstag', 'Mittwoch'
 const FONT = 'Poppins';
 const BRAND_BLUE = '003F75';
 const WSA_RED = 'A4283F';
+const CANCELLED_RED = 'C0392B';
 const ACCENT_TEAL = '1D6F5C';
 const MUTED = '5C6570';
 const BORDER_LIGHT = 'E4E4E4';
@@ -193,9 +194,13 @@ function extractRoomsByDay(DATA, workshopCodes){
           const isRed = !!s.isWSA || workshopCodes.has(code);
           let rows = [];
           for(const talk of (s.talks || [])){
-            const author = abbrevFirstAuthor(talk.authors || '', isFullName);
             const talkTime = isWrhcNoTimes ? '' : (talk.time || '');
-            rows.push([talkTime, author, talk.title || '']);
+            if(talk.cancelled){
+              rows.push([talkTime, '', 'Vortrag kurzfristig abgesagt', true]);
+              continue;
+            }
+            const author = abbrevFirstAuthor(talk.authors || '', isFullName);
+            rows.push([talkTime, author, talk.title || '', false]);
           }
           if(!rows.length) rows.push([block.time || '', '', title]);
           if(isWrhcNoTimes) sessionLabel += '  (' + (block.time || '') + ')';
@@ -240,7 +245,7 @@ function bodyCell(text, width, opts){
     width: { size: width, type: WidthType.DXA },
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: 70, bottom: 70, left: 120, right: 120 },
-    children: [new Paragraph({ keepNext: !opts.isLastRow, keepLines: true, children: [new TextRun({ text: text || '', size: 20, italics: !!opts.italics, font: FONT })] })]
+    children: [new Paragraph({ keepNext: !opts.isLastRow, keepLines: true, children: [new TextRun({ text: text || '', size: 20, italics: !!opts.italics, font: FONT, color: opts.color })] })]
   });
 }
 
@@ -331,8 +336,16 @@ function buildRoomSection(room, sessions, logoBuf){
     const rows = [ new TableRow({ tableHeader: true, cantSplit: true, children: [
       headerCell('Zeit', COL_WIDTHS[0], headerColor), headerCell('Erstautor:in', COL_WIDTHS[1], headerColor), headerCell('Titel', COL_WIDTHS[2], headerColor)
     ] }) ];
-    sess.rows.forEach(([time, author, title], idx) => {
+    sess.rows.forEach(([time, author, title, cancelled], idx) => {
       const isLastRow = idx === sess.rows.length - 1;
+      if(cancelled){
+        rows.push(new TableRow({ cantSplit: true, children: [
+          bodyCell(time, COL_WIDTHS[0], { isLastRow }),
+          bodyCell('', COL_WIDTHS[1], { isLastRow }),
+          bodyCell(title, COL_WIDTHS[2], { isLastRow, italics: true, color: CANCELLED_RED })
+        ] }));
+        return;
+      }
       rows.push(new TableRow({ cantSplit: true, children: [
         bodyCell(time, COL_WIDTHS[0], { isLastRow }), bodyCell(author, COL_WIDTHS[1], { italics: !author, isLastRow }), bodyCell(title, COL_WIDTHS[2], { isLastRow })
       ] }));
