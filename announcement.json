@@ -183,7 +183,7 @@
     "id": "feedback-reminder1",
     "enabled": true,
     "begins": "2026-09-15T14:00:00",
-    "expires": "2026-09-15T17:30:00",
+    "expires": "2026-09-15T16:20:00",
     "title_de": "Wie gefällt dir die App?",
     "title_en": "How do you like the app?",
     "message_de": "Lass es uns gerne wissen - im Info-Tab kannst du uns schnell und unkompliziert Feedback zur App schicken.",
