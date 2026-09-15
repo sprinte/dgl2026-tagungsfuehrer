@@ -200,6 +200,16 @@
 	"message_en": "You can send us quick feedback about the app in the Info tab."
   },
   {
+    "id": "confticket-reminder",
+    "enabled": true,
+    "begins": "2026-09-15T16:25:00",
+    "expires": "2026-09-15T17:40:00",
+	"title_de": "Tickets Gesellschaftsabend",
+	"title_en": "Conference Dinner tickets",
+	"message_de": "Abholung ab sofort beim Tagungsbüro möglich.",
+	"message_en": "You can pick up your ticket at the conference office."
+  },
+  {
     "id": "goodbye",
     "enabled": true,
     "begins": "2026-09-17T13:00:00",
