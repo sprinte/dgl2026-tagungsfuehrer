@@ -173,7 +173,7 @@
     "id": "posterpreis-stimmzettel-reminder",
     "enabled": true,
     "begins": "2026-09-16T17:15:00",
-    "expires": "2026-09-16T18:00:00",
+    "expires": "2026-09-16T17:55:00",
     "title_de": "Jetzt für den Posterpreis abstimmen!",
     "title_en": "Vote for the Poster Award now!",
     "message_de": "Die Postersession ist gleich vorbei – vergiss nicht, deinen Stimmzettel für den Posterpreis im Tagungsbüro abzugeben.",
@@ -196,8 +196,8 @@
     "expires": "2026-09-17T12:00:00",
 	"title_de": "Bevor du gehst...",
 	"title_en": "Before you go...",
-	"message_de": "Im Info-Tab kannst du uns in ein paar Sekunden Feedback zur App schicken – das hilft uns sehr für nächstes Jahr!",
-	"message_en": "You can send us quick feedback about the app in the Info tab – it really helps us for next year!"
+	"message_de": "Im Info-Tab kannst du uns in ein paar Sekunden Feedback zur App schicken.",
+	"message_en": "You can send us quick feedback about the app in the Info tab."
   },
   {
     "id": "goodbye",
