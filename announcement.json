@@ -210,6 +210,16 @@
 	"message_en": "You can pick up your ticket at the conference office."
   },
   {
+    "id": "s21-raumwechsel",
+    "enabled": true,
+    "begins": "2026-09-16T14:15:00",
+    "expires": "2026-09-14T14:50:00",
+    "title_de": "S21: Achtung Raumwechsel!",
+    "title_en": "S21: Attention - room change!",
+    "message_de": "S21 (Karriere in der Limnologie) findet im SR 1/305 statt (obere Etage).",
+    "message_en": "S21 (Career in limnology) takes place in SR 1/305 (upper floor)."
+  },
+  {
     "id": "goodbye",
     "enabled": true,
     "begins": "2026-09-17T13:00:00",
