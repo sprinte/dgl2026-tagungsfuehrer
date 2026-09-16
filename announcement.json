@@ -196,8 +196,8 @@
     "expires": "2026-09-17T12:00:00",
 	"title_de": "Bevor du gehst...",
 	"title_en": "Before you go...",
-	"message_de": "Im Info-Tab kannst du uns in ein paar Sekunden Feedback zur App schicken.",
-	"message_en": "You can send us quick feedback about the app in the Info tab."
+	"message_de": "Wenn dir der digitale Tagugngsführer gefallen hat, bitte gib uns Feedback im Info-Tab :) Danke!",
+	"message_en": "If you liked the digital conference guide, please give us feedback in the Info tab :) Thank you!"
   },
   {
     "id": "confticket-reminder",
