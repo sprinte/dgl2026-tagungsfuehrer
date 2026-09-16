@@ -99,14 +99,7 @@ self.addEventListener('activate', function(event){
 function fetchWithTimeout(req, ms){
   return new Promise(function(resolve, reject){
     var timer = setTimeout(function(){ reject(new Error('timeout')); }, ms);
-    // cache: 'no-store' bypasses the browser's own HTTP cache for this
-    // request — without it, a network-first strategy can still end up
-    // serving a stale response if the web server sends caching headers
-    // for these files, defeating the whole point of "network first". This
-    // is what makes every normal page load behave like a forced hard
-    // refresh for app.js/app-data.js/index.html etc., without anyone
-    // needing to know a keyboard shortcut.
-    fetch(req, { cache: 'no-store' }).then(function(res){
+    fetch(req).then(function(res){
       clearTimeout(timer);
       resolve(res);
     }).catch(function(err){
