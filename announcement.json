@@ -196,8 +196,8 @@
     "expires": "2026-09-17T12:00:00",
 	"title_de": "Bevor du gehst...",
 	"title_en": "Before you go...",
-	"message_de": "Wenn dir der digitale Tagugngsführer gefallen hat, bitte gib uns Feedback im Info-Tab :) Danke!",
-	"message_en": "If you liked the digital conference guide, please give us feedback in the Info tab :) Thank you!"
+	"message_de": "Wenn dir der digitale Tagugngsführer gefallen hat, lass es uns gerne wissen über das Feedbackformular im Info-Tab :) Danke!",
+	"message_en": "If you liked the digital conference guide, please let us know via the feedback section in the Info tab :) Thank you!"
   },
   {
     "id": "confticket-reminder",
@@ -223,7 +223,7 @@
     "id": "goodbye",
     "enabled": true,
     "begins": "2026-09-17T13:00:00",
-    "expires": "2026-09-17T15:00:00",
+    "expires": "2026-09-18T18:00:00",
 	"title_de": "Danke für eine großartige Tagung!",
 	"title_en": "Thanks for a great conference!",
 	"message_de": "Das war's - wir hoffen, es hat dir gefallen! Wir sehen uns im nächsten Jahr. Gute Heimreise!",
